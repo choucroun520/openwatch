@@ -17,6 +17,26 @@ const sb = createClient(
 const FLARE_URL = 'http://localhost:8191/v1';
 const PAGE_SIZE = 60;
 
+// Only track these brands — all others are ignored
+const ALLOWED_BRANDS = [
+  'rolex',
+  'richard mille',
+  'patek philippe',
+  'patek',
+  'vacheron constantin',
+  'vacheron',
+  'f.p. journe',
+  'fp journe',
+  'audemars piguet',
+  'audemars',
+];
+
+function isAllowedBrand(title) {
+  if (!title) return false;
+  const t = title.toLowerCase();
+  return ALLOWED_BRANDS.some(b => t.startsWith(b));
+}
+
 async function flareGet(url) {
   const res = await fetch(FLARE_URL, {
     method: 'POST',
@@ -209,7 +229,7 @@ async function main() {
   // Store all listings regardless of price — accessories included.
   // Consumers can filter by price threshold when querying.
   const toUpsert = listings_unique
-    .filter(l => l.chrono24Id && l.title) // must have ID and title
+    .filter(l => l.chrono24Id && l.title && isAllowedBrand(l.title)) // target brands only
     .map(l => ({
       chrono24_id: l.chrono24Id,
       dealer_id: dealer.id,

@@ -23,6 +23,26 @@ const sb = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+// ─── Target brands — only import these ──────────────────────────────────────
+const ALLOWED_BRANDS = [
+  'rolex',
+  'richard mille',
+  'patek philippe',
+  'patek',
+  'vacheron constantin',
+  'vacheron',
+  'f.p. journe',
+  'fp journe',
+  'audemars piguet',
+  'audemars',
+];
+
+function isAllowedBrand(title) {
+  if (!title) return false;
+  const t = title.toLowerCase();
+  return ALLOWED_BRANDS.some(b => t.startsWith(b));
+}
+
 // ─── Brand name → DB UUID lookup ────────────────────────────────────────────
 
 /** Build a case-insensitive map from brand name aliases → brand UUID */
@@ -191,8 +211,10 @@ async function main() {
     console.log(`  Active C24 listings: ${allListings.length}`)
 
     // Filter: skip items below $500 (accessories, straps, etc.)
-    const pricedListings = allListings.filter(l => l.price && parseFloat(l.price) > 500)
-    console.log(`  After price filter (>$500): ${pricedListings.length}`)
+    const pricedListings = allListings.filter(l =>
+      l.price && parseFloat(l.price) > 500 && isAllowedBrand(l.title)
+    )
+    console.log(`  After brand+price filter: ${pricedListings.length}`)
 
     // Map to listings table format
     let skippedNoBrand = 0
