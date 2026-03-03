@@ -4,14 +4,10 @@ import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import {
-  Compass,
-  Grid3x3,
   BarChart3,
-  Zap,
-  Building2,
-  Package,
-  MessageSquare,
-  User,
+  TrendingUp,
+  DollarSign,
+  Search,
   Settings,
   Shield,
   Watch,
@@ -30,19 +26,15 @@ interface NavItem {
 }
 
 const TOP_NAV: NavItem[] = [
-  { icon: Compass,    label: "Discover",      href: "/" },
-  { icon: Grid3x3,    label: "Browse",        href: "/network" },
-  { icon: BarChart3,  label: "Rankings",      href: "/rankings" },
-  { icon: Zap,        label: "Activity",      href: "/activity" },
-  { icon: Building2,  label: "Dealers",       href: "/dealers" },
+  { icon: BarChart3,   label: "Analytics",   href: "/analytics" },
+  { icon: TrendingUp,  label: "Trending",    href: "/trending" },
+  { icon: DollarSign,  label: "Sold",        href: "/sold" },
+  { icon: Search,      label: "Search Refs", href: "/ref" },
 ]
 
 const BOTTOM_NAV: NavItem[] = [
-  { icon: Package,        label: "My Inventory",  href: "/inventory" },
-  { icon: MessageSquare,  label: "Inquiries",     href: "/inquiries" },
-  { icon: User,           label: "Profile",       href: "/profile" },
-  { icon: Settings,       label: "Settings",      href: "/settings" },
-  { icon: Shield,         label: "Admin",         href: "/admin", adminOnly: true },
+  { icon: Settings, label: "Settings", href: "/settings" },
+  { icon: Shield,   label: "Admin",    href: "/admin", adminOnly: true },
 ]
 
 // ─── Single nav row ──────────────────────────────────────────────────────────
@@ -235,11 +227,11 @@ export default function Sidebar() {
         }}
       >
         {[
-          { icon: Compass,   label: "Discover",   href: "/" },
-          { icon: Grid3x3,   label: "Browse",     href: "/network" },
-          { icon: BarChart3, label: "Rankings",   href: "/rankings" },
-          { icon: Zap,       label: "Activity",   href: "/activity" },
-          { icon: Package,   label: "Inventory",  href: "/inventory" },
+          { icon: BarChart3,  label: "Analytics",  href: "/analytics" },
+          { icon: TrendingUp, label: "Trending",   href: "/trending" },
+          { icon: DollarSign, label: "Sold",       href: "/sold" },
+          { icon: Search,     label: "Search",     href: "/ref" },
+          { icon: Settings,   label: "Settings",   href: "/settings" },
         ].map(({ icon: Icon, label, href }) => {
           const active = isActive(href)
           return (

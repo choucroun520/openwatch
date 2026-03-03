@@ -174,10 +174,34 @@ async function main() {
     if (comps.length > 0) {
       const { error: insertErr } = await sb.from('market_comps').insert(comps);
       if (insertErr) {
-        console.error('  Insert error:', insertErr.message);
+        console.error('  Insert error (market_comps):', insertErr.message);
       } else {
         totalInserted += comps.length;
         console.log(`  Inserted ${comps.length} comps`);
+      }
+
+      // Also upsert into unified market_data table
+      const mdRows = cards
+        .filter(c => c.price > 1000)
+        .map(c => ({
+          ref_number: ref,
+          brand: brand,
+          price: c.price,
+          currency: 'USD',
+          is_sold: false,
+          source: 'chrono24',
+          source_id: c.chrono24Id,
+          listing_url: (c.url ?? '').substring(0, 500),
+          scraped_at: now,
+          last_seen_at: now,
+        }));
+
+      const { error: mdErr } = await sb
+        .from('market_data')
+        .insert(mdRows);
+
+      if (mdErr && !mdErr.message.includes('duplicate')) {
+        console.error('  Insert error (market_data):', mdErr.message);
       }
     }
 
