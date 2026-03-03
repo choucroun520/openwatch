@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
+import { ExternalLink } from "lucide-react"
 import type { Chrono24Dealer } from "@/lib/types"
 
 function timeAgo(dateStr: string | null) {
@@ -13,8 +15,14 @@ function timeAgo(dateStr: string | null) {
   return `${d}d ago`
 }
 
+interface DealerWithStats extends Chrono24Dealer {
+  market_listing_count?: number
+  brands_carried?: string[]
+  avg_price?: number | null
+}
+
 export default function Chrono24DealersSection() {
-  const [dealers, setDealers] = useState<Chrono24Dealer[]>([])
+  const [dealers, setDealers] = useState<DealerWithStats[]>([])
   const [loading, setLoading] = useState(true)
   const [slugInput, setSlugInput] = useState("")
   const [scraping, setScraping] = useState<string | null>(null)
@@ -22,9 +30,17 @@ export default function Chrono24DealersSection() {
 
   async function fetchDealers() {
     try {
-      const res = await fetch("/api/chrono24/dealers")
-      const json = await res.json()
-      setDealers(json.dealers ?? [])
+      // Try the new /api/dealers endpoint first (includes market stats)
+      const res = await fetch("/api/dealers")
+      if (res.ok) {
+        const json = await res.json()
+        setDealers(json.dealers ?? [])
+        return
+      }
+      // Fall back to chrono24/dealers
+      const res2 = await fetch("/api/chrono24/dealers")
+      const json2 = await res2.json()
+      setDealers(json2.dealers ?? [])
     } catch {
       // ignore
     } finally {
@@ -53,7 +69,6 @@ export default function Chrono24DealersSection() {
       if (json.started) {
         setScrapeMsg(`Scrape started for "${slug}". Refresh in ~2 min to see results.`)
         setSlugInput("")
-        // Refresh dealer list after a short delay
         setTimeout(() => fetchDealers(), 5000)
       } else {
         setScrapeMsg(json.error ?? "Unknown error")
@@ -69,7 +84,7 @@ export default function Chrono24DealersSection() {
     <div>
       <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl font-black text-white">Market Dealers</h2>
+          <h2 className="text-2xl font-black text-white">Tracked Market Dealers</h2>
           <p className="text-sm mt-1" style={{ color: "#8A939B" }}>
             Chrono24 dealer inventories tracked for market intelligence
           </p>
@@ -113,7 +128,7 @@ export default function Chrono24DealersSection() {
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[0, 1, 2].map(i => (
-            <div key={i} className="rounded-2xl h-40 animate-pulse" style={{ background: "#1E1E2E" }} />
+            <div key={i} className="rounded-2xl h-52 animate-pulse" style={{ background: "#1E1E2E" }} />
           ))}
         </div>
       ) : dealers.length === 0 ? (
@@ -152,10 +167,14 @@ export default function Chrono24DealersSection() {
                 </div>
               </div>
 
-              <div className="flex gap-4 mb-4">
+              <div className="flex gap-4 mb-3">
                 <div>
-                  <p className="text-lg font-black font-mono text-white">{dealer.total_listings.toLocaleString()}</p>
-                  <p className="text-[11px]" style={{ color: "#8A939B" }}>Listings</p>
+                  <p className="text-lg font-black font-mono text-white">
+                    {(dealer.market_listing_count ?? dealer.total_listings).toLocaleString()}
+                  </p>
+                  <p className="text-[11px]" style={{ color: "#8A939B" }}>
+                    {dealer.market_listing_count !== undefined ? "In market data" : "Listings"}
+                  </p>
                 </div>
                 <div>
                   <p className="text-lg font-black font-mono" style={{ color: "#8A939B" }}>
@@ -165,23 +184,43 @@ export default function Chrono24DealersSection() {
                 </div>
               </div>
 
+              {/* Brands carried */}
+              {dealer.brands_carried && dealer.brands_carried.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {dealer.brands_carried.slice(0, 4).map(b => (
+                    <span
+                      key={b}
+                      className="text-[10px] px-1.5 py-0.5 rounded"
+                      style={{ background: "rgba(32,129,226,0.1)", color: "#2081E2" }}
+                    >
+                      {b}
+                    </span>
+                  ))}
+                  {dealer.brands_carried.length > 4 && (
+                    <span className="text-[10px]" style={{ color: "#64748b" }}>
+                      +{dealer.brands_carried.length - 4} more
+                    </span>
+                  )}
+                </div>
+              )}
+
               <div className="flex flex-col gap-2">
-                <a
-                  href="/network"
+                <Link
+                  href={`/dealers/${dealer.slug}`}
                   className="block w-full text-center py-2 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
                   style={{ background: "#2081E2" }}
                 >
                   View Inventory
-                </a>
+                </Link>
                 <div className="flex gap-2">
                   <a
                     href={`https://www.chrono24.com/dealer/${dealer.slug}/index.htm`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 text-center py-1.5 rounded-lg text-sm font-semibold transition-opacity hover:opacity-80"
+                    className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-sm font-semibold transition-opacity hover:opacity-80"
                     style={{ background: "rgba(32,129,226,0.15)", color: "#2081E2", border: "1px solid rgba(32,129,226,0.2)" }}
                   >
-                    View on C24 ↗
+                    C24 <ExternalLink size={12} />
                   </a>
                   <button
                     onClick={() => {

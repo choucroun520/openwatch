@@ -11,6 +11,8 @@ import {
   Settings,
   Shield,
   Watch,
+  Tag,
+  Users,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
@@ -29,6 +31,8 @@ const TOP_NAV: NavItem[] = [
   { icon: BarChart3,   label: "Analytics",   href: "/analytics" },
   { icon: TrendingUp,  label: "Trending",    href: "/trending" },
   { icon: DollarSign,  label: "Sold",        href: "/sold" },
+  { icon: Tag,         label: "Brands",      href: "/brands" },
+  { icon: Users,       label: "Dealers",     href: "/dealers" },
   { icon: Search,      label: "Search Refs", href: "/ref" },
 ]
 
@@ -229,9 +233,9 @@ export default function Sidebar() {
         {[
           { icon: BarChart3,  label: "Analytics",  href: "/analytics" },
           { icon: TrendingUp, label: "Trending",   href: "/trending" },
-          { icon: DollarSign, label: "Sold",       href: "/sold" },
+          { icon: Tag,        label: "Brands",     href: "/brands" },
+          { icon: Users,      label: "Dealers",    href: "/dealers" },
           { icon: Search,     label: "Search",     href: "/ref" },
-          { icon: Settings,   label: "Settings",   href: "/settings" },
         ].map(({ icon: Icon, label, href }) => {
           const active = isActive(href)
           return (

@@ -5,6 +5,7 @@ import { ExternalLink, TrendingUp, TrendingDown } from "lucide-react"
 import { formatCurrency } from "@/lib/utils/currency"
 import { shortTimeAgo } from "@/lib/utils/dates"
 import { PriceHistoryDualChart } from "@/components/charts/price-history-dual-chart"
+import { MarketListingCard, dealerNameToSlug, type MarketDataRow } from "@/components/analytics/market-listing-card"
 
 export const dynamic = "force-dynamic"
 
@@ -15,20 +16,6 @@ export async function generateMetadata({
 }) {
   const { reference } = await params
   return { title: `${reference} — Market Intelligence — OpenWatch` }
-}
-
-interface MarketListing {
-  id: string
-  price: string
-  condition: string | null
-  has_box: boolean | null
-  has_papers: boolean | null
-  source: string
-  dealer_name: string | null
-  dealer_country: string | null
-  listing_url: string | null
-  listed_at: string | null
-  scraped_at: string
 }
 
 interface SaleRecord {
@@ -51,28 +38,37 @@ interface Snapshot {
   sold_count: number
 }
 
-function ConditionDot({ condition }: { condition: string | null }) {
-  const color = condition === "unworn" ? "#22c55e"
-    : condition === "excellent" ? "#60a5fa"
-    : condition === "very_good" ? "#94a3b8"
-    : "#64748b"
-  return (
-    <span className="inline-flex items-center gap-1">
-      <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-      <span className="text-[11px] capitalize" style={{ color }}>{condition ?? "—"}</span>
-    </span>
-  )
-}
-
 export default async function RefDeepDivePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ reference: string }>
+  searchParams: Promise<{ view?: string; source?: string; condition?: string; sort?: string }>
 }) {
   const { reference } = await params
+  const { view = "grid", source: srcFilter, condition: condFilter, sort = "price_asc" } = await searchParams
   const supabase = await createClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any
+
+  // Build listings query with optional filters
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let listingsQuery: any = db
+    .from("market_data")
+    .select("id, ref_number, brand, model, price, condition, has_box, has_papers, source, dealer_name, dealer_country, listing_url, listed_at, scraped_at, image_url")
+    .eq("ref_number", reference)
+    .eq("is_sold", false)
+    .gt("price", 1000)
+
+  if (srcFilter) listingsQuery = listingsQuery.eq("source", srcFilter)
+  if (condFilter) listingsQuery = listingsQuery.eq("condition", condFilter)
+
+  if (sort === "price_asc") listingsQuery = listingsQuery.order("price", { ascending: true })
+  else if (sort === "price_desc") listingsQuery = listingsQuery.order("price", { ascending: false })
+  else if (sort === "newest") listingsQuery = listingsQuery.order("scraped_at", { ascending: false })
+  else listingsQuery = listingsQuery.order("price", { ascending: true })
+
+  listingsQuery = listingsQuery.limit(60)
 
   const [
     marketStatsResult,
@@ -84,13 +80,7 @@ export default async function RefDeepDivePage({
   ] = await Promise.all([
     db.from("ref_market_stats").select("*").eq("ref_number", reference).maybeSingle(),
     db.from("ref_sold_stats").select("*").eq("ref_number", reference).maybeSingle(),
-    db.from("market_data")
-      .select("id, price, condition, has_box, has_papers, source, dealer_name, dealer_country, listing_url, listed_at, scraped_at")
-      .eq("ref_number", reference)
-      .eq("is_sold", false)
-      .gt("price", 1000)
-      .order("price", { ascending: true })
-      .limit(50),
+    listingsQuery,
     db.from("market_data")
       .select("id, price, condition, source, dealer_name, listing_url, sold_at, scraped_at")
       .eq("ref_number", reference)
@@ -112,7 +102,7 @@ export default async function RefDeepDivePage({
 
   const marketStats = marketStatsResult.data
   const soldStats = soldStatsResult.data
-  const listings: MarketListing[] = listingsResult.data ?? []
+  const listings: MarketDataRow[] = listingsResult.data ?? []
   const sales: SaleRecord[] = salesResult.data ?? []
   const snapshots: Snapshot[] = snapshotsResult.data ?? []
   const trend = trendResult.data
@@ -132,13 +122,39 @@ export default async function RefDeepDivePage({
 
   const hasChartData = chartData.length > 1
 
+  // Build filter URL helper
+  function filterUrl(overrides: Record<string, string>) {
+    const p = new URLSearchParams()
+    if (view !== "grid") p.set("view", view)
+    if (srcFilter) p.set("source", srcFilter)
+    if (condFilter) p.set("condition", condFilter)
+    if (sort !== "price_asc") p.set("sort", sort)
+    Object.entries(overrides).forEach(([k, v]) => { if (v) p.set(k, v); else p.delete(k) })
+    const qs = p.toString()
+    return `/ref/${encodeURIComponent(reference)}${qs ? `?${qs}` : ""}`
+  }
+
+  const sources = [...new Set(listings.map(l => l.source).filter(Boolean))]
+  const conditions = [...new Set(listings.map(l => l.condition).filter(Boolean))]
+
   return (
     <AppLayout>
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <nav className="text-sm mb-6 flex items-center gap-2" style={{ color: "#64748b" }}>
           <Link href="/analytics" className="hover:text-white transition-colors">Analytics</Link>
           <span>/</span>
           <Link href="/trending" className="hover:text-white transition-colors">Trending</Link>
+          {brandName && (
+            <>
+              <span>/</span>
+              <Link
+                href={`/brands/${brandNameToSlug(brandName)}`}
+                className="hover:text-white transition-colors"
+              >
+                {brandName}
+              </Link>
+            </>
+          )}
           <span>/</span>
           <span className="text-white font-mono">{reference}</span>
         </nav>
@@ -201,60 +217,103 @@ export default async function RefDeepDivePage({
           </div>
         )}
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <section>
-            <h2 className="text-base font-black text-white mb-3">Current Listings ({listings.length})</h2>
-            <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#1c1c2a" }}>
-              <div className="grid grid-cols-12 gap-2 px-4 py-2 text-[11px] font-bold uppercase tracking-wider" style={{ background: "#0b0b14", color: "#64748b" }}>
-                <div className="col-span-3">Price</div>
-                <div className="col-span-3">Condition</div>
-                <div className="col-span-2">B/P</div>
-                <div className="col-span-2">Source</div>
-                <div className="col-span-2 text-right">Link</div>
-              </div>
-              {listings.length === 0 ? (
-                <div className="px-4 py-6 text-center text-sm" style={{ background: "#111119", color: "#64748b" }}>No active listings.</div>
-              ) : listings.map((l, i) => (
-                <div key={l.id} className="grid grid-cols-12 gap-2 px-4 py-2.5 border-t items-center" style={{ borderColor: "#1c1c2a", background: i % 2 === 0 ? "#111119" : "#0d0d15" }}>
-                  <div className="col-span-3">
-                    <p className="text-sm font-black font-mono text-white">{formatCurrency(parseFloat(l.price))}</p>
-                  </div>
-                  <div className="col-span-3"><ConditionDot condition={l.condition} /></div>
-                  <div className="col-span-2">
-                    <span className="text-[11px]" style={{ color: "#64748b" }}>
-                      {l.has_box && l.has_papers ? "B+P" : l.has_box ? "Box" : l.has_papers ? "Papers" : "—"}
-                    </span>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="text-[11px] px-1.5 py-0.5 rounded font-medium capitalize" style={{ background: "rgba(32,129,226,0.1)", color: "#60a5fa" }}>{l.source}</span>
-                  </div>
-                  <div className="col-span-2 text-right flex items-center justify-end gap-1.5">
-                    <span className="text-[10px]" style={{ color: "#64748b" }}>{l.listed_at ? shortTimeAgo(l.listed_at) : shortTimeAgo(l.scraped_at)}</span>
-                    {l.listing_url && (
-                      <a href={l.listing_url} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-blue-400" style={{ color: "#64748b" }}>
-                        <ExternalLink size={12} />
-                      </a>
-                    )}
-                  </div>
+        {/* ── All Listings — OpenSea-style grid ── */}
+        <section className="mb-10">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <h2 className="text-lg font-black text-white">All Listings ({listings.length})</h2>
+
+            {/* Filter + sort row */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Source filter */}
+              {sources.length > 1 && (
+                <div className="flex gap-1">
+                  <Link
+                    href={filterUrl({ source: "" })}
+                    className="px-2 py-1 rounded text-[11px] font-semibold transition-colors"
+                    style={{
+                      background: !srcFilter ? "#2081E2" : "#111119",
+                      color: !srcFilter ? "#fff" : "#8A939B",
+                      border: `1px solid ${!srcFilter ? "#2081E2" : "#1c1c2a"}`,
+                    }}
+                  >All</Link>
+                  {sources.map(s => (
+                    <Link
+                      key={s}
+                      href={filterUrl({ source: s ?? "" })}
+                      className="px-2 py-1 rounded text-[11px] font-semibold transition-colors capitalize"
+                      style={{
+                        background: srcFilter === s ? "#2081E2" : "#111119",
+                        color: srcFilter === s ? "#fff" : "#8A939B",
+                        border: `1px solid ${srcFilter === s ? "#2081E2" : "#1c1c2a"}`,
+                      }}
+                    >
+                      {s}
+                    </Link>
+                  ))}
                 </div>
+              )}
+
+              {/* Sort */}
+              {(["price_asc", "price_desc", "newest"] as const).map(s => {
+                const label = s === "price_asc" ? "Price ↑" : s === "price_desc" ? "Price ↓" : "Newest"
+                return (
+                  <Link
+                    key={s}
+                    href={filterUrl({ sort: s })}
+                    className="px-2 py-1 rounded text-[11px] font-semibold transition-colors"
+                    style={{
+                      background: sort === s ? "#1c1c2a" : "transparent",
+                      color: sort === s ? "#ffffff" : "#64748b",
+                      border: `1px solid ${sort === s ? "#333333" : "transparent"}`,
+                    }}
+                  >
+                    {label}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+
+          {listings.length === 0 ? (
+            <div className="rounded-xl border py-12 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+              <p className="text-sm" style={{ color: "#64748b" }}>No active listings for this reference.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {listings.map(listing => (
+                <MarketListingCard
+                  key={listing.id}
+                  listing={listing}
+                  showDealer={true}
+                  showSource={true}
+                  showRef={false}
+                />
               ))}
             </div>
-          </section>
+          )}
+        </section>
 
-          <section>
-            <h2 className="text-base font-black text-white mb-3">Recent Sales ({sales.length})</h2>
-            <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#1c1c2a" }}>
-              <div className="grid grid-cols-12 gap-2 px-4 py-2 text-[11px] font-bold uppercase tracking-wider" style={{ background: "#0b0b14", color: "#64748b" }}>
-                <div className="col-span-4">Price</div>
-                <div className="col-span-3">Condition</div>
-                <div className="col-span-2">Source</div>
-                <div className="col-span-3 text-right">Date</div>
-              </div>
-              {sales.length === 0 ? (
-                <div className="px-4 py-6 text-center text-sm" style={{ background: "#111119", color: "#64748b" }}>No confirmed sales.</div>
-              ) : sales.map((s, i) => (
-                <div key={s.id} className="grid grid-cols-12 gap-2 px-4 py-2.5 border-t items-center" style={{ borderColor: "#1c1c2a", background: i % 2 === 0 ? "#111119" : "#0d0d15" }}>
-                  <div className="col-span-4 flex items-center gap-1.5">
+        {/* ── Recent Sales ── */}
+        <section className="mb-8">
+          <h2 className="text-lg font-black text-white mb-4">Recent Sales ({sales.length})</h2>
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#1c1c2a" }}>
+            <div className="grid grid-cols-12 gap-2 px-4 py-2 text-[11px] font-bold uppercase tracking-wider" style={{ background: "#0b0b14", color: "#64748b" }}>
+              <div className="col-span-3">Price</div>
+              <div className="col-span-3">Condition</div>
+              <div className="col-span-3">Source / Dealer</div>
+              <div className="col-span-3 text-right">Date</div>
+            </div>
+            {sales.length === 0 ? (
+              <div className="px-4 py-6 text-center text-sm" style={{ background: "#111119", color: "#64748b" }}>No confirmed sales.</div>
+            ) : sales.map((s, i) => {
+              const dealerSlug = s.dealer_name ? dealerNameToSlug(s.dealer_name) : null
+              return (
+                <div
+                  key={s.id}
+                  className="grid grid-cols-12 gap-2 px-4 py-2.5 border-t items-center"
+                  style={{ borderColor: "#1c1c2a", background: i % 2 === 0 ? "#111119" : "#0d0d15" }}
+                >
+                  <div className="col-span-3 flex items-center gap-1.5">
                     <p className="text-sm font-black font-mono text-white">{formatCurrency(parseFloat(s.price))}</p>
                     {s.listing_url && (
                       <a href={s.listing_url} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-blue-400 shrink-0" style={{ color: "#64748b" }}>
@@ -262,21 +321,32 @@ export default async function RefDeepDivePage({
                       </a>
                     )}
                   </div>
-                  <div className="col-span-3"><ConditionDot condition={s.condition} /></div>
-                  <div className="col-span-2">
+                  <div className="col-span-3">
+                    <span className="text-[11px] capitalize" style={{ color: "#94a3b8" }}>{s.condition ?? "—"}</span>
+                  </div>
+                  <div className="col-span-3">
                     <span className="text-[11px] px-1.5 py-0.5 rounded font-medium capitalize" style={{ background: "rgba(32,129,226,0.1)", color: "#60a5fa" }}>{s.source}</span>
+                    {s.dealer_name && dealerSlug && (
+                      <Link
+                        href={`/dealers/${dealerSlug}`}
+                        className="block text-[10px] mt-0.5 hover:underline truncate"
+                        style={{ color: "#64748b" }}
+                      >
+                        {s.dealer_name}
+                      </Link>
+                    )}
                   </div>
                   <div className="col-span-3 text-right">
                     <p className="text-[11px]" style={{ color: "#64748b" }}>{s.sold_at ? shortTimeAgo(s.sold_at) : shortTimeAgo(s.scraped_at)}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
-        </div>
+              )
+            })}
+          </div>
+        </section>
 
         {marketStats && (
-          <div className="mt-6 rounded-xl border p-5" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+          <div className="rounded-xl border p-5" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
             <h3 className="text-sm font-black text-white mb-3">Market Intelligence</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
               <div>
@@ -315,4 +385,14 @@ export default async function RefDeepDivePage({
       </div>
     </AppLayout>
   )
+}
+
+function brandNameToSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\./g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
 }
