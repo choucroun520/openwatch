@@ -2,9 +2,16 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { Search, Clock, TrendingUp, Hash, Store, ArrowRight, Loader2 } from "lucide-react"
+import { Search, Clock, TrendingUp, Hash, Store, ArrowRight, Loader2, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { SearchResult } from "@/app/api/search/route"
+
+// Extended type for enriched search results (optional market context fields from API)
+interface EnrichedResult extends SearchResult {
+  trend?: "surging" | "rising" | "stable" | "cooling" | "dropping"
+  trend_pct?: number
+  has_arbitrage?: boolean
+}
 
 const POPULAR = [
   { label: "Rolex Submariner", q: "Submariner" },
@@ -34,7 +41,7 @@ export default function CommandSearch() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<SearchResult[]>([])
+  const [results, setResults] = useState<EnrichedResult[]>([])
   const [loading, setLoading] = useState(false)
   const [activeIdx, setActiveIdx] = useState(-1)
   const [recentSearches, setRecentSearches] = useState<string[]>([])
@@ -79,7 +86,7 @@ export default function CommandSearch() {
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`)
       const data = await res.json()
-      setResults(data.results ?? [])
+      setResults((data.results ?? []) as EnrichedResult[])
       setActiveIdx(-1)
     } catch {
       setResults([])
@@ -248,7 +255,7 @@ export default function CommandSearch() {
 
                   {/* Text */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-sm font-medium truncate" style={{ color: "#e2e8f0" }}>
                         {r.title}
                       </span>
@@ -262,6 +269,27 @@ export default function CommandSearch() {
                           }}
                         >
                           {r.badge}
+                        </span>
+                      )}
+                      {/* Trend badge */}
+                      {r.trend_pct !== undefined && (
+                        <span
+                          className="text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0"
+                          style={{
+                            background: r.trend_pct >= 0 ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)",
+                            color: r.trend_pct >= 0 ? "#10b981" : "#ef4444",
+                          }}
+                        >
+                          {r.trend_pct >= 0 ? "↑" : "↓"} {Math.abs(r.trend_pct).toFixed(1)}%
+                        </span>
+                      )}
+                      {/* ARB badge */}
+                      {r.has_arbitrage && (
+                        <span
+                          className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0"
+                          style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b" }}
+                        >
+                          <Zap size={9} />ARB
                         </span>
                       )}
                     </div>
@@ -336,6 +364,27 @@ export default function CommandSearch() {
               ))}
             </div>
           )}
+
+          {/* Quick-action shortcuts */}
+          <div
+            className="flex items-center gap-2 px-3 py-2"
+            style={{ borderTop: "1px solid #1c1c2a" }}
+          >
+            <button
+              onClick={() => navigate("/analytics")}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors hover:opacity-80"
+              style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}
+            >
+              🔥 View Hot Trends
+            </button>
+            <button
+              onClick={() => navigate("/analytics?tab=arbitrage")}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors hover:opacity-80"
+              style={{ background: "rgba(245,158,11,0.1)", color: "#f59e0b" }}
+            >
+              <Zap size={11} /> Arbitrage Opportunities
+            </button>
+          </div>
 
           {/* Footer hint */}
           {results.length > 0 && (
