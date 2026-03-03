@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Filter, LayoutGrid, List, X, SlidersHorizontal } from "lucide-react"
+import { Filter, LayoutGrid, List, X, SlidersHorizontal, ChevronRight, ChevronDown } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import {
   Select,
@@ -29,9 +29,14 @@ interface NetworkGridProps {
 }
 
 function FilterSidebar({
+  listings,
   brands,
   activeBrand,
   setActiveBrand,
+  activeModel,
+  setActiveModel,
+  activeDealerId,
+  setActiveDealerId,
   conditionFilters,
   toggleCondition,
   hasBox,
@@ -45,9 +50,14 @@ function FilterSidebar({
   brandCounts,
   clearAll,
 }: {
+  listings: ListingWithRelations[]
   brands: Brand[]
   activeBrand: string | null
   setActiveBrand: (v: string | null) => void
+  activeModel: string | null
+  setActiveModel: (v: string | null) => void
+  activeDealerId: string | null
+  setActiveDealerId: (v: string | null) => void
   conditionFilters: string[]
   toggleCondition: (c: string) => void
   hasBox: boolean
@@ -61,13 +71,72 @@ function FilterSidebar({
   brandCounts: Map<string, number>
   clearAll: () => void
 }) {
+  const [expandedBrand, setExpandedBrand] = useState<string | null>(activeBrand)
+
+  // Sync expandedBrand when activeBrand changes externally (e.g., clearAll)
+  useEffect(() => {
+    setExpandedBrand(activeBrand)
+  }, [activeBrand])
+
+  // Models grouped per brand slug — key: model name or ref number, value: count
+  const modelsByBrand = useMemo(() => {
+    const map = new Map<string, Map<string, number>>()
+    for (const l of listings) {
+      const brandSlug = l.brand.slug
+      const modelKey = l.model?.name ?? l.reference_number
+      if (!modelKey) continue
+      if (!map.has(brandSlug)) map.set(brandSlug, new Map())
+      const brandMap = map.get(brandSlug)!
+      brandMap.set(modelKey, (brandMap.get(modelKey) ?? 0) + 1)
+    }
+    return map
+  }, [listings])
+
+  // Unique dealers derived from listings — RC Crown sorted first
+  const dealers = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; count: number; isRC: boolean }>()
+    for (const l of listings) {
+      const id = l.dealer.id
+      if (!map.has(id)) {
+        const name = l.dealer.company_name ?? l.dealer.full_name ?? "Unknown"
+        const isRC = name.toUpperCase().includes("RC")
+        map.set(id, { id, name, count: 0, isRC })
+      }
+      map.get(id)!.count++
+    }
+    return [...map.values()].sort((a, b) => {
+      if (a.isRC && !b.isRC) return -1
+      if (!a.isRC && b.isRC) return 1
+      return a.name.localeCompare(b.name)
+    })
+  }, [listings])
+
   const hasFilters =
     activeBrand !== null ||
+    activeModel !== null ||
+    activeDealerId !== null ||
     conditionFilters.length > 0 ||
     hasBox ||
     hasPapers ||
     minPrice !== "" ||
     maxPrice !== ""
+
+  function handleBrandClick(slug: string | null) {
+    if (slug === null) {
+      setActiveBrand(null)
+      setActiveModel(null)
+      setExpandedBrand(null)
+    } else {
+      setActiveBrand(slug)
+      setActiveModel(null)
+      setExpandedBrand(slug)
+    }
+  }
+
+  function handleChevronClick(e: React.MouseEvent, slug: string) {
+    e.stopPropagation()
+    setExpandedBrand((prev) => (prev === slug ? null : slug))
+  }
 
   return (
     <div className="flex flex-col gap-0">
@@ -100,13 +169,14 @@ function FilterSidebar({
       {/* Brand section */}
       <div className="px-4 py-3 border-b" style={{ borderColor: "#1c1c2a" }}>
         <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-2.5">Brand</p>
-        <div className="space-y-1.5 max-h-56 overflow-y-auto">
+        <div className="space-y-1.5 max-h-80 overflow-y-auto">
+          {/* All Brands */}
           <label className="flex items-center gap-2.5 cursor-pointer group">
             <input
               type="radio"
               name="brand"
               checked={activeBrand === null}
-              onChange={() => setActiveBrand(null)}
+              onChange={() => handleBrandClick(null)}
               className="accent-blue-500"
             />
             <span className="text-sm text-foreground flex-1 group-hover:text-blue-400 transition-colors">
@@ -116,27 +186,132 @@ function FilterSidebar({
               {brands.reduce((acc, b) => acc + (brandCounts.get(b.id) ?? 0), 0)}
             </span>
           </label>
+
           {brands.map((brand) => {
             const count = brandCounts.get(brand.id) ?? 0
             if (count === 0) return null
+            const isActive = activeBrand === brand.slug
+            const isExpanded = expandedBrand === brand.slug
+            const models = modelsByBrand.get(brand.slug)
+
             return (
-              <label key={brand.id} className="flex items-center gap-2.5 cursor-pointer group">
-                <input
-                  type="radio"
-                  name="brand"
-                  checked={activeBrand === brand.slug}
-                  onChange={() => setActiveBrand(brand.slug)}
-                  className="accent-blue-500"
-                />
-                <span className="text-sm text-foreground flex-1 truncate group-hover:text-blue-400 transition-colors">
-                  {brand.name}
-                </span>
-                <span className="text-xs text-muted-foreground">{count}</span>
-              </label>
+              <div key={brand.id}>
+                {/* Brand row */}
+                <div className="flex items-center gap-1">
+                  <label className="flex items-center gap-2.5 cursor-pointer group flex-1 min-w-0">
+                    <input
+                      type="radio"
+                      name="brand"
+                      checked={isActive}
+                      onChange={() => handleBrandClick(brand.slug)}
+                      className="accent-blue-500 shrink-0"
+                    />
+                    <span className={cn(
+                      "text-sm flex-1 truncate transition-colors",
+                      isActive ? "text-blue-400 font-semibold" : "text-foreground group-hover:text-blue-400"
+                    )}>
+                      {brand.name}
+                    </span>
+                    <span className="text-xs text-muted-foreground shrink-0">{count}</span>
+                  </label>
+                  {/* Chevron toggle */}
+                  {models && models.size > 0 && (
+                    <button
+                      onClick={(e) => handleChevronClick(e, brand.slug)}
+                      className="shrink-0 p-0.5 rounded hover:bg-bg-elevated transition-colors text-muted-foreground hover:text-foreground"
+                      aria-label={isExpanded ? "Collapse models" : "Expand models"}
+                    >
+                      {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+                    </button>
+                  )}
+                </div>
+
+                {/* Model sub-list */}
+                {isExpanded && models && models.size > 0 && (
+                  <div className="ml-4 pl-3 border-l mt-1 space-y-1" style={{ borderColor: "#1c1c2a" }}>
+                    {[...models.entries()]
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([modelKey, modelCount]) => {
+                        const isActiveModel = activeModel === modelKey
+                        return (
+                          <button
+                            key={modelKey}
+                            onClick={() => setActiveModel(isActiveModel ? null : modelKey)}
+                            className="flex items-center gap-1.5 w-full text-left group py-0.5"
+                          >
+                            <span
+                              className="w-1.5 h-1.5 rounded-full shrink-0 transition-colors"
+                              style={{ background: isActiveModel ? "#2563eb" : "#374151" }}
+                            />
+                            <span className={cn(
+                              "text-xs flex-1 truncate transition-colors",
+                              isActiveModel
+                                ? "text-blue-400 font-semibold"
+                                : "text-muted-foreground group-hover:text-foreground"
+                            )}>
+                              {modelKey}
+                            </span>
+                            <span className="text-[11px] shrink-0" style={{ color: "#475569" }}>
+                              {modelCount}
+                            </span>
+                          </button>
+                        )
+                      })}
+                  </div>
+                )}
+              </div>
             )
           })}
         </div>
       </div>
+
+      {/* Dealer section */}
+      {dealers.length > 0 && (
+        <div className="px-4 py-3 border-b" style={{ borderColor: "#1c1c2a" }}>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-2.5">Dealer</p>
+          <div className="space-y-1.5 max-h-48 overflow-y-auto">
+            {/* All Dealers */}
+            <label className="flex items-center gap-2.5 cursor-pointer group">
+              <input
+                type="radio"
+                name="dealer"
+                checked={activeDealerId === null}
+                onChange={() => setActiveDealerId(null)}
+                className="accent-blue-500"
+              />
+              <span className="text-sm text-foreground flex-1 group-hover:text-blue-400 transition-colors">
+                All Dealers
+              </span>
+              <span className="text-xs text-muted-foreground">{listings.length}</span>
+            </label>
+
+            {dealers.map((dealer) => (
+              <label key={dealer.id} className="flex items-center gap-2.5 cursor-pointer group">
+                <input
+                  type="radio"
+                  name="dealer"
+                  checked={activeDealerId === dealer.id}
+                  onChange={() => setActiveDealerId(dealer.id)}
+                  className="accent-blue-500"
+                />
+                <span className={cn(
+                  "text-sm flex-1 truncate transition-colors",
+                  activeDealerId === dealer.id
+                    ? "text-blue-400"
+                    : "text-foreground group-hover:text-blue-400",
+                  dealer.isRC && "font-semibold"
+                )}>
+                  {dealer.isRC && (
+                    <span className="mr-1" style={{ color: "#006039" }}>●</span>
+                  )}
+                  {dealer.name}
+                </span>
+                <span className="text-xs text-muted-foreground shrink-0">{dealer.count}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Condition section */}
       <div className="px-4 py-3 border-b" style={{ borderColor: "#1c1c2a" }}>
@@ -199,6 +374,8 @@ function FilterSidebar({
 
 export default function NetworkGrid({ listings, brands, initialBrand }: NetworkGridProps) {
   const [activeBrand, setActiveBrand] = useState<string | null>(initialBrand ?? null)
+  const [activeModel, setActiveModel] = useState<string | null>(null)
+  const [activeDealerId, setActiveDealerId] = useState<string | null>(null)
   const [conditionFilters, setConditionFilters] = useState<string[]>([])
   const [hasBox, setHasBox] = useState(false)
   const [hasPapers, setHasPapers] = useState(false)
@@ -224,7 +401,7 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
       .catch(() => {}) // market stats are optional — fail silently
   }, [listings])
 
-  // Brand count map
+  // Brand count map (keyed by brand.id)
   const brandCounts = useMemo(() => {
     const map = new Map<string, number>()
     for (const l of listings) {
@@ -241,6 +418,8 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
 
   function clearAll() {
     setActiveBrand(null)
+    setActiveModel(null)
+    setActiveDealerId(null)
     setConditionFilters([])
     setHasBox(false)
     setHasPapers(false)
@@ -252,7 +431,20 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
   const activeChips: { label: string; onRemove: () => void }[] = []
   if (activeBrand) {
     const brandName = brands.find((b) => b.slug === activeBrand)?.name ?? activeBrand
-    activeChips.push({ label: brandName, onRemove: () => setActiveBrand(null) })
+    activeChips.push({
+      label: brandName,
+      onRemove: () => { setActiveBrand(null); setActiveModel(null) },
+    })
+  }
+  if (activeModel) {
+    activeChips.push({ label: activeModel, onRemove: () => setActiveModel(null) })
+  }
+  if (activeDealerId) {
+    const dealerListing = listings.find((l) => l.dealer.id === activeDealerId)
+    const dealerName = dealerListing
+      ? (dealerListing.dealer.company_name ?? dealerListing.dealer.full_name ?? "Dealer")
+      : "Dealer"
+    activeChips.push({ label: dealerName, onRemove: () => setActiveDealerId(null) })
   }
   for (const c of conditionFilters) {
     const _c = c
@@ -267,6 +459,14 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
 
     if (activeBrand) {
       result = result.filter((l) => l.brand.slug === activeBrand)
+    }
+    if (activeModel) {
+      result = result.filter(
+        (l) => l.model?.name === activeModel || l.reference_number === activeModel
+      )
+    }
+    if (activeDealerId) {
+      result = result.filter((l) => l.dealer.id === activeDealerId)
     }
     if (conditionFilters.length > 0) {
       result = result.filter((l) => l.condition != null && conditionFilters.includes(l.condition))
@@ -316,12 +516,17 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
     }
 
     return result
-  }, [listings, activeBrand, conditionFilters, hasBox, hasPapers, minPrice, maxPrice, sort])
+  }, [listings, activeBrand, activeModel, activeDealerId, conditionFilters, hasBox, hasPapers, minPrice, maxPrice, sort])
 
   const sidebarProps = {
+    listings,
     brands,
     activeBrand,
     setActiveBrand,
+    activeModel,
+    setActiveModel,
+    activeDealerId,
+    setActiveDealerId,
     conditionFilters,
     toggleCondition,
     hasBox,
