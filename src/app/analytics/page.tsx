@@ -551,10 +551,11 @@ export default function AnalyticsPage() {
       if (Array.isArray(json)) {
         setFxRates(json as FxRate[])
       } else if (json && typeof json === "object") {
-        const rates: FxRate[] = Object.entries(json).map(([pair, rate]) => ({
-          pair,
-          rate: rate as number,
-        }))
+        // API returns { rates: { EUR: 0.86, ... }, fetched_at, ... }
+        const ratesObj = json.rates && typeof json.rates === "object" ? json.rates : json
+        const rates: FxRate[] = Object.entries(ratesObj)
+          .filter(([, v]) => typeof v === "number")
+          .map(([pair, rate]) => ({ pair, rate: rate as number }))
         setFxRates(rates)
       }
     } catch { /* silent */ } finally {
