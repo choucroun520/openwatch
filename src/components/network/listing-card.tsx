@@ -10,9 +10,10 @@ import type { ListingWithRelations, MarketStats } from "@/lib/types"
 interface ListingCardProps {
   listing: ListingWithRelations
   marketStats?: MarketStats
+  isSoldOnChrono24?: boolean
 }
 
-export default function ListingCard({ listing, marketStats }: ListingCardProps) {
+export default function ListingCard({ listing, marketStats, isSoldOnChrono24 }: ListingCardProps) {
   const price = parseFloat(listing.wholesale_price)
   const hasPriceOnRequest = price === 0
   const companyName = listing.dealer.company_name ?? listing.dealer.full_name ?? "?"
@@ -65,6 +66,16 @@ export default function ListingCard({ listing, marketStats }: ListingCardProps) 
               style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}
             >
               Full Set
+            </div>
+          )}
+
+          {/* Sold on Chrono24 badge — bottom-left */}
+          {isSoldOnChrono24 && (
+            <div
+              className="absolute bottom-2 left-2 text-[10px] px-2 py-0.5 rounded-full font-bold"
+              style={{ background: "rgba(230,126,0,0.15)", color: "#e67e00", border: "1px solid rgba(230,126,0,0.3)" }}
+            >
+              Sold on C24
             </div>
           )}
 

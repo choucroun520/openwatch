@@ -220,6 +220,41 @@ export interface MarketStats {
   total: number;
 }
 
+// ─── Chrono24 tracking types ─────────────────────────────────────────────────
+
+export interface Chrono24Dealer {
+  id: string;
+  merchant_id: number;
+  slug: string;
+  name: string;
+  country: string | null;
+  total_listings: number;
+  last_scraped_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Chrono24Listing {
+  id: string;
+  chrono24_id: string;
+  dealer_id: string | null;
+  merchant_id: number | null;
+  title: string;
+  reference_number: string | null;
+  brand_name: string | null;
+  price: string | null; // NUMERIC as string
+  currency: string;
+  image_url: string | null;
+  listing_url: string | null;
+  condition: string | null;
+  is_sold: boolean;
+  first_seen_at: string;
+  last_seen_at: string;
+  sold_detected_at: string | null;
+  scraped_at: string;
+  created_at: string;
+}
+
 // ─── Supabase Database type (used for typed clients) ─────────────────────────
 
 export type Database = {
@@ -293,6 +328,16 @@ export type Database = {
           currency: string;
         };
         Update: Partial<MarketComp>;
+      };
+      chrono24_dealers: {
+        Row: Chrono24Dealer;
+        Insert: Partial<Chrono24Dealer> & { merchant_id: number; slug: string; name: string };
+        Update: Partial<Chrono24Dealer>;
+      };
+      chrono24_listings: {
+        Row: Chrono24Listing;
+        Insert: Partial<Chrono24Listing> & { chrono24_id: string; title: string };
+        Update: Partial<Chrono24Listing>;
       };
     };
     Views: Record<string, never>;
