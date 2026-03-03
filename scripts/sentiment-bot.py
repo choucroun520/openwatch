@@ -24,18 +24,18 @@ load_dotenv(Path(__file__).parent.parent / ".env.local")
 
 from scrapling.fetchers import StealthyFetcher
 from supabase import create_client
-import anthropic
+from openai import OpenAI
 
 SUPABASE_URL = os.environ["NEXT_PUBLIC_SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+OPENAI_KEY = os.environ.get("OPENAI_API_KEY", "")
 
-if not ANTHROPIC_KEY:
-    print("❌ ANTHROPIC_API_KEY not set in .env.local")
+if not OPENAI_KEY:
+    print("❌ OPENAI_API_KEY not set in .env.local")
     sys.exit(1)
 
 sb = create_client(SUPABASE_URL, SUPABASE_KEY)
-claude = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
+openai_client = OpenAI(api_key=OPENAI_KEY)
 
 NEWS_SOURCES = [
     {
@@ -124,7 +124,7 @@ def scrape_headlines() -> list[dict]:
     return all_headlines
 
 
-def analyze_with_claude(headlines: list[dict]) -> list[dict]:
+def analyze_with_openai(headlines: list[dict]) -> list[dict]:
     """Use Claude to analyze headlines and generate structured sentiment reports."""
 
     headlines_text = "\n".join([f"- [{h['source']}] {h['title']} ({h.get('url','')})" for h in headlines[:30]])
@@ -167,14 +167,14 @@ Always include at least one report in each category.
 
 Return only the JSON array."""
 
-    print("  Calling Claude API for analysis...")
-    response = claude.messages.create(
-        model="claude-opus-4-5",
+    print("  Calling OpenAI API for analysis...")
+    response = openai_client.chat.completions.create(
+        model="gpt-4o",
         max_tokens=4096,
         messages=[{"role": "user", "content": prompt}]
     )
 
-    raw = response.content[0].text.strip()
+    raw = response.choices[0].message.content.strip()
 
     # Strip markdown if Claude wrapped in ```json
     raw = re.sub(r'^```json?\s*', '', raw, flags=re.MULTILINE)
@@ -235,7 +235,7 @@ def main():
 
     # Step 2: Analyze with Claude
     print("\n🧠 Analyzing with Claude AI...")
-    reports = analyze_with_claude(headlines)
+    reports = analyze_with_openai(headlines)
 
     # Step 3: Save to Supabase
     print("\n💾 Saving to Supabase...")

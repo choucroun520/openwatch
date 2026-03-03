@@ -1,11 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Search, Watch } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-import { cn } from "@/lib/utils"
+import CommandSearch from "@/components/search/command-search"
 import type { Profile } from "@/lib/types"
 
 function getCompanyInitial(profile: Profile | null): string {
@@ -35,9 +33,7 @@ function avatarGradient(profile: Profile | null): string {
 }
 
 export default function TopBar() {
-  const router = useRouter()
-  const [profile, setProfile]       = useState<Profile | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
+  const [profile, setProfile] = useState<Profile | null>(null)
 
   useEffect(() => {
     const supabase = createClient()
@@ -58,12 +54,6 @@ export default function TopBar() {
     load()
   }, [])
 
-  function handleSearch(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const q = searchQuery.trim()
-    if (q) router.push(`/network?q=${encodeURIComponent(q)}`)
-  }
-
   const initial  = getCompanyInitial(profile)
   const gradient = avatarGradient(profile)
 
@@ -77,36 +67,7 @@ export default function TopBar() {
       }}
     >
       {/* ── Search ── */}
-      <form
-        onSubmit={handleSearch}
-        className="flex-1 max-w-[520px]"
-      >
-        <div className="relative">
-          <Search
-            size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ color: "#8A939B" }}
-          />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search watches, refs, dealers..."
-            className={cn(
-              "w-full h-9 pl-9 pr-4 rounded-lg text-sm",
-              "focus:outline-none focus:ring-2 focus:ring-[#2081E2]/30 focus:border-[#2081E2]",
-              "transition-all duration-150"
-            )}
-            style={{
-              backgroundColor: "#1E1E2E",
-              border: "1px solid #333333",
-              color: "#ffffff",
-            }}
-            // Inline placeholder colour via CSS variable isn't possible in Tailwind v4 easily,
-            // so we rely on the globals.css placeholder styling
-          />
-        </div>
-      </form>
+      <CommandSearch />
 
       {/* ── Spacer ── */}
       <div className="flex-1" />
