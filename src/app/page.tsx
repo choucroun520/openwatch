@@ -1,15 +1,6 @@
 import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
 
-export default async function HomePage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (user) {
-    redirect("/network")
-  } else {
-    redirect("/login")
-  }
+// DEV MODE: skip auth, go straight to network
+export default function HomePage() {
+  redirect("/network")
 }
