@@ -150,7 +150,7 @@ function InventoryTableRow({ listing, onRefresh }: InventoryTableRowProps) {
 
         {/* Condition */}
         <TableCell className="py-3">
-          <ConditionBadge condition={listing.condition} />
+          {listing.condition ? <ConditionBadge condition={listing.condition} /> : <span className="text-xs text-muted-foreground">—</span>}
         </TableCell>
 
         {/* Price */}

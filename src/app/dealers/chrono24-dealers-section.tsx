@@ -165,39 +165,48 @@ export default function Chrono24DealersSection() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
                 <a
-                  href={`https://www.chrono24.com/dealer/${dealer.slug}/index.htm`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 text-center py-2 rounded-lg text-sm font-semibold transition-opacity hover:opacity-80"
-                  style={{ background: "rgba(32,129,226,0.15)", color: "#2081E2", border: "1px solid rgba(32,129,226,0.2)" }}
+                  href="/network"
+                  className="block w-full text-center py-2 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                  style={{ background: "#2081E2" }}
                 >
-                  View on C24
+                  View Inventory
                 </a>
-                <button
-                  onClick={() => {
-                    setScraping(dealer.slug)
-                    setScrapeMsg("")
-                    fetch("/api/chrono24/scrape", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ slug: dealer.slug }),
-                    })
-                      .then(r => r.json())
-                      .then(json => {
-                        if (json.started) setScrapeMsg(`Re-scrape started for "${dealer.slug}".`)
-                        else setScrapeMsg(json.error ?? "Error")
+                <div className="flex gap-2">
+                  <a
+                    href={`https://www.chrono24.com/dealer/${dealer.slug}/index.htm`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 text-center py-1.5 rounded-lg text-sm font-semibold transition-opacity hover:opacity-80"
+                    style={{ background: "rgba(32,129,226,0.15)", color: "#2081E2", border: "1px solid rgba(32,129,226,0.2)" }}
+                  >
+                    View on C24 ↗
+                  </a>
+                  <button
+                    onClick={() => {
+                      setScraping(dealer.slug)
+                      setScrapeMsg("")
+                      fetch("/api/chrono24/scrape", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ slug: dealer.slug }),
                       })
-                      .catch(err => setScrapeMsg(err.message))
-                      .finally(() => setScraping(null))
-                  }}
-                  disabled={scraping === dealer.slug}
-                  className="px-3 py-2 rounded-lg text-sm font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-80"
-                  style={{ background: "#1a1a1a", border: "1px solid #333333" }}
-                >
-                  {scraping === dealer.slug ? "…" : "↻"}
-                </button>
+                        .then(r => r.json())
+                        .then(json => {
+                          if (json.started) setScrapeMsg(`Re-scrape started for "${dealer.slug}".`)
+                          else setScrapeMsg(json.error ?? "Error")
+                        })
+                        .catch(err => setScrapeMsg(err.message))
+                        .finally(() => setScraping(null))
+                    }}
+                    disabled={scraping === dealer.slug}
+                    className="px-3 py-1.5 rounded-lg text-sm font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-80"
+                    style={{ background: "#1a1a1a", border: "1px solid #333333" }}
+                  >
+                    {scraping === dealer.slug ? "…" : "↻"}
+                  </button>
+                </div>
               </div>
             </div>
           ))}

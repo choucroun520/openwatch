@@ -269,7 +269,7 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
       result = result.filter((l) => l.brand.slug === activeBrand)
     }
     if (conditionFilters.length > 0) {
-      result = result.filter((l) => conditionFilters.includes(l.condition))
+      result = result.filter((l) => l.condition != null && conditionFilters.includes(l.condition))
     }
     if (hasBox) {
       result = result.filter((l) => l.has_box)
@@ -477,6 +477,68 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
             </div>
 
             {filtered.map((l) => (
+              l.source === 'chrono24' && l.external_url ? (
+              <a
+                key={l.id}
+                href={l.external_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="grid grid-cols-12 gap-3 px-4 py-3 border-t items-center hover:bg-bg-elevated transition-colors"
+                style={{ borderColor: "#1c1c2a" }}
+              >
+                {/* Watch icon */}
+                <div
+                  className="col-span-1 w-10 h-10 rounded-lg flex items-center justify-center relative"
+                  style={{ background: l.brand.banner_gradient ?? "linear-gradient(135deg, #1e3a5f, #111119)" }}
+                >
+                  <span className="text-base">⌚</span>
+                  <span className="absolute -top-1 -right-1 text-[8px] px-1 rounded font-black text-white" style={{ background: "rgba(32,129,226,0.9)" }}>C24</span>
+                </div>
+
+                {/* Brand + Model */}
+                <div className="col-span-4 min-w-0">
+                  <p className="text-xs text-blue-400 font-medium">{l.brand.name}</p>
+                  <p className="text-sm font-semibold text-foreground truncate">
+                    {l.model?.name ?? l.notes?.slice(0, 40) ?? "Watch"}
+                  </p>
+                </div>
+
+                {/* Ref */}
+                <div className="col-span-2">
+                  <p className="text-xs text-muted-foreground font-mono truncate">{l.reference_number ?? "—"}</p>
+                  {l.year && <p className="text-xs text-muted-foreground">{l.year}</p>}
+                </div>
+
+                {/* Condition */}
+                <div className="col-span-2">
+                  {l.condition
+                    ? <ConditionBadge condition={l.condition} />
+                    : <span className="text-xs text-muted-foreground">—</span>
+                  }
+                </div>
+
+                {/* Box/Papers */}
+                <div className="col-span-1 text-center">
+                  {l.has_box && l.has_papers ? (
+                    <span className="text-green-400 text-xs font-bold">Full</span>
+                  ) : l.has_box ? (
+                    <span className="text-yellow-400 text-xs">Box</span>
+                  ) : l.has_papers ? (
+                    <span className="text-blue-400 text-xs">Papers</span>
+                  ) : (
+                    <span className="text-muted-foreground text-xs">—</span>
+                  )}
+                </div>
+
+                {/* Price */}
+                <div className="col-span-2 text-right">
+                  <p className="text-sm font-black font-mono text-foreground">
+                    {parseFloat(l.wholesale_price) > 0 ? formatCurrency(l.wholesale_price) : "P.O.R."}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">{shortTimeAgo(l.listed_at)}</p>
+                </div>
+              </a>
+              ) : (
               <Link
                 key={l.id}
                 href={`/listing/${l.id}`}
@@ -494,18 +556,23 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
                 {/* Brand + Model */}
                 <div className="col-span-4 min-w-0">
                   <p className="text-xs text-blue-400 font-medium">{l.brand.name}</p>
-                  <p className="text-sm font-semibold text-foreground truncate">{l.model.name}</p>
+                  <p className="text-sm font-semibold text-foreground truncate">
+                    {l.model?.name ?? l.notes?.slice(0, 40) ?? "Watch"}
+                  </p>
                 </div>
 
                 {/* Ref */}
                 <div className="col-span-2">
-                  <p className="text-xs text-muted-foreground font-mono truncate">{l.reference_number}</p>
+                  <p className="text-xs text-muted-foreground font-mono truncate">{l.reference_number ?? "—"}</p>
                   {l.year && <p className="text-xs text-muted-foreground">{l.year}</p>}
                 </div>
 
                 {/* Condition */}
                 <div className="col-span-2">
-                  <ConditionBadge condition={l.condition} />
+                  {l.condition
+                    ? <ConditionBadge condition={l.condition} />
+                    : <span className="text-xs text-muted-foreground">—</span>
+                  }
                 </div>
 
                 {/* Box/Papers */}
@@ -529,7 +596,8 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
                   <p className="text-[11px] text-muted-foreground">{shortTimeAgo(l.listed_at)}</p>
                 </div>
               </Link>
-            ))}
+              ))
+            )}
           </div>
         )}
       </div>

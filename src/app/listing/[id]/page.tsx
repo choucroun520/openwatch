@@ -72,14 +72,16 @@ export default async function ListingPage({
     .update({ views: listing.views + 1 })
     .eq("id", id)
 
-  // Fetch model avg price
-  const { data: modelListings } = await supabase
-    .from("listings")
-    .select("wholesale_price")
-    .eq("model_id", listing.model_id)
-    .eq("status", "active")
-    .is("deleted_at", null)
-    .neq("id", id)
+  // Fetch model avg price (skip if no model_id — e.g. imported C24 listings)
+  const { data: modelListings } = listing.model_id
+    ? await supabase
+        .from("listings")
+        .select("wholesale_price")
+        .eq("model_id", listing.model_id)
+        .eq("status", "active")
+        .is("deleted_at", null)
+        .neq("id", id)
+    : { data: [] }
 
   const modelPrices = (modelListings ?? [])
     .map((l: { wholesale_price: string }) => parseFloat(l.wholesale_price))
@@ -198,9 +200,11 @@ export default async function ListingPage({
                   Full Set
                 </div>
               )}
-              <div className="absolute bottom-3 left-3">
-                <ConditionBadge condition={listing.condition} />
-              </div>
+              {listing.condition && (
+                <div className="absolute bottom-3 left-3">
+                  <ConditionBadge condition={listing.condition} />
+                </div>
+              )}
             </div>
 
             {/* Toolbar */}
@@ -321,13 +325,13 @@ export default async function ListingPage({
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { label: "Brand", value: listing.brand.name },
-                  { label: "Model", value: listing.model?.name },
-                  { label: "Reference", value: listing.reference_number },
-                  { label: "Material", value: listing.material },
-                  { label: "Dial Color", value: listing.dial_color },
-                  { label: "Case Size", value: listing.case_size || "—" },
-                  { label: "Year", value: listing.year.toString() },
-                  { label: "Movement", value: listing.movement || "—" },
+                  { label: "Model", value: listing.model?.name ?? "—" },
+                  { label: "Reference", value: listing.reference_number ?? "—" },
+                  { label: "Material", value: listing.material ?? "—" },
+                  { label: "Dial Color", value: listing.dial_color ?? "—" },
+                  { label: "Case Size", value: listing.case_size ?? "—" },
+                  { label: "Year", value: listing.year?.toString() ?? "—" },
+                  { label: "Movement", value: listing.movement ?? "—" },
                   { label: "Listed", value: timeAgo(listing.listed_at) },
                 ].map((trait) => (
                   <div
@@ -374,9 +378,19 @@ export default async function ListingPage({
               className="rounded-2xl border p-5"
               style={{ background: "#111119", borderColor: "#1c1c2a" }}
             >
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
-                Wholesale Price
-              </p>
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                  {listing.source === 'chrono24' ? 'Asking Price' : 'Wholesale Price'}
+                </p>
+                {listing.source === 'chrono24' && (
+                  <span
+                    className="text-[10px] px-2 py-0.5 rounded font-black"
+                    style={{ background: "rgba(32,129,226,0.15)", color: "#2081E2", border: "1px solid rgba(32,129,226,0.2)" }}
+                  >
+                    Chrono24
+                  </span>
+                )}
+              </div>
               <div className="flex items-end gap-3 mt-1.5">
                 <p className="text-4xl font-black font-mono text-foreground">
                   {hasPriceOnRequest ? (
@@ -409,9 +423,21 @@ export default async function ListingPage({
 
               {/* Action buttons */}
               <div className="flex gap-2 mt-4">
-                <div className="flex-1">
-                  <InquiryDialog listing={listing} />
-                </div>
+                {listing.source === 'chrono24' && listing.external_url ? (
+                  <a
+                    href={listing.external_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 h-10 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-1.5 transition-opacity hover:opacity-90"
+                    style={{ background: "#e67e00" }}
+                  >
+                    View on Chrono24 ↗
+                  </a>
+                ) : (
+                  <div className="flex-1">
+                    <InquiryDialog listing={listing} />
+                  </div>
+                )}
                 <button
                   className="px-4 h-10 rounded-lg border text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-bg-elevated transition-colors flex items-center gap-1.5"
                   style={{ borderColor: "#1c1c2a" }}

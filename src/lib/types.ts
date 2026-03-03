@@ -93,16 +93,20 @@ export interface Listing {
   id: string;
   dealer_id: string;
   brand_id: string;
-  model_id: string;
-  reference_number: string;
+  model_id: string | null;
+  // Source tracking (migration 00017)
+  source: string; // 'openwatch' | 'chrono24'
+  external_id: string | null; // chrono24 listing ID, eBay ID, etc.
+  external_url: string | null; // link to original listing
+  reference_number: string | null; // nullable for imported data
   serial_number: string | null;
-  year: number;
-  material: string;
-  dial_color: string;
+  year: number | null;
+  material: string | null;
+  dial_color: string | null;
   case_size: string | null;
   movement: string | null;
   complications: string[] | null;
-  condition: string;
+  condition: string | null; // nullable for imported data
   condition_score: string | null; // NUMERIC as string
   has_box: boolean;
   has_papers: boolean;
@@ -285,12 +289,6 @@ export type Database = {
         Insert: Partial<Listing> & {
           dealer_id: string;
           brand_id: string;
-          model_id: string;
-          reference_number: string;
-          year: number;
-          material: string;
-          dial_color: string;
-          condition: string;
           wholesale_price: string;
         };
         Update: Partial<Listing>;
