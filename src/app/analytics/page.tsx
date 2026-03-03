@@ -33,7 +33,6 @@ import {
 import { formatCurrency, formatCompact } from "@/lib/utils/currency"
 import { shortTimeAgo } from "@/lib/utils/dates"
 import { Sparkline } from "@/components/charts/sparkline"
-import { createClient } from "@/lib/supabase/client"
 import ListingCard from "@/components/network/listing-card"
 import type { ListingWithRelations } from "@/lib/types"
 
@@ -382,14 +381,10 @@ export default function AnalyticsPage() {
   async function fetchListings() {
     setListingsLoading(true)
     try {
-      const supabase = createClient()
-      const { data } = await supabase
-        .from("listings")
-        .select(`*, brand:brands(*), model:models(*), dealer:profiles!dealer_id(id, full_name, company_name, avatar_url, verified, seller_rating, total_sales)`)
-        .eq("status", "active")
-        .is("deleted_at", null)
-        .order("wholesale_price", { ascending: true })
-      setListings((data ?? []) as ListingWithRelations[])
+      const res = await fetch("/api/analytics/listings", { cache: "no-store" })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      setListings(data as ListingWithRelations[])
     } catch { /* silent */ } finally {
       setListingsLoading(false)
     }
