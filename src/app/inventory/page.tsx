@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import TopNav from "@/components/layout/top-nav"
+import AppLayout from "@/components/layout/app-layout"
 import InventoryClient from "./_client"
 import type { Listing, Brand, Model } from "@/lib/types"
 
@@ -28,9 +28,8 @@ export default async function InventoryPage() {
   ])
 
   return (
-    <div className="min-h-screen bg-bg">
-      <TopNav />
-      <main className="max-w-7xl mx-auto px-4 py-8">
+    <AppLayout>
+      <main className="max-w-7xl mx-auto">
         <InventoryClient
           initialListings={
             (listingsResult.data || []) as (Listing & {
@@ -42,6 +41,6 @@ export default async function InventoryPage() {
           userId={user.id}
         />
       </main>
-    </div>
+    </AppLayout>
   )
 }

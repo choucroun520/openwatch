@@ -1,11 +1,10 @@
-import TopNav from "@/components/layout/top-nav"
+import AppLayout from "@/components/layout/app-layout"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function InquiriesLoading() {
   return (
-    <div className="min-h-screen bg-bg">
-      <TopNav />
-      <main className="max-w-7xl mx-auto px-4 py-8">
+    <AppLayout>
+      <main className="max-w-7xl mx-auto">
         <Skeleton className="h-8 w-32 mb-6" />
         <div className="flex gap-4 mb-4">
           <Skeleton className="h-9 w-32 rounded-full" />
@@ -28,6 +27,6 @@ export default function InquiriesLoading() {
           ))}
         </div>
       </main>
-    </div>
+    </AppLayout>
   )
 }

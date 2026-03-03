@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import TopNav from "@/components/layout/top-nav"
+import AppLayout from "@/components/layout/app-layout"
 import InquiriesClient from "./_client"
 
 export const metadata = { title: "Inquiries — OpenWatch" }
@@ -27,11 +27,10 @@ export default async function InquiriesPage() {
     .order("created_at", { ascending: false })
 
   return (
-    <div className="min-h-screen bg-bg">
-      <TopNav />
-      <main className="max-w-7xl mx-auto px-4 py-8">
+    <AppLayout>
+      <main className="max-w-7xl mx-auto">
         <InquiriesClient inquiries={inquiries || []} userId={user.id} />
       </main>
-    </div>
+    </AppLayout>
   )
 }

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { Watch, Star, Share2, RefreshCw, MoreHorizontal, Eye, Bookmark } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import TopNav from "@/components/layout/top-nav"
+import AppLayout from "@/components/layout/app-layout"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
 import { ConditionBadge } from "@/components/shared/condition-badge"
 import { BrandAvatar, getBrandGradientBySlug } from "@/components/shared/brand-avatar"
@@ -137,9 +137,7 @@ export default async function ListingPage({
   const hasPriceOnRequest = currentPrice === 0
 
   return (
-    <div className="min-h-screen" style={{ background: "#0b0b14" }}>
-      <TopNav />
-
+    <AppLayout>
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* ── BREADCRUMB ── */}
         <nav className="text-sm text-muted-foreground mb-6 flex items-center gap-2 flex-wrap">
@@ -473,6 +471,6 @@ export default async function ListingPage({
           </section>
         )}
       </div>
-    </div>
+    </AppLayout>
   )
 }

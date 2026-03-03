@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import TopNav from "@/components/layout/top-nav"
+import AppLayout from "@/components/layout/app-layout"
 import { timeAgo } from "@/lib/utils/dates"
 import { formatCurrency } from "@/lib/utils/currency"
 
@@ -53,10 +53,8 @@ export default async function ActivityPage() {
   ]
 
   return (
-    <div className="min-h-screen" style={{ background: "#0b0b14" }}>
-      <TopNav />
-
-      <div className="max-w-[1400px] mx-auto px-4 py-8">
+    <AppLayout>
+      <div className="max-w-[1400px] mx-auto">
         {/* Page header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -210,6 +208,6 @@ export default async function ActivityPage() {
           </p>
         )}
       </div>
-    </div>
+    </AppLayout>
   )
 }

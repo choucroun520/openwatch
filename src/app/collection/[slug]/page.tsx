@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
-import TopNav from "@/components/layout/top-nav"
+import AppLayout from "@/components/layout/app-layout"
 import NetworkGrid from "@/components/network/network-grid"
 import { BrandAvatar, getBrandGradientBySlug } from "@/components/shared/brand-avatar"
 import { ActivityRow } from "@/components/shared/activity-row"
@@ -101,9 +101,7 @@ export default async function CollectionPage({
   const gradient = brand.banner_gradient ?? getBrandGradientBySlug(brand.slug)
 
   return (
-    <div className="min-h-screen" style={{ background: "#0b0b14" }}>
-      <TopNav />
-
+    <AppLayout>
       {/* ── BANNER ── */}
       <div className="relative" style={{ height: 200, background: gradient }}>
         <div
@@ -218,6 +216,6 @@ export default async function CollectionPage({
           </div>
         </div>
       )}
-    </div>
+    </AppLayout>
   )
 }

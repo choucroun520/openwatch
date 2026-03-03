@@ -1,12 +1,11 @@
-import TopNav from "@/components/layout/top-nav";
+import AppLayout from "@/components/layout/app-layout";
 import { CardSkeleton } from "@/components/shared/loading-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function NetworkLoading() {
   return (
-    <div className="min-h-screen bg-bg">
-      <TopNav />
-      <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <AppLayout>
+      <main className="max-w-7xl mx-auto space-y-6">
         {/* Stats bar skeleton */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -40,6 +39,6 @@ export default function NetworkLoading() {
           ))}
         </div>
       </main>
-    </div>
+    </AppLayout>
   );
 }

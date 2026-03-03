@@ -1,11 +1,10 @@
-import TopNav from "@/components/layout/top-nav";
+import AppLayout from "@/components/layout/app-layout";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ListingLoading() {
   return (
-    <div className="min-h-screen bg-bg">
-      <TopNav />
-      <main className="max-w-6xl mx-auto px-4 py-8">
+    <AppLayout>
+      <main className="max-w-6xl mx-auto">
         {/* Breadcrumb skeleton */}
         <Skeleton className="h-4 w-64 mb-6" />
 
@@ -51,6 +50,6 @@ export default function ListingLoading() {
           </div>
         </div>
       </main>
-    </div>
+    </AppLayout>
   );
 }

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import TopNav from "@/components/layout/top-nav"
+import AppLayout from "@/components/layout/app-layout"
 import AdminClient from "./_client"
 
 export const metadata = { title: "Admin — OpenWatch" }
@@ -37,14 +37,13 @@ export default async function AdminPage() {
   ])
 
   return (
-    <div className="min-h-screen bg-bg">
-      <TopNav />
-      <main className="max-w-7xl mx-auto px-4 py-8">
+    <AppLayout>
+      <main className="max-w-7xl mx-auto">
         <AdminClient
           dealers={dealersResult.data || []}
           inviteCodes={inviteCodesResult.data || []}
         />
       </main>
-    </div>
+    </AppLayout>
   )
 }

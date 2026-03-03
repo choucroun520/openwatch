@@ -1,11 +1,10 @@
-import TopNav from "@/components/layout/top-nav"
+import AppLayout from "@/components/layout/app-layout"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AnalyticsLoading() {
   return (
-    <div className="min-h-screen bg-bg">
-      <TopNav />
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <AppLayout>
+      <main className="max-w-7xl mx-auto space-y-8">
         <div>
           <Skeleton className="h-9 w-56 mb-2" />
           <Skeleton className="h-4 w-80" />
@@ -40,6 +39,6 @@ export default function AnalyticsLoading() {
           ))}
         </div>
       </main>
-    </div>
+    </AppLayout>
   )
 }

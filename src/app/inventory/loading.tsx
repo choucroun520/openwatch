@@ -1,11 +1,10 @@
-import TopNav from "@/components/layout/top-nav"
+import AppLayout from "@/components/layout/app-layout"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function InventoryLoading() {
   return (
-    <div className="min-h-screen bg-bg">
-      <TopNav />
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+    <AppLayout>
+      <main className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-40" />
           <Skeleton className="h-9 w-28" />
@@ -40,6 +39,6 @@ export default function InventoryLoading() {
           ))}
         </div>
       </main>
-    </div>
+    </AppLayout>
   )
 }

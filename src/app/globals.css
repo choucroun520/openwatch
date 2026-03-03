@@ -90,24 +90,24 @@
 /* ─── Force dark theme (OpenWatch is always dark) ─── */
 :root {
   --radius: 0.625rem;
-  --background: #0b0b14;
-  --foreground: #e2e8f0;
-  --card: #111119;
-  --card-foreground: #e2e8f0;
-  --popover: #111119;
-  --popover-foreground: #e2e8f0;
-  --primary: #2563eb;
+  --background: #121212;
+  --foreground: #ffffff;
+  --card: #1E1E2E;
+  --card-foreground: #ffffff;
+  --popover: #1E1E2E;
+  --popover-foreground: #ffffff;
+  --primary: #2081E2;
   --primary-foreground: #ffffff;
-  --secondary: #161622;
-  --secondary-foreground: #e2e8f0;
-  --muted: #161622;
-  --muted-foreground: #94a3b8;
-  --accent: #1a1a28;
-  --accent-foreground: #e2e8f0;
-  --destructive: #ef4444;
-  --border: #1c1c2a;
-  --input: #1c1c2a;
-  --ring: #2563eb;
+  --secondary: #1E1E2E;
+  --secondary-foreground: #ffffff;
+  --muted: #1E1E2E;
+  --muted-foreground: #8A939B;
+  --accent: #1a1a1a;
+  --accent-foreground: #ffffff;
+  --destructive: #EB5757;
+  --border: #333333;
+  --input: #333333;
+  --ring: #2081E2;
   --chart-1: #2563eb;
   --chart-2: #22c55e;
   --chart-3: #eab308;
@@ -135,8 +135,8 @@
   }
 
   body {
-    background-color: #0b0b14;
-    color: #e2e8f0;
+    background-color: #121212;
+    color: #ffffff;
     font-family: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

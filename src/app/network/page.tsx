@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import NetworkGrid from "@/components/network/network-grid";
-import TopNav from "@/components/layout/top-nav";
+import AppLayout from "@/components/layout/app-layout";
 import type { ListingWithRelations, Brand } from "@/lib/types";
 
 export const metadata = { title: "Network — OpenWatch" };
@@ -31,14 +31,13 @@ export default async function NetworkPage() {
     .order("name");
 
   return (
-    <div className="min-h-screen" style={{ background: "#0b0b14" }}>
-      <TopNav />
-      <div className="max-w-[1400px] mx-auto">
+    <AppLayout>
+      <div className="max-w-[1400px] mx-auto -mx-4 sm:-mx-6 lg:-mx-8">
         <NetworkGrid
           listings={(listings || []) as ListingWithRelations[]}
           brands={(brands || []) as Brand[]}
         />
       </div>
-    </div>
+    </AppLayout>
   );
 }

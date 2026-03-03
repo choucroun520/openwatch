@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import TopNav from "@/components/layout/top-nav"
+import AppLayout from "@/components/layout/app-layout"
 import AnalyticsClient from "./_client"
 
 export const metadata = { title: "Analytics — OpenWatch" }
@@ -27,15 +27,14 @@ export default async function AnalyticsPage() {
   ])
 
   return (
-    <div className="min-h-screen bg-bg">
-      <TopNav />
-      <main className="max-w-7xl mx-auto px-4 py-8">
+    <AppLayout>
+      <main className="max-w-7xl mx-auto">
         <AnalyticsClient
           listings={listingsResult.data || []}
           brands={brandsResult.data || []}
           events={eventsResult.data || []}
         />
       </main>
-    </div>
+    </AppLayout>
   )
 }

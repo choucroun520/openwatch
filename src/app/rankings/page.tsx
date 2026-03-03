@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
-import TopNav from "@/components/layout/top-nav"
+import AppLayout from "@/components/layout/app-layout"
 import { BrandAvatar } from "@/components/shared/brand-avatar"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
 import { Sparkline } from "@/components/charts/sparkline"
@@ -124,9 +124,7 @@ export default async function RankingsPage() {
     .map((b: BrandStats, i: number) => ({ ...b, rank: i + 1 }))
 
   return (
-    <div className="min-h-screen" style={{ background: "#0b0b14" }}>
-      <TopNav />
-
+    <AppLayout>
       <div className="max-w-[1400px] mx-auto px-4 py-8">
         {/* Page header */}
         <div className="mb-8">
@@ -277,6 +275,6 @@ export default async function RankingsPage() {
           </div>
         )}
       </div>
-    </div>
+    </AppLayout>
   )
 }
