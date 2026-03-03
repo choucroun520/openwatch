@@ -2,15 +2,17 @@
 import Link from "next/link"
 import { Watch } from "lucide-react"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
+import { MarketBadge } from "@/components/shared/market-badge"
 import { formatCurrency } from "@/lib/utils/currency"
 import { shortTimeAgo } from "@/lib/utils/dates"
-import type { ListingWithRelations } from "@/lib/types"
+import type { ListingWithRelations, MarketStats } from "@/lib/types"
 
 interface ListingCardProps {
   listing: ListingWithRelations
+  marketStats?: MarketStats
 }
 
-export default function ListingCard({ listing }: ListingCardProps) {
+export default function ListingCard({ listing, marketStats }: ListingCardProps) {
   const price = parseFloat(listing.wholesale_price)
   const hasPriceOnRequest = price === 0
   const companyName = listing.dealer.company_name ?? listing.dealer.full_name ?? "?"
@@ -131,6 +133,11 @@ export default function ListingCard({ listing }: ListingCardProps) {
               {shortTimeAgo(listing.listed_at)}
             </p>
           </div>
+
+          {/* Market badge */}
+          {marketStats && !hasPriceOnRequest && (
+            <MarketBadge askingPrice={price} marketStats={marketStats} />
+          )}
 
           {/* Hover: Make Inquiry button */}
           <div className="opacity-0 group-hover:opacity-100 transition-opacity pt-0.5">

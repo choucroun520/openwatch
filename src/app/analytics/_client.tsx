@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   Table,
   TableBody,
@@ -11,10 +12,18 @@ import {
 import { formatCurrency, formatCompact } from "@/lib/utils/currency"
 import { shortTimeAgo } from "@/lib/utils/dates"
 
+interface MarketDataSummary {
+  totalComps: number
+  refsCovered: number
+  avgCompsPerRef: number
+  lastScraped: string | null
+}
+
 interface AnalyticsClientProps {
   listings: any[]
   brands: any[]
   events: any[]
+  marketData: MarketDataSummary
 }
 
 function EventBadge({ type }: { type: string }) {
@@ -70,7 +79,24 @@ export default function AnalyticsClient({
   listings,
   brands,
   events,
+  marketData,
 }: AnalyticsClientProps) {
+  const [refreshing, setRefreshing] = useState(false)
+  const [refreshMsg, setRefreshMsg] = useState<string | null>(null)
+
+  async function handleRefresh() {
+    setRefreshing(true)
+    setRefreshMsg(null)
+    try {
+      const res = await fetch("/api/market/refresh", { method: "POST" })
+      const data = await res.json()
+      setRefreshMsg(data.message ?? "Done")
+    } catch {
+      setRefreshMsg("Error — check console")
+    } finally {
+      setRefreshing(false)
+    }
+  }
   // --- KPI Computation ---
   const activeListings = listings.filter((l) => l.status === "active")
   const soldListings = listings.filter((l) => l.status === "sold")
@@ -250,6 +276,73 @@ export default function AnalyticsClient({
             <p className="p-8 text-center text-muted-foreground text-sm">
               No activity yet
             </p>
+          )}
+        </div>
+      </div>
+
+      {/* Market Data */}
+      <div className="bg-bg-card border border-border rounded-xl overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <div>
+            <h2 className="font-semibold text-foreground">Market Data</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {marketData.lastScraped
+                ? `Last updated ${shortTimeAgo(marketData.lastScraped)}`
+                : "Not scraped yet"}
+            </p>
+          </div>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity disabled:opacity-50"
+            style={{ background: "#2081E2" }}
+          >
+            {refreshing ? "Checking..." : "Refresh Market Data"}
+          </button>
+        </div>
+
+        <div className="p-4 space-y-4">
+          {/* Stats row */}
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { label: "Total Comps", value: marketData.totalComps.toLocaleString() },
+              { label: "Refs Covered", value: marketData.refsCovered.toString() },
+              { label: "Avg / Ref", value: marketData.avgCompsPerRef.toString() },
+            ].map((s) => (
+              <div key={s.label} className="bg-bg-elevated rounded-xl p-4 border border-border">
+                <p className="text-xs text-[#475569] uppercase tracking-wider">{s.label}</p>
+                <p className="text-2xl font-black font-mono text-foreground mt-1">{s.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Refresh message */}
+          {refreshMsg && (
+            <div
+              className="rounded-lg p-3 text-xs text-muted-foreground border"
+              style={{ background: "#161622", borderColor: "#22222e" }}
+            >
+              <code>{refreshMsg}</code>
+            </div>
+          )}
+
+          {/* Instructions */}
+          {marketData.totalComps === 0 && (
+            <div
+              className="rounded-lg p-4 text-sm border"
+              style={{ background: "rgba(32,129,226,0.05)", borderColor: "rgba(32,129,226,0.2)" }}
+            >
+              <p className="text-blue-400 font-semibold mb-1">No market data yet</p>
+              <p className="text-muted-foreground text-xs">
+                Run the scraper to populate eBay sold comps for all refs:
+              </p>
+              <code
+                className="block mt-2 px-3 py-2 rounded text-xs text-blue-300"
+                style={{ background: "#161622" }}
+              >
+                node scripts/scrape-ebay.mjs
+              </code>
+            </div>
           )}
         </div>
       </div>

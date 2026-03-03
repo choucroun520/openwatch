@@ -191,6 +191,35 @@ export interface ModelWithStats extends Model {
   ceiling_price: string | null;
 }
 
+// ─── Market Intelligence types ───────────────────────────────────────────────
+
+export interface MarketComp {
+  id: string;
+  reference_number: string;
+  brand_name: string | null;
+  source: string;
+  title: string | null;
+  price: string; // NUMERIC as string
+  currency: string;
+  condition: string | null;
+  has_box: boolean | null;
+  has_papers: boolean | null;
+  sale_date: string | null;
+  listing_url: string | null;
+  seller_name: string | null;
+  seller_country: string | null;
+  scraped_at: string;
+  created_at: string;
+}
+
+export interface MarketStats {
+  floor: number;
+  avg: number;
+  ceiling: number;
+  sold_30d: number;
+  total: number;
+}
+
 // ─── Supabase Database type (used for typed clients) ─────────────────────────
 
 export type Database = {
@@ -254,6 +283,16 @@ export type Database = {
           snapshot_date: string;
         };
         Update: Partial<PriceSnapshot>;
+      };
+      market_comps: {
+        Row: MarketComp;
+        Insert: Partial<MarketComp> & {
+          reference_number: string;
+          price: string;
+          source: string;
+          currency: string;
+        };
+        Update: Partial<MarketComp>;
       };
     };
     Views: Record<string, never>;

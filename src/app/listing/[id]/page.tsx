@@ -7,11 +7,12 @@ import { VerifiedBadge } from "@/components/shared/verified-badge"
 import { ConditionBadge } from "@/components/shared/condition-badge"
 import { BrandAvatar, getBrandGradientBySlug } from "@/components/shared/brand-avatar"
 import InquiryDialog from "./_inquiry-dialog"
+import MarketCompsSection from "./_market-comps"
 import ListingCard from "@/components/network/listing-card"
 import { formatCurrency } from "@/lib/utils/currency"
 import { timeAgo } from "@/lib/utils/dates"
 import { cn } from "@/lib/utils"
-import type { ListingWithRelations } from "@/lib/types"
+import type { ListingWithRelations, MarketComp } from "@/lib/types"
 
 export const dynamic = "force-dynamic"
 
@@ -114,6 +115,17 @@ export default async function ListingPage({
     .neq("id", id)
     .order("listed_at", { ascending: false })
     .limit(5)
+
+  // Fetch market comps for this reference number
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: marketComps } = listing.reference_number
+    ? await (supabase as any)
+        .from("market_comps")
+        .select("*")
+        .eq("reference_number", listing.reference_number)
+        .order("sale_date", { ascending: false })
+        .limit(20)
+    : { data: [] }
 
   // Fetch more from same dealer
   const { data: dealerListings } = await db
@@ -409,6 +421,15 @@ export default async function ListingPage({
                 </button>
               </div>
             </div>
+
+            {/* Market Comps */}
+            {listing.reference_number && (
+              <MarketCompsSection
+                comps={(marketComps ?? []) as MarketComp[]}
+                askingPrice={currentPrice}
+                referenceNumber={listing.reference_number}
+              />
+            )}
 
             {/* Dealer Notes */}
             {listing.notes && (

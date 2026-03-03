@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Filter, LayoutGrid, List, X, SlidersHorizontal } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import {
@@ -19,7 +19,7 @@ import { formatCurrency } from "@/lib/utils/currency"
 import { shortTimeAgo } from "@/lib/utils/dates"
 import { cn } from "@/lib/utils"
 import { CONDITIONS } from "@/lib/constants"
-import type { ListingWithRelations, Brand } from "@/lib/types"
+import type { ListingWithRelations, Brand, MarketStats } from "@/lib/types"
 import Link from "next/link"
 
 interface NetworkGridProps {
@@ -207,6 +207,22 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
   const [sort, setSort] = useState<string>("newest")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [marketStats, setMarketStats] = useState<Record<string, MarketStats>>({})
+
+  // Fetch market stats for all listing refs
+  useEffect(() => {
+    const refs = [
+      ...new Set(
+        listings.map((l) => l.reference_number).filter(Boolean)
+      ),
+    ] as string[]
+    if (refs.length === 0) return
+
+    fetch(`/api/market/stats?refs=${refs.join(",")}`)
+      .then((r) => r.json())
+      .then((data) => setMarketStats(data))
+      .catch(() => {}) // market stats are optional — fail silently
+  }, [listings])
 
   // Brand count map
   const brandCounts = useMemo(() => {
@@ -438,7 +454,11 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
         ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map((l) => (
-              <ListingCard key={l.id} listing={l} />
+              <ListingCard
+                key={l.id}
+                listing={l}
+                marketStats={l.reference_number ? marketStats[l.reference_number] : undefined}
+              />
             ))}
           </div>
         ) : (
