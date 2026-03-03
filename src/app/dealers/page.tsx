@@ -96,7 +96,7 @@ export default async function DealersPage() {
                   )}
 
                   <Link
-                    href={`/network?dealer=${dealer.id}`}
+                    href={`/dealers/${dealer.id}`}
                     className="block w-full text-center py-2 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
                     style={{ background: "#2081E2" }}
                   >

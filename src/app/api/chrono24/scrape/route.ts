@@ -1,11 +1,9 @@
 // POST /api/chrono24/scrape
 // Body: { "slug": "jewelsintimeofboca" }
-// Spawns scrape-chrono24-dealer.mjs as a child process.
-// Returns immediately with { started: true, dealer: slug }.
+// NOTE: Scraping runs locally via `node scripts/scrape-chrono24-dealer.mjs <slug>`
+// This endpoint is a no-op stub on Vercel — spawn-based scraping is local-only.
 
 import { NextRequest, NextResponse } from "next/server"
-import { spawn } from "child_process"
-import path from "path"
 
 export const dynamic = "force-dynamic"
 
@@ -22,14 +20,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid dealer slug" }, { status: 400 })
   }
 
-  const scriptPath = path.join(process.cwd(), "scripts", "scrape-chrono24-dealer.mjs")
-
-  const child = spawn("node", [scriptPath, slug], {
-    detached: true,
-    stdio: "ignore",
-    env: { ...process.env },
+  // Scraping is local-only — run manually:
+  // node scripts/scrape-chrono24-dealer.mjs <slug>
+  return NextResponse.json({
+    ok: false,
+    message: "Scraping runs locally only. Use: node scripts/scrape-chrono24-dealer.mjs " + slug,
   })
-  child.unref()
-
-  return NextResponse.json({ started: true, dealer: slug })
 }
