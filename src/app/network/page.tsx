@@ -31,14 +31,14 @@ export default async function NetworkPage() {
     .order("name");
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen" style={{ background: "#0b0b14" }}>
       <TopNav />
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-[1400px] mx-auto">
         <NetworkGrid
           listings={(listings || []) as ListingWithRelations[]}
           brands={(brands || []) as Brand[]}
         />
-      </main>
+      </div>
     </div>
   );
 }

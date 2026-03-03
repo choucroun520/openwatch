@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -10,19 +10,28 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Menu, Watch, LogOut, Settings, User } from "lucide-react"
+import {
+  Menu,
+  Watch,
+  LogOut,
+  Settings,
+  User,
+  Search,
+  Bell,
+  BarChart3,
+  Activity,
+  ChevronDown,
+  Network,
+  Package,
+  TrendingUp,
+  BookOpen,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Profile } from "@/lib/types"
-
-const NAV_ITEMS = [
-  { label: "Network", href: "/network" },
-  { label: "Inventory", href: "/inventory" },
-  { label: "Analytics", href: "/analytics" },
-  { label: "Inquiries", href: "/inquiries" },
-] as const
 
 function getInitials(profile: Profile | null): string {
   if (!profile) return "?"
@@ -42,6 +51,8 @@ export default function TopNav() {
   const router = useRouter()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const searchRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const supabase = createClient()
@@ -70,59 +81,166 @@ export default function TopNav() {
     router.push("/login")
   }
 
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/network?q=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
+
   const initials = getInitials(profile)
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-border"
-      style={{ backgroundColor: "rgba(11, 11, 20, 0.95)", backdropFilter: "blur(8px)" }}
+      className="sticky top-0 z-50 border-b"
+      style={{
+        backgroundColor: "rgba(11, 11, 20, 0.96)",
+        backdropFilter: "blur(12px)",
+        borderColor: "#1c1c2a",
+      }}
     >
-      <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+      <div className="max-w-[1400px] mx-auto px-4 h-[72px] flex items-center gap-3">
         {/* LEFT — Logo */}
-        <Link href="/network" className="flex items-center gap-2 shrink-0">
-          <Watch size={20} className="text-blue-500" />
-          <span className="text-base font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+        <Link href="/" className="flex items-center gap-2 shrink-0 mr-2">
+          <Watch size={22} className="text-blue-500" />
+          <span className="text-lg font-black bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent hidden sm:block">
             OpenWatch
           </span>
         </Link>
 
-        {/* CENTER — Desktop nav */}
-        <nav className="hidden md:flex gap-1">
-          {NAV_ITEMS.map((item) => {
-            const isActive = pathname.startsWith(item.href)
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "px-3 py-1.5 rounded-full text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-blue-600 text-white"
-                    : "text-muted-foreground hover:text-foreground hover:bg-bg-hover"
-                )}
-              >
-                {item.label}
-              </Link>
-            )
-          })}
-        </nav>
+        {/* CENTER — Search bar */}
+        <form
+          onSubmit={handleSearchSubmit}
+          className="flex-1 max-w-xl hidden md:block"
+        >
+          <div className="relative">
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            />
+            <input
+              ref={searchRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search watches, references, dealers..."
+              className="w-full h-10 pl-9 pr-4 rounded-xl text-sm bg-bg-elevated border border-border-default focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-foreground placeholder:text-muted-foreground transition-all"
+              style={{ background: "#161622", borderColor: "#1c1c2a" }}
+            />
+          </div>
+        </form>
 
         {/* RIGHT — Desktop actions */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-1 ml-auto">
+          {/* Explore dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={cn(
+                  "flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  pathname.startsWith("/network") || pathname.startsWith("/collection")
+                    ? "text-foreground bg-bg-elevated"
+                    : "text-muted-foreground hover:text-foreground hover:bg-bg-elevated"
+                )}
+              >
+                Explore
+                <ChevronDown size={13} className="opacity-60" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-52 bg-bg-card border-border-default"
+            >
+              <DropdownMenuItem asChild>
+                <Link href="/network" className="flex items-center gap-3 cursor-pointer">
+                  <Network size={15} className="text-blue-400" />
+                  <div>
+                    <p className="text-sm font-medium">Network</p>
+                    <p className="text-xs text-muted-foreground">Browse all listings</p>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/rankings" className="flex items-center gap-3 cursor-pointer">
+                  <TrendingUp size={15} className="text-green-400" />
+                  <div>
+                    <p className="text-sm font-medium">Rankings</p>
+                    <p className="text-xs text-muted-foreground">Brand stats &amp; floor prices</p>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/activity" className="flex items-center gap-3 cursor-pointer">
+                  <Activity size={15} className="text-purple-400" />
+                  <div>
+                    <p className="text-sm font-medium">Activity</p>
+                    <p className="text-xs text-muted-foreground">Live deal feed</p>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/analytics" className="flex items-center gap-3 cursor-pointer">
+                  <BarChart3 size={15} className="text-yellow-400" />
+                  <div>
+                    <p className="text-sm font-medium">Analytics</p>
+                    <p className="text-xs text-muted-foreground">Market intelligence</p>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Stats link */}
+          <Link
+            href="/rankings"
+            className={cn(
+              "px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+              pathname === "/rankings"
+                ? "text-foreground bg-bg-elevated"
+                : "text-muted-foreground hover:text-foreground hover:bg-bg-elevated"
+            )}
+          >
+            Stats
+          </Link>
+
+          {/* Activity link */}
+          <Link
+            href="/activity"
+            className={cn(
+              "px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+              pathname === "/activity"
+                ? "text-foreground bg-bg-elevated"
+                : "text-muted-foreground hover:text-foreground hover:bg-bg-elevated"
+            )}
+          >
+            Activity
+          </Link>
+
+          {/* Notification bell */}
+          <button className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-bg-elevated transition-colors">
+            <Bell size={18} />
+            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full" />
+          </button>
+
+          {/* List a Watch */}
           <Link href="/inventory">
             <Button
               size="sm"
-              className="text-sm py-1.5 px-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:opacity-90 border-0"
+              className="text-sm px-4 h-9 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:opacity-90 border-0 ml-1"
             >
               List a Watch
             </Button>
           </Link>
 
+          {/* Profile dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="outline-none focus:ring-0">
-                <Avatar className="w-8 h-8 cursor-pointer ring-1 ring-border hover:ring-blue-500 transition-all">
-                  <AvatarFallback className="bg-bg-elevated text-sm font-semibold text-foreground">
+              <button className="outline-none focus:ring-0 ml-1">
+                <Avatar className="w-9 h-9 cursor-pointer ring-2 ring-border-default hover:ring-blue-500 transition-all">
+                  <AvatarFallback
+                    className="text-sm font-bold text-foreground"
+                    style={{ background: "#1a1a28" }}
+                  >
                     {initials}
                   </AvatarFallback>
                 </Avatar>
@@ -130,35 +248,57 @@ export default function TopNav() {
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-48 bg-bg-card border-border text-foreground"
+              className="w-56 bg-bg-card border-border-default text-foreground"
             >
               {profile && (
-                <div className="px-3 py-2 border-b border-border mb-1">
-                  <p className="text-sm font-medium truncate">
+                <div className="px-3 py-3 border-b border-border-default mb-1">
+                  <p className="text-sm font-semibold truncate">
                     {profile.full_name ?? profile.email}
                   </p>
                   {profile.company_name && (
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">
                       {profile.company_name}
                     </p>
+                  )}
+                  {profile.verified && (
+                    <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] bg-blue-500/15 text-blue-400 px-1.5 py-0.5 rounded-full font-semibold">
+                      <svg viewBox="0 0 12 12" className="w-2.5 h-2.5 fill-current">
+                        <path d="M10.3 3.3L5 8.6 1.7 5.3 0.3 6.7 5 11.4l6.7-6.7-1.4-1.4z" />
+                      </svg>
+                      Verified Dealer
+                    </span>
                   )}
                 </div>
               )}
               <DropdownMenuItem asChild>
-                <Link href="/profile" className="flex items-center gap-2 cursor-pointer">
-                  <User size={14} />
+                <Link href="/inventory" className="flex items-center gap-2.5 cursor-pointer">
+                  <Package size={14} className="text-muted-foreground" />
+                  My Inventory
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/inquiries" className="flex items-center gap-2.5 cursor-pointer">
+                  <BookOpen size={14} className="text-muted-foreground" />
+                  Inquiries
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-border-default" />
+              <DropdownMenuItem asChild>
+                <Link href="/profile" className="flex items-center gap-2.5 cursor-pointer">
+                  <User size={14} className="text-muted-foreground" />
                   Profile
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/settings" className="flex items-center gap-2 cursor-pointer">
-                  <Settings size={14} />
+                <Link href="/settings" className="flex items-center gap-2.5 cursor-pointer">
+                  <Settings size={14} className="text-muted-foreground" />
                   Settings
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-border-default" />
               <DropdownMenuItem
                 onClick={handleSignOut}
-                className="flex items-center gap-2 text-danger cursor-pointer focus:text-danger focus:bg-danger/10"
+                className="flex items-center gap-2.5 text-danger cursor-pointer focus:text-danger focus:bg-danger/10"
               >
                 <LogOut size={14} />
                 Sign Out
@@ -167,8 +307,15 @@ export default function TopNav() {
           </DropdownMenu>
         </div>
 
-        {/* RIGHT — Mobile hamburger */}
-        <div className="md:hidden">
+        {/* MOBILE: Search + Hamburger */}
+        <div className="md:hidden flex items-center gap-2 ml-auto">
+          <button
+            className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => searchRef.current?.focus()}
+          >
+            <Search size={18} />
+          </button>
+
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <button className="p-2 text-muted-foreground hover:text-foreground transition-colors">
@@ -177,18 +324,36 @@ export default function TopNav() {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-72 bg-bg-card border-border-default p-0"
+              className="w-80 p-0"
+              style={{ background: "#111119", borderColor: "#1c1c2a" }}
             >
+              {/* Mobile search */}
+              <div className="p-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+                <form onSubmit={(e) => { handleSearchSubmit(e); setMobileOpen(false) }}>
+                  <div className="relative">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search..."
+                      className="w-full h-9 pl-8 pr-3 rounded-lg text-sm border text-foreground placeholder:text-muted-foreground focus:outline-none"
+                      style={{ background: "#161622", borderColor: "#1c1c2a" }}
+                    />
+                  </div>
+                </form>
+              </div>
+
               {/* Mobile profile header */}
               {profile && (
-                <div className="px-4 py-4 border-b border-border flex items-center gap-3">
+                <div className="px-4 py-3 border-b flex items-center gap-3" style={{ borderColor: "#1c1c2a" }}>
                   <Avatar className="w-10 h-10">
-                    <AvatarFallback className="bg-bg-elevated text-sm font-semibold text-foreground">
+                    <AvatarFallback className="text-sm font-bold text-foreground" style={{ background: "#1a1a28" }}>
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">
+                    <p className="text-sm font-semibold truncate">
                       {profile.full_name ?? profile.email}
                     </p>
                     {profile.company_name && (
@@ -201,53 +366,45 @@ export default function TopNav() {
               )}
 
               {/* Mobile nav links */}
-              <nav className="flex flex-col p-3 gap-1">
-                {NAV_ITEMS.map((item) => {
-                  const isActive = pathname.startsWith(item.href)
+              <nav className="flex flex-col p-3 gap-0.5">
+                {[
+                  { label: "Network", href: "/network", icon: Network },
+                  { label: "Rankings", href: "/rankings", icon: TrendingUp },
+                  { label: "Activity", href: "/activity", icon: Activity },
+                  { label: "Analytics", href: "/analytics", icon: BarChart3 },
+                  { label: "My Inventory", href: "/inventory", icon: Package },
+                  { label: "Inquiries", href: "/inquiries", icon: BookOpen },
+                ].map(({ label, href, icon: Icon }) => {
+                  const isActive = pathname.startsWith(href)
                   return (
                     <Link
-                      key={item.href}
-                      href={item.href}
+                      key={href}
+                      href={href}
                       onClick={() => setMobileOpen(false)}
                       className={cn(
-                        "px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                         isActive
                           ? "bg-blue-600 text-white"
-                          : "text-muted-foreground hover:text-foreground hover:bg-bg-hover"
+                          : "text-muted-foreground hover:text-foreground hover:bg-bg-elevated"
                       )}
                     >
-                      {item.label}
+                      <Icon size={16} />
+                      {label}
                     </Link>
                   )
                 })}
               </nav>
 
               {/* Mobile bottom actions */}
-              <div className="p-3 border-t border-border mt-auto flex flex-col gap-2">
+              <div className="p-3 border-t mt-auto flex flex-col gap-2" style={{ borderColor: "#1c1c2a" }}>
                 <Link href="/inventory" onClick={() => setMobileOpen(false)}>
                   <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:opacity-90 border-0">
                     List a Watch
                   </Button>
                 </Link>
-                <Link
-                  href="/profile"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-bg-hover"
-                >
-                  <User size={14} />
-                  Profile
-                </Link>
-                <Link
-                  href="/settings"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-bg-hover"
-                >
-                  <Settings size={14} />
-                  Settings
-                </Link>
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-danger hover:bg-danger/10 transition-colors rounded-lg text-left"
+                  className="flex items-center gap-2.5 px-3 py-2 text-sm text-danger hover:bg-danger/10 transition-colors rounded-lg text-left"
                 >
                   <LogOut size={14} />
                   Sign Out
