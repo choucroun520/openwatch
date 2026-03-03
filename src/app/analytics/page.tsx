@@ -33,6 +33,9 @@ import {
 import { formatCurrency, formatCompact } from "@/lib/utils/currency"
 import { shortTimeAgo } from "@/lib/utils/dates"
 import { Sparkline } from "@/components/charts/sparkline"
+import { createClient } from "@/lib/supabase/client"
+import ListingCard from "@/components/network/listing-card"
+import type { ListingWithRelations } from "@/lib/types"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -309,10 +312,10 @@ function SentimentBadge({ sentiment, lg = false }: { sentiment: "bullish" | "bea
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-type MainTab = "market" | "sentiment" | "trending" | "deals"
+type MainTab = "market" | "sentiment" | "trending" | "deals" | "listings"
 type SortField = "heat_score" | "floor" | "avg" | "listings" | "spread"
 
-const MAIN_TABS: MainTab[] = ["market", "sentiment", "trending", "deals"]
+const MAIN_TABS: MainTab[] = ["market", "sentiment", "trending", "deals", "listings"]
 
 export default function AnalyticsPage() {
   // ── Core data state ──────────────────────────────────────────────────────────
@@ -333,6 +336,13 @@ export default function AnalyticsPage() {
   const [sentimentError, setSentimentError] = useState<string | null>(null)
   const [sentimentRefreshing, setSentimentRefreshing] = useState(false)
   const [sentimentFetched, setSentimentFetched] = useState(false)
+
+  // ── Listings state ───────────────────────────────────────────────────────────
+  const [listings, setListings] = useState<ListingWithRelations[]>([])
+  const [listingsLoading, setListingsLoading] = useState(false)
+  const [listingsFetched, setListingsFetched] = useState(false)
+  const [listingsBrand, setListingsBrand] = useState<string>("All")
+  const [listingsSort, setListingsSort] = useState<"price-asc" | "price-desc" | "newest">("price-asc")
 
   // ── Fetch functions ──────────────────────────────────────────────────────────
 
@@ -369,11 +379,31 @@ export default function AnalyticsPage() {
     fetchData()
   }, [])
 
+  async function fetchListings() {
+    setListingsLoading(true)
+    try {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from("listings")
+        .select(`*, brand:brands(*), model:models(*), dealer:profiles!dealer_id(id, full_name, company_name, avatar_url, verified, seller_rating, total_sales)`)
+        .eq("status", "active")
+        .is("deleted_at", null)
+        .order("wholesale_price", { ascending: true })
+      setListings((data ?? []) as ListingWithRelations[])
+    } catch { /* silent */ } finally {
+      setListingsLoading(false)
+    }
+  }
+
   // Lazy-load sentiment only when tab is first visited
   useEffect(() => {
     if (mainTab === "sentiment" && !sentimentFetched) {
       setSentimentFetched(true)
       fetchSentiment()
+    }
+    if (mainTab === "listings" && !listingsFetched) {
+      setListingsFetched(true)
+      fetchListings()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mainTab])
@@ -1476,6 +1506,133 @@ export default function AnalyticsPage() {
             )}
           </div>
         )}
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            TAB: LISTINGS
+            ═══════════════════════════════════════════════════════════════════ */}
+        {mainTab === "listings" && (() => {
+          // Derive unique brands from listings
+          const brandSet = new Map<string, string>() // slug → name
+          for (const l of listings) {
+            if (l.brand?.slug && l.brand?.name) brandSet.set(l.brand.slug, l.brand.name)
+          }
+          const brandTabs = ["All", ...Array.from(brandSet.values())]
+
+          // Filter by brand
+          const filtered = listings.filter(l =>
+            listingsBrand === "All" || l.brand?.name === listingsBrand
+          )
+
+          // Sort
+          const sorted = [...filtered].sort((a, b) => {
+            const pa = parseFloat(a.wholesale_price)
+            const pb = parseFloat(b.wholesale_price)
+            if (listingsSort === "price-asc") return pa - pb
+            if (listingsSort === "price-desc") return pb - pa
+            return new Date(b.listed_at).getTime() - new Date(a.listed_at).getTime()
+          })
+
+          // Price ladder buckets
+          const buckets = [
+            { label: "Under $10K",   min: 0,      max: 10000 },
+            { label: "$10K–$25K",    min: 10000,  max: 25000 },
+            { label: "$25K–$50K",    min: 25000,  max: 50000 },
+            { label: "$50K–$100K",   min: 50000,  max: 100000 },
+            { label: "$100K–$250K",  min: 100000, max: 250000 },
+            { label: "$250K+",       min: 250000, max: Infinity },
+          ].map(b => ({
+            ...b,
+            count: filtered.filter(l => {
+              const p = parseFloat(l.wholesale_price)
+              return p >= b.min && p < b.max
+            }).length,
+            floor: Math.min(...filtered
+              .filter(l => { const p = parseFloat(l.wholesale_price); return p >= b.min && p < b.max && p > 0 })
+              .map(l => parseFloat(l.wholesale_price))
+              .filter(p => isFinite(p))
+            ),
+          })).filter(b => b.count > 0)
+
+          return (
+            <div className="space-y-6">
+
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-black text-white">All Listings</h2>
+                  <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                    {filtered.length} watches · sorted by {listingsSort === "price-asc" ? "floor price" : listingsSort === "price-desc" ? "highest price" : "newest"}
+                  </p>
+                </div>
+                <select
+                  value={listingsSort}
+                  onChange={e => setListingsSort(e.target.value as typeof listingsSort)}
+                  className="h-8 px-3 rounded-lg text-sm font-bold text-white border"
+                  style={{ background: "#161622", borderColor: "#22222e", color: "#e2e8f0" }}
+                >
+                  <option value="price-asc">Price: Low → High</option>
+                  <option value="price-desc">Price: High → Low</option>
+                  <option value="newest">Recently Listed</option>
+                </select>
+              </div>
+
+              {/* Price Ladder */}
+              {buckets.length > 0 && (
+                <div className="rounded-xl border p-4" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                  <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "#64748b" }}>Price Ladder</p>
+                  <div className="flex flex-wrap gap-2">
+                    {buckets.map(b => (
+                      <div key={b.label} className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                        style={{ background: "#0b0b14", border: "1px solid #1c1c2a" }}>
+                        <span className="text-xs font-bold text-white">{b.label}</span>
+                        <span className="text-xs font-black font-mono" style={{ color: "#2081E2" }}>{b.count} watches</span>
+                        {isFinite(b.floor) && b.floor > 0 && (
+                          <span className="text-[10px] font-mono" style={{ color: "#22c55e" }}>
+                            floor {formatCompact(b.floor)}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Brand filter tabs */}
+              <div className="flex gap-1.5 flex-wrap">
+                {brandTabs.map(tab => (
+                  <button key={tab} onClick={() => setListingsBrand(tab)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                    style={listingsBrand === tab
+                      ? { background: "#2081E2", color: "#fff" }
+                      : { background: "#111119", color: "#8A939B", border: "1px solid #1c1c2a" }
+                    }>
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              {/* Loading */}
+              {listingsLoading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <div key={i} className="rounded-xl animate-pulse" style={{ background: "#111119", aspectRatio: "3/4" }} />
+                  ))}
+                </div>
+              ) : sorted.length === 0 ? (
+                <div className="rounded-xl border p-10 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                  <p className="text-white font-bold mb-1">No listings found</p>
+                  <p className="text-sm" style={{ color: "#64748b" }}>No active listings for this filter.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {sorted.map(l => (
+                    <ListingCard key={l.id} listing={l} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })()}
 
       </div>
     </AppLayout>
