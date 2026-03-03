@@ -33,6 +33,12 @@ function parsePrice(str) {
   return match ? parseInt(match[1].replace(/,/g, ''), 10) : null;
 }
 
+/**
+ * Parse all listing cards from a Chrono24 search results page.
+ * Returns ALL cards (including cheap accessories) so pagination logic
+ * can use raw card count to determine when to stop.
+ * Price filtering happens later in the upsert pipeline.
+ */
 function parseCards(html) {
   const dom = new JSDOM(html);
   const doc = dom.window.document;
@@ -48,17 +54,16 @@ function parseCards(html) {
       const chrono24Id = idMatch[1];
 
       const img = card.querySelector('img[alt]');
-      const title = img?.getAttribute('alt') || '';
+      const title = img?.getAttribute('alt') || card.querySelector('a[href*="--id"]')?.textContent?.trim() || '';
       const masterSrc = img?.getAttribute('data-lazy-sweet-spot-master-src') || '';
       const imgUrl = masterSrc
         ? masterSrc.replace('_SIZE_', '280')
         : (img?.getAttribute('src') || '');
 
       const price = parsePrice(card.textContent || '');
-      if (!price || price < 500) return;
-
       const url = href.startsWith('/') ? `https://www.chrono24.com${href}` : href;
 
+      // Include even if price is null/low — filter on upsert side
       results.push({ chrono24Id, title, price, imgUrl, url });
     } catch {
       // skip malformed card
@@ -97,7 +102,8 @@ async function scrapeAllPages(merchantId) {
   let totalExpected = null;
 
   while (true) {
-    const url = `https://www.chrono24.com/search/index.htm?merchantId=${merchantId}&dosearch=true&sortorder=1&pageSize=60&p=${page}`;
+    // Chrono24 pagination: p=1 is fixed, showpage=N increments
+    const url = `https://www.chrono24.com/search/index.htm?dosearch=true&merchantId=${merchantId}&p=1&pageSize=60&showpage=${page}&sortorder=1`;
     console.log(`  Scraping page ${page}${totalExpected ? ` of ~${Math.ceil(totalExpected / PAGE_SIZE)}` : ''}...`);
 
     const html = await flareGet(url);
@@ -112,8 +118,9 @@ async function scrapeAllPages(merchantId) {
     }
 
     const cards = parseCards(html);
-    console.log(`  Page ${page}: ${cards.length} listings parsed`);
+    console.log(`  Page ${page}: ${cards.length} cards parsed (all price tiers)`);
 
+    // Break only when no cards at all — NOT based on filtered count
     if (cards.length === 0) break;
     allListings.push(...cards);
 
@@ -166,7 +173,15 @@ async function main() {
   // Scrape all pages
   console.log('\nScraping inventory...');
   const listings = await scrapeAllPages(merchantId);
-  console.log(`\nTotal scraped: ${listings.length} listings`);
+  // Deduplicate by chrono24_id (pages can overlap)
+  const seen = new Set();
+  const deduped = listings.filter(l => {
+    if (seen.has(l.chrono24Id)) return false;
+    seen.add(l.chrono24Id);
+    return true;
+  });
+  console.log(`\nTotal scraped: ${deduped.length} unique listings (${listings.length - deduped.length} duplicates removed)`);
+  const listings_unique = deduped;
 
   // Get existing active listing IDs for sold detection
   const { data: existing } = await sb
@@ -176,7 +191,7 @@ async function main() {
     .eq('is_sold', false);
 
   const existingIds = new Set((existing ?? []).map(l => l.chrono24_id));
-  const scrapedIds = new Set(listings.map(l => l.chrono24Id));
+  const scrapedIds = new Set(listings_unique.map(l => l.chrono24Id));
 
   // Listings that disappeared = sold
   const soldIds = [...existingIds].filter(id => !scrapedIds.has(id));
@@ -191,19 +206,23 @@ async function main() {
 
   // Upsert all current listings in batches of 100
   const now = new Date().toISOString();
-  const toUpsert = listings.map(l => ({
-    chrono24_id: l.chrono24Id,
-    dealer_id: dealer.id,
-    merchant_id: merchantId,
-    title: (l.title ?? '').substring(0, 255),
-    price: l.price,
-    currency: 'USD',
-    image_url: (l.imgUrl ?? '').substring(0, 500),
-    listing_url: (l.url ?? '').substring(0, 500),
-    is_sold: false,
-    last_seen_at: now,
-    scraped_at: now,
-  }));
+  // Store all listings regardless of price — accessories included.
+  // Consumers can filter by price threshold when querying.
+  const toUpsert = listings_unique
+    .filter(l => l.chrono24Id && l.title) // must have ID and title
+    .map(l => ({
+      chrono24_id: l.chrono24Id,
+      dealer_id: dealer.id,
+      merchant_id: merchantId,
+      title: (l.title ?? '').substring(0, 255),
+      price: l.price ?? null,
+      currency: 'USD',
+      image_url: (l.imgUrl ?? '').substring(0, 500) || null,
+      listing_url: (l.url ?? '').substring(0, 500) || null,
+      is_sold: false,
+      last_seen_at: now,
+      scraped_at: now,
+    }));
 
   let upsertedCount = 0;
   for (let i = 0; i < toUpsert.length; i += 100) {
@@ -223,14 +242,14 @@ async function main() {
   await sb
     .from('chrono24_dealers')
     .update({
-      total_listings: listings.length,
+      total_listings: listings_unique.length,
       last_scraped_at: now,
       updated_at: now,
     })
     .eq('id', dealer.id);
 
   console.log(`\n✅ Done!`);
-  console.log(`   ${listings.length} listings saved`);
+  console.log(`   ${listings_unique.length} listings saved`);
   console.log(`   ${soldIds.length} marked as sold`);
 }
 
