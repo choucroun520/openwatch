@@ -16,7 +16,7 @@ interface ListingCardProps {
 export default function ListingCard({ listing, marketStats, isSoldOnChrono24 }: ListingCardProps) {
   const price = parseFloat(listing.wholesale_price)
   const hasPriceOnRequest = price === 0
-  const companyName = listing.dealer.company_name ?? listing.dealer.full_name ?? "?"
+  const companyName = listing.dealer?.company_name ?? listing.dealer?.full_name ?? "Unknown Dealer"
   const isRcCrown = companyName.toUpperCase().startsWith("RC")
   const dealerInitial = isRcCrown ? "RC" : companyName[0]?.toUpperCase() ?? "?"
   const dealerBg = isRcCrown ? "#006039" : "linear-gradient(135deg, #2563eb, #7c3aed)"
@@ -133,12 +133,12 @@ export default function ListingCard({ listing, marketStats, isSoldOnChrono24 }: 
 
           {/* Brand */}
           <p className="text-[11px] font-medium" style={{ color: "#2081E2" }}>
-            {listing.brand.name}
+            {listing.brand?.name ?? ""}
           </p>
 
-          {/* Model name */}
+          {/* Model name / title */}
           <p className="text-[13px] font-bold text-white leading-tight line-clamp-1">
-            {listing.model?.name ?? listing.notes?.slice(0, 35) ?? "Watch"}
+            {listing.model?.name ?? listing.notes?.slice(0, 40) ?? listing.reference_number ?? "Watch"}
           </p>
 
           {/* Ref · Year · Material */}
