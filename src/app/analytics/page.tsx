@@ -8,11 +8,12 @@ import {
   Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
   Cell,
+  LabelList,
+  CartesianGrid,
 } from "recharts"
 import {
   TrendingUp,
@@ -173,6 +174,64 @@ const MSRP_INFO: Record<string, { name: string; brand: string; msrp: number }> =
   "15510ST.OO.1320ST.06": { name: "Royal Oak 41", brand: "Audemars Piguet", msrp: 22100 },
   "26240ST.OO.1320ST.02": { name: "Royal Oak Chrono", brand: "Audemars Piguet", msrp: 29900 },
   "4500V/110A-B128": { name: "Overseas 41", brand: "Vacheron Constantin", msrp: 22900 },
+  // Rolex additional
+  "126600": { name: "Sea-Dweller 43", brand: "Rolex", msrp: 11400 },
+  "126660": { name: "Deepsea", brand: "Rolex", msrp: 13150 },
+  "126655": { name: "Daytona Everose", brand: "Rolex", msrp: 28150 },
+  "126715CHNR": { name: "GMT-Master II RootBeer", brand: "Rolex", msrp: 39650 },
+  "126711CHNR": { name: "GMT-Master II RootBeer Steel", brand: "Rolex", msrp: 14550 },
+  "228235": { name: "Day-Date 40 RG", brand: "Rolex", msrp: 46950 },
+  "228238": { name: "Day-Date 40 YG", brand: "Rolex", msrp: 46450 },
+  "228206": { name: "Day-Date 40 PT", brand: "Rolex", msrp: 52950 },
+  "228396TBR": { name: "Day-Date 40 PT Diamonds", brand: "Rolex", msrp: 0 },
+  "128235": { name: "Day-Date 36 RG", brand: "Rolex", msrp: 39100 },
+  "336235": { name: "Day-Date 40 RG 2024", brand: "Rolex", msrp: 47550 },
+  "336238": { name: "Day-Date 40 YG 2024", brand: "Rolex", msrp: 47050 },
+  "336935": { name: "Day-Date 40 WG 2024", brand: "Rolex", msrp: 49750 },
+  "336938": { name: "Day-Date 40 PT 2024", brand: "Rolex", msrp: 57950 },
+  "126505": { name: "Day-Date 40 YG Oyster", brand: "Rolex", msrp: 46450 },
+  "226627": { name: "Sky-Dweller Oysterflex", brand: "Rolex", msrp: 48650 },
+  "326935": { name: "Sky-Dweller RG", brand: "Rolex", msrp: 54050 },
+  "126334-0010": { name: "Datejust 41 TT", brand: "Rolex", msrp: 11650 },
+  "126334-0022": { name: "Datejust 41 TT Blue", brand: "Rolex", msrp: 11650 },
+  "126334-0028": { name: "Datejust 41 TT", brand: "Rolex", msrp: 11650 },
+  "126333-oyster": { name: "Datejust 41 Two-Tone Oyster", brand: "Rolex", msrp: 9750 },
+  "126610LN-0001": { name: "Submariner Date", brand: "Rolex", msrp: 9100 },
+  "126610LV-0002": { name: "Submariner Hulk", brand: "Rolex", msrp: 9100 },
+  "116610LN-0001": { name: "Submariner Date (prev)", brand: "Rolex", msrp: 0 },
+  "16610LV": { name: "Submariner Kermit", brand: "Rolex", msrp: 0 },
+  "126710BLRO-0001": { name: "GMT-Master II Pepsi", brand: "Rolex", msrp: 10800 },
+  "126710BLNR-0002": { name: "GMT-Master II Batman", brand: "Rolex", msrp: 10800 },
+  "126720VTNR-0001": { name: "GMT-Master II Sprite LH", brand: "Rolex", msrp: 10800 },
+  "126720VTNR-0002": { name: "GMT-Master II Sprite", brand: "Rolex", msrp: 10800 },
+  "116519LN-0038": { name: "Daytona WG Meteorite", brand: "Rolex", msrp: 0 },
+  "126613LB-0002": { name: "Submariner TT Blue", brand: "Rolex", msrp: 12550 },
+  // Patek Philippe additional
+  "5711/1A-011-olive": { name: "Nautilus Olive Green", brand: "Patek Philippe", msrp: 31000 },
+  "5711-1R-001": { name: "Nautilus 5711 Rose Gold", brand: "Patek Philippe", msrp: 0 },
+  "5712R-001": { name: "Nautilus Moonphase RG", brand: "Patek Philippe", msrp: 0 },
+  "5726A-001": { name: "Annual Calendar 5726", brand: "Patek Philippe", msrp: 59500 },
+  "5740/1G-001": { name: "Perpetual Calendar Ultra-Thin", brand: "Patek Philippe", msrp: 0 },
+  "5740-1G-001": { name: "Perpetual Calendar Ultra-Thin", brand: "Patek Philippe", msrp: 0 },
+  "5968G-010": { name: "Aquanaut Chrono WG", brand: "Patek Philippe", msrp: 0 },
+  "5980-1R-001": { name: "Aquanaut Chrono RG", brand: "Patek Philippe", msrp: 0 },
+  "5269R-001": { name: "Aquanaut Travel Time RG", brand: "Patek Philippe", msrp: 0 },
+  "5261R-001": { name: "Aquanaut Annual Cal RG", brand: "Patek Philippe", msrp: 0 },
+  // Audemars Piguet additional
+  "15510ST.OO.1320ST.07": { name: "Royal Oak 41 Black", brand: "Audemars Piguet", msrp: 22100 },
+  "15510ST": { name: "Royal Oak 41", brand: "Audemars Piguet", msrp: 22100 },
+  "15407ST.OO.1220ST.02": { name: "Royal Oak Skeleton 41", brand: "Audemars Piguet", msrp: 0 },
+  "15407ST": { name: "Royal Oak Skeleton", brand: "Audemars Piguet", msrp: 0 },
+  "15407OR.OO.1220OR.01": { name: "Royal Oak Skeleton RG", brand: "Audemars Piguet", msrp: 0 },
+  "15407OR": { name: "Royal Oak Skeleton RG", brand: "Audemars Piguet", msrp: 0 },
+  "26574BC.OO.1220BC.01": { name: "Royal Oak Perp Cal WG", brand: "Audemars Piguet", msrp: 0 },
+  "26240ST-alt": { name: "Royal Oak Chrono 41", brand: "Audemars Piguet", msrp: 29900 },
+  "26240ST": { name: "Royal Oak Chrono 41", brand: "Audemars Piguet", msrp: 29900 },
+  "16202BC.OO.1240BC.02": { name: "Royal Oak Jumbo Extra-Thin WG", brand: "Audemars Piguet", msrp: 0 },
+  "16204OR.OO.1240OR.01": { name: "Royal Oak Jumbo Extra-Thin RG", brand: "Audemars Piguet", msrp: 0 },
+  // Vacheron Constantin additional
+  "4200H-222J-B935": { name: "Historiques 222 YG", brand: "Vacheron Constantin", msrp: 0 },
+  "4500V-110A-B128": { name: "Overseas 41 Steel", brand: "Vacheron Constantin", msrp: 22900 },
 }
 
 // ─── Helper components ─────────────────────────────────────────────────────────
@@ -264,7 +323,7 @@ function DistributionTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
     <div className="rounded-lg border p-3 text-xs shadow-xl"
-      style={{ background: "#111119", borderColor: "#1c1c2a", minWidth: 160 }}>
+      style={{ background: "#1a1a2e", borderColor: "#1c1c2a", minWidth: 180 }}>
       <p className="font-bold text-white mb-2">{label}</p>
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {payload.map((p: any) => (
@@ -282,10 +341,12 @@ function SupplyTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null
   const d = payload[0]?.payload as SupplyItem
   if (!d) return null
+  const info = MSRP_INFO[d.ref_number]
   return (
     <div className="rounded-lg border p-3 text-xs shadow-xl"
-      style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+      style={{ background: "#1a1a2e", borderColor: "#1c1c2a" }}>
       <p className="font-mono font-bold text-white">{d.ref_number}</p>
+      {info && <p className="text-[10px] mt-0.5" style={{ color: "#94a3b8" }}>{info.name}</p>}
       <p className="mt-0.5" style={{ color: BRAND_COLORS[d.brand] ?? "#94a3b8" }}>{d.brand}</p>
       <p className="font-bold text-white mt-1">{d.count} listings</p>
     </div>
