@@ -2285,7 +2285,7 @@ export default function AnalyticsPage() {
                                     dataKey="momentum_30d"
                                     position="right"
                                     style={{ fill: "#94a3b8", fontSize: 9, fontFamily: "monospace" }}
-                                    formatter={(v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`}
+                                    formatter={(v: unknown) => { const n = Number(v); return `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`; }}
                                   />
                                 </Bar>
                               </BarChart>
