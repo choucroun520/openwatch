@@ -30,6 +30,7 @@ import {
   Zap,
   Tag,
   Brain,
+  Globe,
 } from "lucide-react"
 import { formatCurrency, formatCompact } from "@/lib/utils/currency"
 import { shortTimeAgo } from "@/lib/utils/dates"
@@ -119,6 +120,43 @@ interface SentimentReport {
   event_date: string | null
   source_url: string | null
   created_at: string
+}
+
+interface ArbitrageOpportunity {
+  ref_number: string
+  brand: string
+  model_name: string | null
+  buy_market: string
+  buy_price_local: number
+  buy_currency: string
+  buy_price_usd: number
+  sell_market: string
+  sell_price_usd: number
+  gross_spread_pct: number
+  import_costs_usd: number
+  net_profit_usd: number
+  net_profit_pct: number
+  buy_listing_count: number
+  sell_listing_count: number
+  last_updated: string
+}
+
+interface TrendRef {
+  ref_number: string
+  brand: string
+  model_name: string | null
+  current_price: number
+  momentum_7d: number
+  momentum_30d: number
+  momentum_90d: number
+  trend_label: "surging" | "rising" | "stable" | "cooling" | "dropping"
+  listing_count: number
+  velocity_signal: number
+}
+
+interface FxRate {
+  pair: string
+  rate: number
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -372,10 +410,24 @@ function SentimentBadge({ sentiment, lg = false }: { sentiment: "bullish" | "bea
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-type MainTab = "market" | "sentiment" | "trending" | "deals" | "listings"
+type MainTab = "market" | "sentiment" | "trending" | "deals" | "listings" | "arbitrage" | "trends"
 type SortField = "heat_score" | "floor" | "avg" | "listings" | "spread"
 
-const MAIN_TABS: MainTab[] = ["market", "sentiment", "trending", "deals", "listings"]
+const MAIN_TABS: MainTab[] = ["market", "sentiment", "trending", "deals", "listings", "arbitrage", "trends"]
+
+const MARKET_FLAGS: Record<string, string> = {
+  EU: "🇪🇺", CH: "🇨🇭", UK: "🇬🇧", SG: "🇸🇬", JP: "🇯🇵", US: "🇺🇸", DE: "🇩🇪", FR: "🇫🇷",
+}
+
+const FX_PAIRS = [
+  { pair: "EUR/USD", code: "EUR" },
+  { pair: "CHF/USD", code: "CHF" },
+  { pair: "GBP/USD", code: "GBP" },
+  { pair: "JPY/USD", code: "JPY" },
+  { pair: "AED/USD", code: "AED" },
+  { pair: "SGD/USD", code: "SGD" },
+  { pair: "HKD/USD", code: "HKD" },
+]
 
 export default function AnalyticsPage() {
   // ── Core data state ──────────────────────────────────────────────────────────
@@ -403,6 +455,21 @@ export default function AnalyticsPage() {
   const [listingsFetched, setListingsFetched] = useState(false)
   const [listingsBrand, setListingsBrand] = useState<string>("All")
   const [listingsSort, setListingsSort] = useState<"price-asc" | "price-desc" | "newest">("price-asc")
+
+  // ── Arbitrage state ──────────────────────────────────────────────────────────
+  const [arbData, setArbData] = useState<ArbitrageOpportunity[]>([])
+  const [arbLoading, setArbLoading] = useState(false)
+  const [arbFetched, setArbFetched] = useState(false)
+  const [arbExplainerOpen, setArbExplainerOpen] = useState(false)
+
+  // ── Trends state ─────────────────────────────────────────────────────────────
+  const [trendsData, setTrendsData] = useState<TrendRef[]>([])
+  const [trendsLoading, setTrendsLoading] = useState(false)
+  const [trendsFetched, setTrendsFetched] = useState(false)
+
+  // ── FX rates state ───────────────────────────────────────────────────────────
+  const [fxRates, setFxRates] = useState<FxRate[]>([])
+  const [fxLoading, setFxLoading] = useState(false)
 
   // ── Fetch functions ──────────────────────────────────────────────────────────
 
@@ -451,7 +518,51 @@ export default function AnalyticsPage() {
     }
   }
 
-  // Lazy-load sentiment only when tab is first visited
+  async function fetchArbitrage() {
+    setArbLoading(true)
+    try {
+      const res = await fetch("/api/analytics/arbitrage", { cache: "no-store" })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const json = await res.json() as ArbitrageOpportunity[]
+      setArbData(Array.isArray(json) ? json : [])
+    } catch { /* silent */ } finally {
+      setArbLoading(false)
+    }
+  }
+
+  async function fetchTrends() {
+    setTrendsLoading(true)
+    try {
+      const res = await fetch("/api/analytics/trends", { cache: "no-store" })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const json = await res.json() as TrendRef[]
+      setTrendsData(Array.isArray(json) ? json : [])
+    } catch { /* silent */ } finally {
+      setTrendsLoading(false)
+    }
+  }
+
+  async function fetchFxRates() {
+    setFxLoading(true)
+    try {
+      const res = await fetch("/api/fx/rates", { cache: "no-store" })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const json = await res.json()
+      if (Array.isArray(json)) {
+        setFxRates(json as FxRate[])
+      } else if (json && typeof json === "object") {
+        const rates: FxRate[] = Object.entries(json).map(([pair, rate]) => ({
+          pair,
+          rate: rate as number,
+        }))
+        setFxRates(rates)
+      }
+    } catch { /* silent */ } finally {
+      setFxLoading(false)
+    }
+  }
+
+  // Lazy-load tabs when first visited
   useEffect(() => {
     if (mainTab === "sentiment" && !sentimentFetched) {
       setSentimentFetched(true)
@@ -461,8 +572,24 @@ export default function AnalyticsPage() {
       setListingsFetched(true)
       fetchListings()
     }
+    if (mainTab === "arbitrage" && !arbFetched) {
+      setArbFetched(true)
+      fetchArbitrage()
+    }
+    if (mainTab === "trends" && !trendsFetched) {
+      setTrendsFetched(true)
+      fetchTrends()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mainTab])
+
+  // FX rates: fetch on mount + refresh every 60s
+  useEffect(() => {
+    fetchFxRates()
+    const interval = setInterval(fetchFxRates, 60_000)
+    return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function handleSort(field: string) {
     if (sortField === field) {
@@ -667,6 +794,42 @@ export default function AnalyticsPage() {
             ═══════════════════════════════════════════════════════════════════ */}
         {mainTab === "market" && (
           <div className="space-y-8">
+
+            {/* ── FX Rates Widget ──────────────────────────────────────────── */}
+            <div className="rounded-xl border p-4" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+              <div className="flex items-center gap-2 mb-3">
+                <Globe size={13} style={{ color: "#2081E2" }} />
+                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>
+                  Live FX Rates
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#22c55e" }} />
+                  <span className="text-[10px] font-bold" style={{ color: "#22c55e" }}>LIVE</span>
+                </span>
+                {fxLoading && <RefreshCw size={10} className="animate-spin ml-auto" style={{ color: "#64748b" }} />}
+              </div>
+              <div className="flex flex-wrap gap-5">
+                {fxRates.length > 0
+                  ? fxRates.map((r) => (
+                    <div key={r.pair} className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>{r.pair}</span>
+                      <span className="text-sm font-black font-mono" style={{ color: "#e2e8f0" }}>
+                        {r.rate.toFixed(4)}
+                      </span>
+                    </div>
+                  ))
+                  : FX_PAIRS.map((p) => (
+                    <div key={p.pair} className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>{p.pair}</span>
+                      <span className="text-sm font-black font-mono" style={{ color: "#475569" }}>—</span>
+                    </div>
+                  ))
+                }
+              </div>
+              <p className="text-[10px] mt-3" style={{ color: "#475569" }}>
+                Prices across markets auto-converted using live rates · Refreshes every 60s
+              </p>
+            </div>
 
             {/* ── A: Global Stats Bar ─────────────────────────────────────── */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -1685,6 +1848,458 @@ export default function AnalyticsPage() {
                     <ListingCard key={l.id} listing={l} />
                   ))}
                 </div>
+              )}
+            </div>
+          )
+        })()}
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            TAB: ARBITRAGE
+            ═══════════════════════════════════════════════════════════════════ */}
+        {mainTab === "arbitrage" && (() => {
+          const bestOpp = arbData.length > 0
+            ? arbData.reduce((best, opp) => opp.net_profit_pct > best.net_profit_pct ? opp : best, arbData[0])
+            : null
+          const avgEuDiscount = arbData.length > 0
+            ? (arbData.reduce((sum, opp) => sum + (opp.sell_price_usd - opp.buy_price_usd) / opp.sell_price_usd, 0) / arbData.length) * 100
+            : 0
+
+          return (
+            <div className="space-y-6">
+              {/* Header */}
+              <div>
+                <h2 className="text-xl font-black text-white flex items-center gap-2">
+                  <span>⚡</span> Arbitrage Opportunities
+                </h2>
+                <p className="text-xs mt-1" style={{ color: "#64748b" }}>
+                  Buy cheaper in EU/CH markets, sell at US prices after import costs
+                </p>
+              </div>
+
+              {arbLoading && (
+                <div className="space-y-3 animate-pulse">
+                  <div className="grid grid-cols-3 gap-3">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="rounded-xl h-20" style={{ background: "#111119" }} />
+                    ))}
+                  </div>
+                  <div className="rounded-xl h-64" style={{ background: "#111119" }} />
+                </div>
+              )}
+
+              {!arbLoading && (
+                <>
+                  {/* Hero Metrics */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {[
+                      {
+                        label: "Best Opportunity",
+                        value: bestOpp ? `${bestOpp.net_profit_pct.toFixed(1)}%` : "—",
+                        sub: bestOpp ? `${bestOpp.ref_number} · ${bestOpp.brand}` : "No data",
+                        color: "#10b981",
+                      },
+                      {
+                        label: "Avg EU Discount",
+                        value: arbData.length > 0 ? `${avgEuDiscount.toFixed(1)}%` : "—",
+                        sub: "vs. US sell price",
+                        color: "#f59e0b",
+                      },
+                      {
+                        label: "Total Opportunities",
+                        value: arbData.length.toString(),
+                        sub: "active arb plays",
+                        color: "#2081E2",
+                      },
+                    ].map((card) => (
+                      <div key={card.label} className="rounded-xl border p-4"
+                        style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                        <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "#64748b" }}>
+                          {card.label}
+                        </p>
+                        <p className="text-2xl font-black font-mono" style={{ color: card.color }}>{card.value}</p>
+                        <p className="text-[11px] mt-0.5 truncate" style={{ color: "#475569" }}>{card.sub}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Main Table */}
+                  {arbData.length === 0 ? (
+                    <div className="rounded-xl border p-12 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                      <p className="text-white font-bold text-lg mb-2">No arbitrage data</p>
+                      <p className="text-sm" style={{ color: "#64748b" }}>
+                        Run the arbitrage scanner to populate cross-market opportunities.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                      <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+                        <h3 className="text-base font-black text-white">Arbitrage Opportunities</h3>
+                        <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                          Import costs include: shipping $350 · 9.8% US duty · $200 authentication
+                        </p>
+                      </div>
+
+                      {/* Table header */}
+                      <div
+                        className="hidden lg:grid px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider"
+                        style={{
+                          background: "#0b0b14",
+                          color: "#64748b",
+                          gridTemplateColumns: "2.5fr 2fr 1fr 1fr 1fr 1fr 1.2fr 100px",
+                        }}
+                      >
+                        <div>Watch</div>
+                        <div>Buy Market</div>
+                        <div className="text-right">USD Equiv</div>
+                        <div className="text-right">Sell (US)</div>
+                        <div className="text-right">Import Costs</div>
+                        <div className="text-right">Net Profit</div>
+                        <div className="text-right">Net %</div>
+                        <div className="text-right">Availability</div>
+                      </div>
+
+                      {arbData.map((opp, i) => {
+                        const flag = MARKET_FLAGS[opp.buy_market] ?? "🌍"
+                        const profitColor = opp.net_profit_pct > 10
+                          ? "#10b981"
+                          : opp.net_profit_pct >= 5
+                            ? "#f59e0b"
+                            : "#ef4444"
+                        const profitBg = opp.net_profit_pct > 10
+                          ? "rgba(16,185,129,0.1)"
+                          : opp.net_profit_pct >= 5
+                            ? "rgba(245,158,11,0.1)"
+                            : "rgba(239,68,68,0.1)"
+                        return (
+                          <div
+                            key={`${opp.ref_number}-${i}`}
+                            className="border-t px-4 py-3 flex flex-col lg:grid gap-2 lg:gap-0 lg:items-center"
+                            style={{
+                              borderColor: "#1c1c2a",
+                              background: i % 2 === 0 ? "#111119" : "#0d0d15",
+                              gridTemplateColumns: "2.5fr 2fr 1fr 1fr 1fr 1fr 1.2fr 100px",
+                            }}
+                          >
+                            {/* Watch */}
+                            <div>
+                              <p className="text-xs font-black font-mono text-white">{opp.ref_number}</p>
+                              <p className="text-sm font-bold text-white mt-0.5">{opp.model_name ?? opp.brand}</p>
+                              <p className="text-[11px]" style={{ color: BRAND_COLORS[opp.brand] ?? "#94a3b8" }}>{opp.brand}</p>
+                            </div>
+                            {/* Buy Market */}
+                            <div className="flex items-start gap-1.5">
+                              <span className="text-base leading-none mt-0.5">{flag}</span>
+                              <div>
+                                <p className="text-xs font-bold text-white">{opp.buy_market}</p>
+                                <p className="text-xs font-mono" style={{ color: "#94a3b8" }}>
+                                  {opp.buy_currency} {opp.buy_price_local.toLocaleString()}
+                                </p>
+                                <p className="text-[10px]" style={{ color: "#64748b" }}>
+                                  {opp.buy_listing_count} listing{opp.buy_listing_count !== 1 ? "s" : ""}
+                                </p>
+                              </div>
+                            </div>
+                            {/* USD Equiv */}
+                            <div className="hidden lg:block text-right">
+                              <span className="text-xs font-mono text-white">{formatCurrency(opp.buy_price_usd)}</span>
+                            </div>
+                            {/* Sell US */}
+                            <div className="hidden lg:block text-right">
+                              <span className="text-xs font-black font-mono text-white">{formatCurrency(opp.sell_price_usd)}</span>
+                              <p className="text-[10px]" style={{ color: "#64748b" }}>{opp.sell_listing_count} US listings</p>
+                            </div>
+                            {/* Import Costs */}
+                            <div className="hidden lg:block text-right">
+                              <span className="text-xs font-mono" style={{ color: "#ef4444" }}>
+                                {formatCurrency(opp.import_costs_usd)}
+                              </span>
+                            </div>
+                            {/* Net Profit $ */}
+                            <div className="hidden lg:block text-right">
+                              <span className="text-sm font-black font-mono" style={{ color: profitColor }}>
+                                {opp.net_profit_usd >= 0 ? "+" : ""}{formatCurrency(opp.net_profit_usd)}
+                              </span>
+                            </div>
+                            {/* Net % */}
+                            <div className="hidden lg:flex justify-end">
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold"
+                                style={{ background: profitBg, color: profitColor }}
+                              >
+                                {opp.net_profit_pct > 0 ? "↑" : "↓"} {Math.abs(opp.net_profit_pct).toFixed(1)}%
+                              </span>
+                            </div>
+                            {/* Action */}
+                            <div className="hidden lg:flex justify-end">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded"
+                                style={{ background: "rgba(32,129,226,0.12)", color: "#60a5fa" }}>
+                                {opp.sell_listing_count} US ask{opp.sell_listing_count !== 1 ? "s" : ""}
+                              </span>
+                            </div>
+                            {/* Mobile summary */}
+                            <div className="flex items-center justify-between lg:hidden">
+                              <span className="text-xs font-mono" style={{ color: "#64748b" }}>
+                                Buy {formatCurrency(opp.buy_price_usd)} · Sell {formatCurrency(opp.sell_price_usd)}
+                              </span>
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
+                                style={{ background: profitBg, color: profitColor }}
+                              >
+                                {opp.net_profit_pct > 0 ? "↑" : "↓"} {Math.abs(opp.net_profit_pct).toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* Info note */}
+                  <div className="rounded-lg border px-4 py-3 text-xs" style={{ background: "#0b0b14", borderColor: "#1c1c2a", color: "#64748b" }}>
+                    ℹ️ Import costs include: shipping ($350) + US import duty (9.8%) + authentication ($200). Net profit is after all costs.
+                  </div>
+
+                  {/* Explainer (collapsible) */}
+                  <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                    <button
+                      onClick={() => setArbExplainerOpen(o => !o)}
+                      className="w-full flex items-center justify-between px-5 py-4 text-left transition-colors hover:opacity-90"
+                    >
+                      <span className="text-sm font-black text-white">How Arbitrage Works</span>
+                      <span className="text-xs" style={{ color: "#64748b" }}>{arbExplainerOpen ? "▲ collapse" : "▼ expand"}</span>
+                    </button>
+                    {arbExplainerOpen && (
+                      <div className="px-5 pb-5 border-t" style={{ borderColor: "#1c1c2a" }}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                          {[
+                            { step: "1", title: "Find cheaper abroad", desc: "Identify watches listed in EU/CH markets below the US asking price" },
+                            { step: "2", title: "Factor in costs", desc: "Add shipping ($350), 9.8% US import duty, and $200 authentication fee" },
+                            { step: "3", title: "Sell in US market", desc: "List at the prevailing US market price after clearing customs" },
+                            { step: "4", title: "Profit if spread > ~12%", desc: "The net spread must exceed ~12% to cover all costs and generate alpha" },
+                          ].map((item) => (
+                            <div key={item.step} className="flex gap-3">
+                              <span
+                                className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black"
+                                style={{ background: "rgba(32,129,226,0.15)", color: "#60a5fa" }}
+                              >
+                                {item.step}
+                              </span>
+                              <div>
+                                <p className="text-sm font-bold text-white">{item.title}</p>
+                                <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>{item.desc}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )
+        })()}
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            TAB: TRENDS
+            ═══════════════════════════════════════════════════════════════════ */}
+        {mainTab === "trends" && (() => {
+          const surgingCount = trendsData.filter(r => r.trend_label === "surging").length
+          const risingCount = trendsData.filter(r => r.trend_label === "rising").length
+          const stableCount = trendsData.filter(r => r.trend_label === "stable").length
+          const coolingCount = trendsData.filter(r => r.trend_label === "cooling").length
+          const droppingCount = trendsData.filter(r => r.trend_label === "dropping").length
+
+          const biggestMovers = [...trendsData]
+            .sort((a, b) => Math.abs(b.momentum_30d) - Math.abs(a.momentum_30d))
+            .slice(0, 10)
+
+          const chartData = [...trendsData]
+            .sort((a, b) => b.momentum_30d - a.momentum_30d)
+            .slice(0, 15)
+            .map(r => ({ ref_number: r.ref_number, momentum_30d: r.momentum_30d, brand: r.brand }))
+
+          return (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-black text-white flex items-center gap-2">
+                  <TrendingUp size={20} style={{ color: "#10b981" }} /> Price Trends
+                </h2>
+                <p className="text-xs mt-1" style={{ color: "#64748b" }}>
+                  7d · 30d · 90d momentum across all tracked references
+                </p>
+              </div>
+
+              {trendsLoading && (
+                <div className="space-y-4 animate-pulse">
+                  <div className="grid grid-cols-5 gap-3">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <div key={i} className="rounded-xl h-20" style={{ background: "#111119" }} />
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="rounded-xl h-80" style={{ background: "#111119" }} />
+                    <div className="rounded-xl h-80" style={{ background: "#111119" }} />
+                  </div>
+                </div>
+              )}
+
+              {!trendsLoading && (
+                <>
+                  {/* 5 Trend Label Cards */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    {[
+                      { label: "Surging", emoji: "🔥", desc: ">5% 30d", count: surgingCount, color: "#ef4444", bg: "rgba(239,68,68,0.1)" },
+                      { label: "Rising", emoji: "↑", desc: "2-5% 30d", count: risingCount, color: "#10b981", bg: "rgba(16,185,129,0.1)" },
+                      { label: "Stable", emoji: "→", desc: "±2% 30d", count: stableCount, color: "#64748b", bg: "rgba(100,116,139,0.1)" },
+                      { label: "Cooling", emoji: "↓", desc: "-2 to -5% 30d", count: coolingCount, color: "#eab308", bg: "rgba(234,179,8,0.1)" },
+                      { label: "Dropping", emoji: "💀", desc: "<-5% 30d", count: droppingCount, color: "#dc2626", bg: "rgba(220,38,38,0.08)" },
+                    ].map((card) => (
+                      <div key={card.label} className="rounded-xl border p-4" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-base">{card.emoji}</span>
+                          <span
+                            className="text-xs font-bold px-2 py-0.5 rounded-full"
+                            style={{ background: card.bg, color: card.color }}
+                          >
+                            {card.label}
+                          </span>
+                        </div>
+                        <p className="text-2xl font-black font-mono" style={{ color: card.color }}>{card.count}</p>
+                        <p className="text-[10px] mt-0.5" style={{ color: "#475569" }}>{card.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {trendsData.length === 0 ? (
+                    <div className="rounded-xl border p-12 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                      <p className="text-white font-bold text-lg mb-2">No trend data</p>
+                      <p className="text-sm" style={{ color: "#64748b" }}>Run the momentum tracker to populate trend analysis.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                      {/* LEFT: Biggest Movers */}
+                      <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                        <div className="px-4 py-3 border-b" style={{ borderColor: "#1c1c2a" }}>
+                          <h3 className="text-sm font-black text-white">Biggest Movers (30d)</h3>
+                          <p className="text-[11px] mt-0.5" style={{ color: "#64748b" }}>Gainers first, then losers</p>
+                        </div>
+                        <div className="divide-y" style={{ borderColor: "#1c1c2a" }}>
+                          {biggestMovers.map((ref, i) => {
+                            const isPositive = ref.momentum_30d >= 0
+                            const color30d = isPositive ? "#10b981" : "#ef4444"
+                            const trendConfig = {
+                              surging: { color: "#ef4444", bg: "rgba(239,68,68,0.1)", label: "🔥 Surging" },
+                              rising: { color: "#10b981", bg: "rgba(16,185,129,0.1)", label: "↑ Rising" },
+                              stable: { color: "#64748b", bg: "rgba(100,116,139,0.1)", label: "→ Stable" },
+                              cooling: { color: "#eab308", bg: "rgba(234,179,8,0.1)", label: "↓ Cooling" },
+                              dropping: { color: "#dc2626", bg: "rgba(220,38,38,0.08)", label: "💀 Dropping" },
+                            }[ref.trend_label] ?? { color: "#64748b", bg: "rgba(100,116,139,0.1)", label: ref.trend_label }
+                            return (
+                              <div key={`${ref.ref_number}-${i}`} className="px-4 py-3 flex items-center gap-3">
+                                <span className="text-[11px] font-bold font-mono w-5 text-right shrink-0" style={{ color: "#475569" }}>
+                                  {i + 1}
+                                </span>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-black font-mono text-white">{ref.ref_number}</p>
+                                  <p className="text-[11px]" style={{ color: BRAND_COLORS[ref.brand] ?? "#94a3b8" }}>{ref.brand}</p>
+                                </div>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+                                    style={{ background: "rgba(100,116,139,0.1)", color: "#64748b" }}>
+                                    7d {ref.momentum_7d >= 0 ? "+" : ""}{ref.momentum_7d.toFixed(1)}%
+                                  </span>
+                                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded font-bold"
+                                    style={{ background: isPositive ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)", color: color30d }}>
+                                    30d {ref.momentum_30d >= 0 ? "+" : ""}{ref.momentum_30d.toFixed(1)}%
+                                  </span>
+                                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+                                    style={{ background: "rgba(100,116,139,0.1)", color: "#64748b" }}>
+                                    90d {ref.momentum_90d >= 0 ? "+" : ""}{ref.momentum_90d.toFixed(1)}%
+                                  </span>
+                                </div>
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
+                                  style={{ background: trendConfig.bg, color: trendConfig.color }}>
+                                  {trendConfig.label}
+                                </span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      {/* RIGHT: Price Momentum Chart */}
+                      <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                        <div className="px-4 py-3 border-b" style={{ borderColor: "#1c1c2a" }}>
+                          <h3 className="text-sm font-black text-white">Price Momentum Chart</h3>
+                          <p className="text-[11px] mt-0.5" style={{ color: "#64748b" }}>Top 15 by 30d momentum · green = up, red = down</p>
+                        </div>
+                        <div className="p-4">
+                          {chartData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={Math.max(300, chartData.length * 28)}>
+                              <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 50, left: 0, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#1c1c2a" horizontal={false} />
+                                <XAxis
+                                  type="number"
+                                  stroke="#1c1c2a"
+                                  tick={{ fill: "#64748b", fontSize: 10 }}
+                                  axisLine={false}
+                                  tickLine={false}
+                                  tickFormatter={(v: number) => `${v > 0 ? "+" : ""}${v}%`}
+                                />
+                                <YAxis
+                                  type="category"
+                                  dataKey="ref_number"
+                                  width={110}
+                                  tick={{ fill: "#e2e8f0", fontSize: 10, fontFamily: "ui-monospace, monospace" }}
+                                  axisLine={false}
+                                  tickLine={false}
+                                />
+                                <Tooltip
+                                  cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                content={({ active, payload }: any) => {
+                                    if (!active || !payload?.length) return null
+                                    const d = payload[0]?.payload as { ref_number: string; momentum_30d: number; brand: string }
+                                    return (
+                                      <div className="rounded-lg border p-2 text-xs shadow-xl"
+                                        style={{ background: "#1a1a2e", borderColor: "#1c1c2a" }}>
+                                        <p className="font-mono font-bold text-white">{d.ref_number}</p>
+                                        <p className="text-[11px] mt-0.5" style={{ color: BRAND_COLORS[d.brand] ?? "#94a3b8" }}>{d.brand}</p>
+                                        <p className="font-bold mt-1"
+                                          style={{ color: d.momentum_30d >= 0 ? "#10b981" : "#ef4444" }}>
+                                          {d.momentum_30d >= 0 ? "+" : ""}{d.momentum_30d.toFixed(1)}% (30d)
+                                        </p>
+                                      </div>
+                                    )
+                                  }}
+                                />
+                                <Bar dataKey="momentum_30d" radius={[0, 4, 4, 0]} maxBarSize={18}>
+                                  {chartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`}
+                                      fill={entry.momentum_30d >= 0 ? "#10b981" : "#ef4444"}
+                                    />
+                                  ))}
+                                  <LabelList
+                                    dataKey="momentum_30d"
+                                    position="right"
+                                    style={{ fill: "#94a3b8", fontSize: 9, fontFamily: "monospace" }}
+                                    formatter={(v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`}
+                                  />
+                                </Bar>
+                              </BarChart>
+                            </ResponsiveContainer>
+                          ) : (
+                            <div className="h-64 flex items-center justify-center" style={{ color: "#475569" }}>
+                              No momentum data
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )
