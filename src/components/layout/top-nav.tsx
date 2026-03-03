@@ -222,16 +222,6 @@ export default function TopNav() {
             <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full" />
           </button>
 
-          {/* List a Watch */}
-          <Link href="/inventory">
-            <Button
-              size="sm"
-              className="text-sm px-4 h-9 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:opacity-90 border-0 ml-1"
-            >
-              List a Watch
-            </Button>
-          </Link>
-
           {/* Profile dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -397,11 +387,6 @@ export default function TopNav() {
 
               {/* Mobile bottom actions */}
               <div className="p-3 border-t mt-auto flex flex-col gap-2" style={{ borderColor: "#1c1c2a" }}>
-                <Link href="/inventory" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:opacity-90 border-0">
-                    List a Watch
-                  </Button>
-                </Link>
                 <button
                   onClick={handleSignOut}
                   className="flex items-center gap-2.5 px-3 py-2 text-sm text-danger hover:bg-danger/10 transition-colors rounded-lg text-left"

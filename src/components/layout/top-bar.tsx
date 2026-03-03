@@ -113,20 +113,6 @@ export default function TopBar() {
 
       {/* ── Right side actions ── */}
       <div className="flex items-center gap-3 shrink-0">
-        {/* List a Watch button */}
-        <Link
-          href="/inventory"
-          className={cn(
-            "hidden sm:inline-flex items-center gap-1.5",
-            "h-9 px-4 rounded-lg text-sm font-bold text-white",
-            "transition-opacity hover:opacity-90"
-          )}
-          style={{ backgroundColor: "#2081E2" }}
-        >
-          <Watch size={14} strokeWidth={2.2} />
-          List a Watch
-        </Link>
-
         {/* Dealer avatar */}
         <Link
           href="/profile"
