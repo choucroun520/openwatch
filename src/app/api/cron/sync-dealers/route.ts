@@ -11,6 +11,9 @@ import { createClient } from "@supabase/supabase-js"
 export const dynamic = "force-dynamic"
 export const maxDuration = 10 // just spawns child processes, returns fast
 
+// Dealers blocked from auto-sync — inaccurate/inflated pricing
+const DEALER_BLOCKLIST = ['jewelsintimeofboca']
+
 function getServiceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -42,6 +45,9 @@ export async function GET(req: NextRequest) {
   const started: string[] = []
 
   for (const dealer of dealers) {
+    // Skip blocklisted dealers
+    if (DEALER_BLOCKLIST.includes(dealer.slug)) continue
+
     // Skip if scraped less than 5 hours ago
     if (dealer.last_scraped_at) {
       const lastScrape = new Date(dealer.last_scraped_at).getTime()

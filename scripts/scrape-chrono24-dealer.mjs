@@ -17,6 +17,15 @@ const sb = createClient(
 const FLARE_URL = 'http://localhost:8191/v1';
 const PAGE_SIZE = 60;
 
+// Dealers blocked from scraping — inaccurate pricing, spam listers, etc.
+const DEALER_BLOCKLIST = [
+  'jewelsintimeofboca',   // JIT: lists at inflated prices to fish for buyers, not real market data
+];
+
+function isBlocklisted(slug) {
+  return DEALER_BLOCKLIST.includes(slug.toLowerCase());
+}
+
 // Only track these brands — all others are ignored
 const ALLOWED_BRANDS = [
   'rolex',
@@ -159,8 +168,13 @@ async function main() {
   const slug = process.argv[2];
   if (!slug) {
     console.error('Usage: node scripts/scrape-chrono24-dealer.mjs <dealer-slug>');
-    console.error('Example: node scripts/scrape-chrono24-dealer.mjs jewelsintimeofboca');
     process.exit(1);
+  }
+
+  if (isBlocklisted(slug)) {
+    console.error(`❌ Dealer "${slug}" is on the blocklist — skipping.`);
+    console.error('Reason: inaccurate pricing / spam lister. Edit DEALER_BLOCKLIST to override.');
+    process.exit(0);
   }
 
   console.log(`\n🔍 Scraping Chrono24 dealer: ${slug}`);
