@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { Watch, Star, Share2, RefreshCw, MoreHorizontal, Eye, Bookmark } from "lucide-react"
+import { Watch, Star, Share2, RefreshCw, MoreHorizontal, Eye, Bookmark, ExternalLink } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import AppLayout from "@/components/layout/app-layout"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
@@ -119,7 +119,6 @@ export default async function ListingPage({
     .limit(5)
 
   // Fetch market comps for this reference number
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: marketComps } = listing.reference_number
     ? await (supabase as any)
         .from("market_comps")
@@ -149,6 +148,91 @@ export default async function ListingPage({
 
   const sellerRating = parseFloat(listing.dealer.seller_rating as string) || 0
   const hasPriceOnRequest = currentPrice === 0
+
+  // RC Crown detection
+  const isRCCrown =
+    listing.source === "rccrown" ||
+    listing.dealer.company_name?.toLowerCase().includes("rc crown") ||
+    listing.dealer.company_name?.toLowerCase().includes("rccrown")
+
+  // Market comps stats for price summary card
+  const compPrices = ((marketComps ?? []) as MarketComp[])
+    .map((c) => parseFloat(String(c.price)))
+    .filter((p) => p > 0)
+  const marketFloor = compPrices.length ? Math.min(...compPrices) : 0
+  const marketAvg = compPrices.length
+    ? compPrices.reduce((a, b) => a + b, 0) / compPrices.length
+    : 0
+  const vsMarketAvg =
+    marketAvg > 0 && currentPrice > 0
+      ? ((currentPrice - marketAvg) / marketAvg) * 100
+      : null
+
+  // External search links
+  const refEncoded = encodeURIComponent(listing.reference_number ?? "")
+  const searchLinks = listing.reference_number
+    ? [
+        {
+          name: "Chrono24",
+          emoji: "🔵",
+          url: `https://www.chrono24.com/search/index.htm?query=${refEncoded}`,
+        },
+        {
+          name: "eBay Sold",
+          emoji: "📦",
+          url: `https://www.ebay.com/sch/i.html?_nkw=${refEncoded}&LH_Sold=1&LH_Complete=1`,
+        },
+        {
+          name: "WatchBox",
+          emoji: "⌚",
+          url: `https://www.watchbox.com/search?q=${refEncoded}`,
+        },
+        {
+          name: "Bob's Watches",
+          emoji: "🏆",
+          url: `https://www.bobswatches.com/rolex-watches.html?q=${refEncoded}`,
+        },
+        {
+          name: "Subdial",
+          emoji: "🔮",
+          url: `https://subdial.com/search?query=${refEncoded}`,
+        },
+        {
+          name: "Watchfinder",
+          emoji: "🔍",
+          url: `https://www.watchfinder.com/search?q=${refEncoded}`,
+        },
+        {
+          name: "WatchCharts",
+          emoji: "📊",
+          url: `https://watchcharts.com/watches/search?query=${refEncoded}`,
+        },
+      ]
+    : []
+
+  // Build specs rows — only show fields with values
+  const specRows: { label: string; value: string; mono?: boolean }[] = [
+    listing.reference_number ? { label: "Reference", value: listing.reference_number, mono: true } : null,
+    listing.brand?.name ? { label: "Brand", value: listing.brand.name } : null,
+    listing.model?.name ? { label: "Model", value: listing.model.name } : null,
+    listing.year ? { label: "Year", value: listing.year.toString() } : null,
+    listing.material ? { label: "Material", value: listing.material } : null,
+    listing.dial_color ? { label: "Dial Color", value: listing.dial_color } : null,
+    listing.case_size ? { label: "Case Size", value: listing.case_size } : null,
+    listing.movement ? { label: "Movement", value: listing.movement } : null,
+    { label: "Serial Number", value: listing.serial_number || "N/A" },
+    listing.has_warranty && listing.warranty_date
+      ? { label: "Warranty", value: `Included · ${new Date(listing.warranty_date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}` }
+      : listing.has_warranty
+      ? { label: "Warranty", value: "Included" }
+      : null,
+    listing.service_history ? { label: "Service History", value: listing.service_history } : null,
+    listing.condition_score
+      ? { label: "Condition Score", value: `${listing.condition_score}/10` }
+      : null,
+    { label: "Listed", value: timeAgo(listing.listed_at) },
+    { label: "Views", value: `${listing.views + 1}` },
+  ].filter((r): r is { label: string; value: string; mono?: boolean } => r !== null)
 
   return (
     <AppLayout>
@@ -200,6 +284,23 @@ export default async function ListingPage({
                   Full Set
                 </div>
               )}
+              {/* Source badge on image */}
+              {isRCCrown && (
+                <div
+                  className="absolute top-3 right-3 text-xs px-2.5 py-1 rounded-full font-black"
+                  style={{ background: "rgba(0,96,57,0.85)", color: "#4ade80", border: "1px solid rgba(0,96,57,0.5)" }}
+                >
+                  👑 RC Crown
+                </div>
+              )}
+              {listing.source === "chrono24" && !isRCCrown && (
+                <div
+                  className="absolute top-3 right-3 text-xs px-2.5 py-1 rounded-full font-black"
+                  style={{ background: "rgba(32,129,226,0.85)", color: "#fff", border: "1px solid rgba(32,129,226,0.4)" }}
+                >
+                  Chrono24
+                </div>
+              )}
               {listing.condition && (
                 <div className="absolute bottom-3 left-3">
                   <ConditionBadge condition={listing.condition} />
@@ -209,19 +310,22 @@ export default async function ListingPage({
 
             {/* Toolbar */}
             <div className="flex items-center gap-2 mt-3 px-1">
-              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-bg-elevated border transition-colors"
+              <button
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-bg-elevated border transition-colors"
                 style={{ borderColor: "#1c1c2a" }}
               >
                 <Share2 size={12} />
                 Share
               </button>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-bg-elevated border transition-colors"
+              <button
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-bg-elevated border transition-colors"
                 style={{ borderColor: "#1c1c2a" }}
               >
                 <RefreshCw size={12} />
                 Refresh
               </button>
-              <button className="ml-auto p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-bg-elevated border transition-colors"
+              <button
+                className="ml-auto p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-bg-elevated border transition-colors"
                 style={{ borderColor: "#1c1c2a" }}
               >
                 <MoreHorizontal size={16} />
@@ -239,16 +343,25 @@ export default async function ListingPage({
                   key={item.label}
                   className={cn(
                     "rounded-xl p-3 text-center border",
-                    item.value
-                      ? "bg-green-500/10 border-green-500/20"
-                      : ""
+                    item.value ? "bg-green-500/10 border-green-500/20" : ""
                   )}
                   style={!item.value ? { background: "#111119", borderColor: "#1c1c2a" } : undefined}
                 >
-                  <p className={cn("text-xs font-semibold", item.value ? "text-green-400" : "text-muted-foreground")}>
-                    {item.value ? "✓ " : "— "}{item.label}
+                  <p
+                    className={cn(
+                      "text-xs font-semibold",
+                      item.value ? "text-green-400" : "text-muted-foreground"
+                    )}
+                  >
+                    {item.value ? "✓ " : "— "}
+                    {item.label}
                   </p>
-                  <p className={cn("text-[11px] mt-0.5", item.value ? "text-green-400/80" : "text-muted-foreground/60")}>
+                  <p
+                    className={cn(
+                      "text-[11px] mt-0.5",
+                      item.value ? "text-green-400/80" : "text-muted-foreground/60"
+                    )}
+                  >
                     {item.value ? "Included" : "Not Included"}
                   </p>
                 </div>
@@ -280,23 +393,47 @@ export default async function ListingPage({
               </p>
             </div>
 
-            {/* Dealer */}
+            {/* ── DEALER CARD ── */}
             <div
               className="flex items-center gap-3 rounded-xl border p-3.5"
-              style={{ background: "#111119", borderColor: "#1c1c2a" }}
+              style={{
+                background: isRCCrown ? "rgba(0,96,57,0.08)" : "#111119",
+                borderColor: isRCCrown ? "rgba(0,96,57,0.3)" : "#1c1c2a",
+              }}
             >
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-black text-white shrink-0"
-                style={{ background: "linear-gradient(135deg, #2563eb, #7c3aed)" }}
+                style={{
+                  background: isRCCrown
+                    ? "linear-gradient(135deg, #006039, #00a86b)"
+                    : "linear-gradient(135deg, #2563eb, #7c3aed)",
+                }}
               >
-                {(listing.dealer.company_name || listing.dealer.full_name || "?")[0].toUpperCase()}
+                {isRCCrown
+                  ? "👑"
+                  : (listing.dealer.company_name || listing.dealer.full_name || "?")[0].toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="font-semibold text-sm text-foreground">
+                  <Link
+                    href={`/dealers/${listing.dealer.id}`}
+                    className="font-semibold text-sm text-foreground hover:underline"
+                  >
                     {listing.dealer.company_name || listing.dealer.full_name}
-                  </span>
+                  </Link>
                   {listing.dealer.verified && <VerifiedBadge />}
+                  {isRCCrown && (
+                    <span
+                      className="text-[10px] px-1.5 py-0.5 rounded font-black"
+                      style={{
+                        background: "rgba(0,96,57,0.2)",
+                        color: "#4ade80",
+                        border: "1px solid rgba(0,96,57,0.3)",
+                      }}
+                    >
+                      RC Crown
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-0.5 mt-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
@@ -317,39 +454,103 @@ export default async function ListingPage({
               </div>
             </div>
 
-            {/* Traits grid */}
+            {/* ── SPECS GRID ── */}
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-2.5">
                 Watch Details
               </p>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: "Brand", value: listing.brand.name },
-                  { label: "Model", value: listing.model?.name ?? "—" },
-                  { label: "Reference", value: listing.reference_number ?? "—" },
-                  { label: "Material", value: listing.material ?? "—" },
-                  { label: "Dial Color", value: listing.dial_color ?? "—" },
-                  { label: "Case Size", value: listing.case_size ?? "—" },
-                  { label: "Year", value: listing.year?.toString() ?? "—" },
-                  { label: "Movement", value: listing.movement ?? "—" },
-                  { label: "Listed", value: timeAgo(listing.listed_at) },
-                ].map((trait) => (
+              <div
+                className="rounded-xl border divide-y overflow-hidden"
+                style={{ borderColor: "#1c1c2a" }}
+              >
+                {specRows.map((row) => (
                   <div
-                    key={trait.label}
-                    className="rounded-xl p-2.5 text-center border"
-                    style={{ background: "rgba(37,99,235,0.05)", borderColor: "rgba(37,99,235,0.15)" }}
+                    key={row.label}
+                    className="flex items-start px-3 py-2 gap-3"
+                    style={{ borderColor: "#1c1c2a" }}
                   >
-                    <p className="text-[10px] text-blue-400 uppercase font-black tracking-wider">
-                      {trait.label}
-                    </p>
-                    <p
-                      className="text-xs font-semibold text-foreground mt-0.5 truncate"
-                      title={trait.value}
+                    <span className="text-xs text-muted-foreground w-28 shrink-0 pt-0.5">
+                      {row.label}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-xs font-semibold text-foreground flex-1 break-words",
+                        row.mono && "font-mono"
+                      )}
                     >
-                      {trait.value}
-                    </p>
+                      {row.value}
+                    </span>
                   </div>
                 ))}
+
+                {/* Has Box row */}
+                <div
+                  className="flex items-start px-3 py-2 gap-3"
+                  style={{ borderColor: "#1c1c2a" }}
+                >
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 pt-0.5">Has Box</span>
+                  <span
+                    className={cn(
+                      "text-xs font-semibold",
+                      listing.has_box ? "text-green-400" : "text-red-400"
+                    )}
+                  >
+                    {listing.has_box ? "✓ Yes" : "✗ No"}
+                  </span>
+                </div>
+
+                {/* Has Papers row */}
+                <div
+                  className="flex items-start px-3 py-2 gap-3"
+                  style={{ borderColor: "#1c1c2a" }}
+                >
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 pt-0.5">Has Papers</span>
+                  <span
+                    className={cn(
+                      "text-xs font-semibold",
+                      listing.has_papers ? "text-green-400" : "text-red-400"
+                    )}
+                  >
+                    {listing.has_papers ? "✓ Yes" : "✗ No"}
+                  </span>
+                </div>
+
+                {/* Source row */}
+                {listing.source && listing.source !== "openwatch" && (
+                  <div
+                    className="flex items-start px-3 py-2 gap-3"
+                    style={{ borderColor: "#1c1c2a" }}
+                  >
+                    <span className="text-xs text-muted-foreground w-28 shrink-0 pt-0.5">Source</span>
+                    <span className="text-xs font-semibold">
+                      {isRCCrown ? (
+                        <span
+                          className="px-2 py-0.5 rounded-full text-[10px] font-black"
+                          style={{
+                            background: "rgba(0,96,57,0.15)",
+                            color: "#4ade80",
+                            border: "1px solid rgba(0,96,57,0.3)",
+                          }}
+                        >
+                          👑 RC Crown
+                        </span>
+                      ) : listing.source === "chrono24" ? (
+                        <span
+                          className="px-2 py-0.5 rounded-full text-[10px] font-black"
+                          style={{
+                            background: "rgba(32,129,226,0.15)",
+                            color: "#2081E2",
+                            border: "1px solid rgba(32,129,226,0.25)",
+                          }}
+                        >
+                          Chrono24
+                        </span>
+                      ) : (
+                        <span className="text-foreground">{listing.source}</span>
+                      )}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -373,19 +574,42 @@ export default async function ListingPage({
               </div>
             )}
 
-            {/* Price card */}
+            {/* ── PRICE CARD ── */}
             <div
               className="rounded-2xl border p-5"
-              style={{ background: "#111119", borderColor: "#1c1c2a" }}
+              style={{
+                background: isRCCrown ? "rgba(0,96,57,0.06)" : "#111119",
+                borderColor: isRCCrown ? "rgba(0,96,57,0.25)" : "#1c1c2a",
+              }}
             >
               <div className="flex items-center justify-between mb-1">
                 <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
-                  {listing.source === 'chrono24' ? 'Asking Price' : 'Wholesale Price'}
+                  {isRCCrown
+                    ? "RC Crown Price"
+                    : listing.source === "chrono24"
+                    ? "Asking Price"
+                    : "Wholesale Price"}
                 </p>
-                {listing.source === 'chrono24' && (
+                {isRCCrown && (
                   <span
                     className="text-[10px] px-2 py-0.5 rounded font-black"
-                    style={{ background: "rgba(32,129,226,0.15)", color: "#2081E2", border: "1px solid rgba(32,129,226,0.2)" }}
+                    style={{
+                      background: "rgba(0,96,57,0.2)",
+                      color: "#4ade80",
+                      border: "1px solid rgba(0,96,57,0.3)",
+                    }}
+                  >
+                    👑 RC Crown
+                  </span>
+                )}
+                {listing.source === "chrono24" && !isRCCrown && (
+                  <span
+                    className="text-[10px] px-2 py-0.5 rounded font-black"
+                    style={{
+                      background: "rgba(32,129,226,0.15)",
+                      color: "#2081E2",
+                      border: "1px solid rgba(32,129,226,0.2)",
+                    }}
                   >
                     Chrono24
                   </span>
@@ -423,7 +647,22 @@ export default async function ListingPage({
 
               {/* Action buttons */}
               <div className="flex gap-2 mt-4">
-                {listing.source === 'chrono24' && listing.external_url ? (
+                {isRCCrown ? (
+                  <>
+                    <a
+                      href={listing.external_url ?? "https://www.rccrown.com"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 h-10 rounded-lg text-sm font-bold text-white flex items-center justify-center gap-1.5 transition-opacity hover:opacity-90"
+                      style={{ background: "#006039" }}
+                    >
+                      👑 View on RC Crown ↗
+                    </a>
+                    <div>
+                      <InquiryDialog listing={listing} />
+                    </div>
+                  </>
+                ) : listing.source === "chrono24" && listing.external_url ? (
                   <a
                     href={listing.external_url}
                     target="_blank"
@@ -471,6 +710,115 @@ export default async function ListingPage({
             )}
           </div>
         </div>
+
+        {/* ── FIND THIS WATCH EVERYWHERE ── */}
+        {listing.reference_number && (
+          <section className="mt-10">
+            <div
+              className="rounded-2xl border p-6"
+              style={{ background: "#0d1117", borderColor: "#1c1c2a" }}
+            >
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="text-lg font-black text-foreground">
+                    🔍 Find This Watch Everywhere
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    Search for{" "}
+                    <span className="font-mono font-bold text-foreground">
+                      {listing.reference_number}
+                    </span>{" "}
+                    across every major marketplace
+                  </p>
+                </div>
+                <a
+                  href={`/ref/${encodeURIComponent(listing.reference_number)}`}
+                  className="text-sm text-blue-400 hover:text-blue-300 font-semibold transition-colors flex items-center gap-1"
+                >
+                  Market deep dive →
+                </a>
+              </div>
+
+              {/* Price Summary Card — if comps exist */}
+              {compPrices.length > 0 && !hasPriceOnRequest && (
+                <div
+                  className="rounded-xl border p-4 mb-5 grid grid-cols-2 sm:grid-cols-4 gap-4"
+                  style={{ background: "#111119", borderColor: "#1c1c2a" }}
+                >
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+                      {isRCCrown ? "RC Crown Asks" : "This Listing"}
+                    </p>
+                    <p
+                      className="text-base font-black font-mono mt-0.5"
+                      style={{ color: isRCCrown ? "#4ade80" : "#e2e8f0" }}
+                    >
+                      {formatCurrency(currentPrice)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+                      Market Floor
+                    </p>
+                    <p className="text-base font-black font-mono text-foreground mt-0.5">
+                      {formatCurrency(marketFloor)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+                      Market Avg
+                    </p>
+                    <p className="text-base font-black font-mono text-foreground mt-0.5">
+                      {formatCurrency(marketAvg)}
+                    </p>
+                  </div>
+                  {vsMarketAvg !== null && (
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+                        vs Market Avg
+                      </p>
+                      <p
+                        className={cn(
+                          "text-base font-black font-mono mt-0.5",
+                          vsMarketAvg <= 0 ? "text-green-400" : "text-red-400"
+                        )}
+                      >
+                        {vsMarketAvg <= 0 ? "▼" : "▲"}{" "}
+                        {Math.abs(vsMarketAvg).toFixed(1)}%{" "}
+                        <span className="text-xs font-normal text-muted-foreground">
+                          {vsMarketAvg <= 0 ? "below avg" : "above avg"}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* External search links grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {searchLinks.map((link) => (
+                  <a
+                    key={link.name}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-2.5 rounded-xl border px-3 py-2.5 transition-all hover:border-blue-500/40 hover:bg-blue-500/5"
+                    style={{ background: "#111119", borderColor: "#1c1c2a" }}
+                  >
+                    <span className="text-lg leading-none">{link.emoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-foreground truncate">{link.name}</p>
+                      <p className="text-[10px] text-muted-foreground group-hover:text-blue-400 transition-colors">
+                        Search →
+                      </p>
+                    </div>
+                    <ExternalLink size={10} className="text-muted-foreground/40 shrink-0" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── MORE FROM DEALER ── */}
         {(dealerListings ?? []).length > 0 && (
