@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     // 3. Validate invite code
     const { data: inviteValid, error: inviteError } = await adb.rpc(
       "validate_invite_code",
-      { code: invite_code }
+      { p_code: invite_code }
     )
 
     if (inviteError) {
@@ -112,8 +112,8 @@ export async function POST(request: NextRequest) {
 
     // 6. Mark invite code as used
     const { error: useCodeError } = await adb.rpc("use_invite_code", {
-      code: invite_code,
-      user_id: userId,
+      p_code: invite_code,
+      p_user_id: userId,
     })
 
     if (useCodeError) {
