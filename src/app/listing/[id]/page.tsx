@@ -171,7 +171,16 @@ export default async function ListingPage({
                 borderColor: "#1c1c2a",
               }}
             >
-              <Watch className="w-36 h-36 text-white/15" />
+              {listing.images && listing.images.length > 0 ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={listing.images[0]}
+                  alt={listing.reference_number ?? "Watch"}
+                  className="w-full h-full object-contain p-8 min-h-[420px]"
+                />
+              ) : (
+                <Watch className="w-36 h-36 text-white/15" />
+              )}
 
               {/* Badges */}
               {listing.has_box && listing.has_papers && (

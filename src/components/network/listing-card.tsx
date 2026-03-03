@@ -31,7 +31,19 @@ export default function ListingCard({ listing }: ListingCardProps) {
               getBrandGradientBySlug(listing.brand.slug),
           }}
         >
-          <Watch className="w-16 h-16 text-white/20" />
+          {listing.images && listing.images.length > 0 ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={listing.images[0]}
+              alt={listing.reference_number ?? "Watch"}
+              className="w-full h-full object-contain p-2"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none"
+              }}
+            />
+          ) : (
+            <Watch className="w-16 h-16 text-white/20" />
+          )}
 
           {/* Top-left rarity badge */}
           {hasPriceOnRequest ? (
