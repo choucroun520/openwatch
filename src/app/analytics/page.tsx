@@ -25,9 +25,14 @@ import {
   ArrowUpDown,
   BarChart2,
   AlertTriangle,
+  Package,
+  Zap,
+  Tag,
+  Brain,
 } from "lucide-react"
 import { formatCurrency, formatCompact } from "@/lib/utils/currency"
 import { shortTimeAgo } from "@/lib/utils/dates"
+import { Sparkline } from "@/components/charts/sparkline"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -57,6 +62,7 @@ interface TopRef {
   heat_score: number
   msrp: number | null
   grey_market_premium_pct: number | null
+  sparkline_data?: number[]
 }
 
 interface Deal {
@@ -98,6 +104,20 @@ interface SummaryData {
   supply_by_ref: SupplyItem[]
 }
 
+interface SentimentReport {
+  id: string
+  category: "discontinued" | "new_release" | "market_news"
+  title: string
+  summary: string
+  sentiment: "bullish" | "bearish" | "neutral"
+  impact_score: number
+  ref_numbers: string[]
+  brand: string | null
+  event_date: string | null
+  source_url: string | null
+  created_at: string
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const BRAND_COLORS: Record<string, string> = {
@@ -131,7 +151,6 @@ const BRAND_SLUGS: Record<string, string> = {
 
 const PRICE_BUCKETS = ["$0-10K", "$10-25K", "$25-50K", "$50-100K", "$100K+"]
 
-// MSRP display info (for grey market table)
 const MSRP_INFO: Record<string, { name: string; brand: string; msrp: number }> = {
   "126710BLRO": { name: "GMT-Master II Pepsi", brand: "Rolex", msrp: 10800 },
   "126710BLNR": { name: "GMT-Master II Batman", brand: "Rolex", msrp: 10800 },
@@ -180,14 +199,8 @@ function PriceChangeBadge({ change }: { change: number }) {
 function HeatDot({ score }: { score: number }) {
   const color = score > 50 ? "#ef4444" : score > 20 ? "#eab308" : "#475569"
   return (
-    <span
-      className="inline-flex items-center gap-1.5 text-xs font-bold font-mono"
-      style={{ color }}
-    >
-      <span
-        className="inline-block w-2 h-2 rounded-full"
-        style={{ backgroundColor: color }}
-      />
+    <span className="inline-flex items-center gap-1.5 text-xs font-bold font-mono" style={{ color }}>
+      <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
       {score.toFixed(1)}
     </span>
   )
@@ -219,12 +232,7 @@ function GreyMarketBadge({ pct }: { pct: number }) {
 }
 
 function SortHeader({
-  field,
-  label,
-  sortField,
-  sortDir,
-  onSort,
-  className = "",
+  field, label, sortField, sortDir, onSort, className = "",
 }: {
   field: string
   label: string
@@ -249,16 +257,12 @@ function SortHeader({
   )
 }
 
-// ─── Custom Recharts Tooltip ──────────────────────────────────────────────────
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function DistributionTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div
-      className="rounded-lg border p-3 text-xs shadow-xl"
-      style={{ background: "#111119", borderColor: "#1c1c2a", minWidth: 160 }}
-    >
+    <div className="rounded-lg border p-3 text-xs shadow-xl"
+      style={{ background: "#111119", borderColor: "#1c1c2a", minWidth: 160 }}>
       <p className="font-bold text-white mb-2">{label}</p>
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {payload.map((p: any) => (
@@ -277,10 +281,8 @@ function SupplyTooltip({ active, payload }: any) {
   const d = payload[0]?.payload as SupplyItem
   if (!d) return null
   return (
-    <div
-      className="rounded-lg border p-3 text-xs shadow-xl"
-      style={{ background: "#111119", borderColor: "#1c1c2a" }}
-    >
+    <div className="rounded-lg border p-3 text-xs shadow-xl"
+      style={{ background: "#111119", borderColor: "#1c1c2a" }}>
       <p className="font-mono font-bold text-white">{d.ref_number}</p>
       <p className="mt-0.5" style={{ color: BRAND_COLORS[d.brand] ?? "#94a3b8" }}>{d.brand}</p>
       <p className="font-bold text-white mt-1">{d.count} listings</p>
@@ -288,18 +290,51 @@ function SupplyTooltip({ active, payload }: any) {
   )
 }
 
+function SentimentBadge({ sentiment, lg = false }: { sentiment: "bullish" | "bearish" | "neutral"; lg?: boolean }) {
+  const map = {
+    bullish: { bg: "rgba(34,197,94,0.12)", color: "#22c55e", label: "BULLISH" },
+    bearish: { bg: "rgba(239,68,68,0.12)", color: "#ef4444", label: "BEARISH" },
+    neutral: { bg: "rgba(234,179,8,0.12)", color: "#eab308", label: "NEUTRAL" },
+  }
+  const c = map[sentiment]
+  return (
+    <span
+      className={`inline-flex items-center rounded font-bold uppercase tracking-wider ${lg ? "px-3 py-1 text-sm" : "px-2 py-0.5 text-xs"}`}
+      style={{ background: c.bg, color: c.color }}
+    >
+      {c.label}
+    </span>
+  )
+}
+
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
+type MainTab = "market" | "sentiment" | "trending" | "deals"
 type SortField = "heat_score" | "floor" | "avg" | "listings" | "spread"
 
+const MAIN_TABS: MainTab[] = ["market", "sentiment", "trending", "deals"]
+
 export default function AnalyticsPage() {
+  // ── Core data state ──────────────────────────────────────────────────────────
   const [data, setData] = useState<SummaryData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState("All")
+  const [refreshing, setRefreshing] = useState(false)
+
+  // ── Tab state ────────────────────────────────────────────────────────────────
+  const [mainTab, setMainTab] = useState<MainTab>("market")
+  const [activeBrandTab, setActiveBrandTab] = useState("All")
   const [sortField, setSortField] = useState<SortField>("heat_score")
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc")
-  const [refreshing, setRefreshing] = useState(false)
+
+  // ── Sentiment state ──────────────────────────────────────────────────────────
+  const [sentimentData, setSentimentData] = useState<SentimentReport[] | null>(null)
+  const [sentimentLoading, setSentimentLoading] = useState(false)
+  const [sentimentError, setSentimentError] = useState<string | null>(null)
+  const [sentimentRefreshing, setSentimentRefreshing] = useState(false)
+  const [sentimentFetched, setSentimentFetched] = useState(false)
+
+  // ── Fetch functions ──────────────────────────────────────────────────────────
 
   async function fetchData() {
     try {
@@ -315,9 +350,33 @@ export default function AnalyticsPage() {
     }
   }
 
+  async function fetchSentiment() {
+    setSentimentLoading(true)
+    try {
+      const res = await fetch("/api/analytics/sentiment", { cache: "no-store" })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const json = await res.json() as SentimentReport[]
+      setSentimentData(json)
+      setSentimentError(null)
+    } catch (e) {
+      setSentimentError(e instanceof Error ? e.message : "Failed to load sentiment data")
+    } finally {
+      setSentimentLoading(false)
+    }
+  }
+
   useEffect(() => {
     fetchData()
   }, [])
+
+  // Lazy-load sentiment only when tab is first visited
+  useEffect(() => {
+    if (mainTab === "sentiment" && !sentimentFetched) {
+      setSentimentFetched(true)
+      fetchSentiment()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mainTab])
 
   function handleSort(field: string) {
     if (sortField === field) {
@@ -334,14 +393,26 @@ export default function AnalyticsPage() {
     setRefreshing(false)
   }
 
-  // ── Derived data ────────────────────────────────────────────────────────────
+  async function handleSentimentRefresh() {
+    setSentimentRefreshing(true)
+    try {
+      await fetch("/api/analytics/sentiment", { method: "POST", cache: "no-store" })
+      await fetchSentiment()
+    } catch (e) {
+      setSentimentError(e instanceof Error ? e.message : "Failed to refresh")
+    } finally {
+      setSentimentRefreshing(false)
+    }
+  }
+
+  // ── Derived data ─────────────────────────────────────────────────────────────
 
   const brandMap = new Map<string, BrandStat>()
   for (const b of data?.brands ?? []) brandMap.set(b.brand, b)
 
-  // Filtered + sorted top refs
+  // Trending tab: filtered + sorted refs
   const filteredRefs = (data?.top_refs ?? []).filter(
-    (r) => activeTab === "All" || r.brand === activeTab
+    (r) => activeBrandTab === "All" || r.brand === activeBrandTab
   )
   const sortedRefs = [...filteredRefs].sort((a, b) => {
     const av = a[sortField] ?? 0
@@ -349,7 +420,7 @@ export default function AnalyticsPage() {
     return sortDir === "desc" ? bv - av : av - bv
   })
 
-  // Price distribution chart data (grouped bars)
+  // Price distribution chart data
   const distributionChartData = PRICE_BUCKETS.map((bucket) => {
     const item: Record<string, string | number> = { bucket }
     for (const brand of TARGET_BRANDS) {
@@ -361,29 +432,65 @@ export default function AnalyticsPage() {
     return item
   }).filter((row) => TARGET_BRANDS.some((b) => (row[b] as number) > 0))
 
-  // Supply chart data
   const supplyChartData = data?.supply_by_ref ?? []
 
-  // Market pulse metrics
-  const mostListedRef = sortedRefs.length > 0
+  // Market pulse
+  const mostListedRef = (data?.top_refs ?? []).length > 0
     ? [...(data?.top_refs ?? [])].sort((a, b) => b.listings - a.listings)[0]
     : null
-  const highestFloorRef = sortedRefs.length > 0
+  const highestFloorRef = (data?.top_refs ?? []).length > 0
     ? [...(data?.top_refs ?? [])].sort((a, b) => b.floor - a.floor)[0]
     : null
-  const widestSpreadRef = sortedRefs.length > 0
+  const widestSpreadRef = (data?.top_refs ?? []).length > 0
     ? [...(data?.top_refs ?? [])].sort((a, b) => b.spread - a.spread)[0]
     : null
   const hottestBrand = (data?.brands ?? []).length > 0
     ? [...(data?.brands ?? [])].sort((a, b) => b.heat_score - a.heat_score)[0]
     : null
 
-  // Grey market refs with known MSRP
+  // Grey market refs
   const greyMarketRefs = (data?.top_refs ?? [])
     .filter((r) => r.msrp !== null && r.grey_market_premium_pct !== null)
     .sort((a, b) => (b.grey_market_premium_pct ?? 0) - (a.grey_market_premium_pct ?? 0))
 
-  // ── Loading / error state ───────────────────────────────────────────────────
+  // Global stats bar
+  const avgPriceAll = (data?.top_refs ?? []).length > 0
+    ? (data?.top_refs ?? []).reduce((s, r) => s + r.avg, 0) / (data?.top_refs ?? []).length
+    : 0
+
+  // Top collections ranked by heat
+  const rankedBrands = [...(data?.brands ?? [])].sort((a, b) => b.heat_score - a.heat_score)
+
+  // Deals stats
+  const avgDiscount = (data?.deals ?? []).length > 0
+    ? ((data?.deals ?? []).reduce((s, d) => s + d.discount_pct, 0) / (data?.deals ?? []).length).toFixed(1)
+    : "0"
+  const lastDealScraped = (data?.deals ?? []).length > 0
+    ? (data?.deals ?? []).reduce(
+        (latest, d) => (new Date(d.scraped_at) > new Date(latest) ? d.scraped_at : latest),
+        data!.deals[0].scraped_at
+      )
+    : null
+
+  // Sentiment derived
+  const discontinuedReports = (sentimentData ?? []).filter((r) => r.category === "discontinued")
+  const newReleaseReports = (sentimentData ?? []).filter((r) => r.category === "new_release")
+  const newsReports = (sentimentData ?? []).filter((r) => r.category === "market_news")
+  const overallSentiment = (() => {
+    if (!sentimentData || sentimentData.length === 0) return "neutral" as const
+    const avg = sentimentData.reduce((s, r) => s + r.impact_score, 0) / sentimentData.length
+    if (avg > 10) return "bullish" as const
+    if (avg < -10) return "bearish" as const
+    return "neutral" as const
+  })()
+  const lastSentimentUpdate = sentimentData && sentimentData.length > 0
+    ? sentimentData.reduce(
+        (latest, r) => (r.created_at > latest ? r.created_at : latest),
+        sentimentData[0].created_at
+      )
+    : null
+
+  // ── Loading / error states ─────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -393,13 +500,8 @@ export default function AnalyticsPage() {
             <div className="h-9 w-72 rounded-lg mb-2" style={{ background: "#111119" }} />
             <div className="h-4 w-96 rounded" style={{ background: "#111119" }} />
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-xl p-5 h-44" style={{ background: "#111119" }} />
-            ))}
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="rounded-xl p-5 h-24" style={{ background: "#111119" }} />
             ))}
           </div>
@@ -414,18 +516,14 @@ export default function AnalyticsPage() {
     return (
       <AppLayout>
         <div className="max-w-7xl mx-auto">
-          <div
-            className="rounded-xl border p-8 text-center"
-            style={{ background: "#111119", borderColor: "#1c1c2a" }}
-          >
+          <div className="rounded-xl border p-8 text-center"
+            style={{ background: "#111119", borderColor: "#1c1c2a" }}>
             <AlertTriangle className="mx-auto mb-3" size={32} style={{ color: "#ef4444" }} />
             <p className="text-white font-bold mb-1">Failed to load analytics</p>
             <p className="text-sm mb-4" style={{ color: "#8A939B" }}>{error ?? "Unknown error"}</p>
-            <button
-              onClick={handleRefresh}
+            <button onClick={handleRefresh}
               className="px-4 py-2 rounded-lg text-sm font-bold text-white"
-              style={{ background: "#2081E2" }}
-            >
+              style={{ background: "#2081E2" }}>
               Retry
             </button>
           </div>
@@ -434,12 +532,14 @@ export default function AnalyticsPage() {
     )
   }
 
+  // ── Main render ───────────────────────────────────────────────────────────────
+
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto">
 
-        {/* ── Section 1: Page Header ──────────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+        {/* ── Page Header ─────────────────────────────────────────────────── */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
           <div>
             <h1 className="text-3xl font-black tracking-tight" style={{ color: "#e2e8f0" }}>
               MARKET INTELLIGENCE
@@ -448,676 +548,934 @@ export default function AnalyticsPage() {
               Real-time watch market analytics · Bloomberg Terminal for luxury watches
             </p>
           </div>
-          <div className="flex items-center gap-3 text-xs" style={{ color: "#64748b" }}>
-            <span className="font-mono">
-              {data.overview.total_listings.toLocaleString()} listings ·{" "}
-              {data.overview.refs_tracked} refs ·{" "}
-              {data.overview.brands_covered} brands
-            </span>
-            <span className="px-2 py-1 rounded font-bold"
-              style={{ background: "#111119", color: data.overview.data_freshness_hours < 24 ? "#22c55e" : "#eab308" }}>
-              {data.overview.last_updated
-                ? `Updated ${shortTimeAgo(data.overview.last_updated)}`
-                : "No data yet"}
-            </span>
-          </div>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold text-white transition-opacity disabled:opacity-50 self-start sm:self-auto"
+            style={{ background: "#1c1c2a" }}
+          >
+            <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+            {refreshing ? "Refreshing…" : "Refresh"}
+          </button>
         </div>
 
-        {/* ── Section 2: Brand Cards ──────────────────────────────────────── */}
-        <section>
-          <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "#64748b" }}>
-            Brand Overview
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 overflow-x-auto">
-            {ALL_BRANDS.map((brand) => {
-              const stat = brandMap.get(brand)
-              const color = BRAND_COLORS[brand] ?? "#94a3b8"
-              const slug = BRAND_SLUGS[brand]
-              if (!stat) {
-                return (
-                  <div
-                    key={brand}
-                    className="rounded-xl border p-4 flex flex-col min-h-[160px]"
-                    style={{ background: "#111119", borderColor: "#1c1c2a" }}
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <span
-                        className="inline-block w-2 h-2 rounded-full"
-                        style={{ backgroundColor: "#475569" }}
-                      />
-                      <span className="text-xs font-bold truncate" style={{ color: "#64748b" }}>
-                        {brand}
-                      </span>
-                    </div>
-                    <p className="text-[11px] mt-auto" style={{ color: "#475569" }}>
-                      No data yet
-                    </p>
-                    <p className="text-[10px] mt-1" style={{ color: "#1c1c2a" }}>
-                      Add a dealer to populate
-                    </p>
+        {/* ── Tab Bar ─────────────────────────────────────────────────────── */}
+        <div className="flex gap-0 border-b mb-8" style={{ borderColor: "#1c1c2a" }}>
+          {MAIN_TABS.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setMainTab(tab)}
+              className="px-5 py-3 text-sm font-bold capitalize transition-colors relative"
+              style={{ color: mainTab === tab ? "#fff" : "#64748b" }}
+            >
+              {tab}
+              {mainTab === tab && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            TAB: MARKET
+            ═══════════════════════════════════════════════════════════════════ */}
+        {mainTab === "market" && (
+          <div className="space-y-8">
+
+            {/* ── A: Global Stats Bar ─────────────────────────────────────── */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {[
+                {
+                  icon: <Package size={13} style={{ color: "#2081E2" }} />,
+                  label: "Total Listings",
+                  value: data.overview.total_listings.toLocaleString(),
+                  sub: null,
+                },
+                {
+                  icon: <Tag size={13} style={{ color: "#6366f1" }} />,
+                  label: "Refs Tracked",
+                  value: data.overview.refs_tracked.toString(),
+                  sub: null,
+                },
+                {
+                  icon: <BarChart2 size={13} style={{ color: "#10b981" }} />,
+                  label: "Brands",
+                  value: data.overview.brands_covered.toString(),
+                  sub: null,
+                },
+                {
+                  icon: <DollarSign size={13} style={{ color: "#22c55e" }} />,
+                  label: "Avg Price",
+                  value: formatCompact(avgPriceAll),
+                  sub: "across all refs",
+                },
+                {
+                  icon: <Flame size={13} style={{ color: "#ef4444" }} />,
+                  label: "Hottest Brand",
+                  value: hottestBrand?.brand ?? "—",
+                  sub: hottestBrand ? `Heat ${hottestBrand.heat_score.toFixed(1)}` : null,
+                },
+                {
+                  icon: <Zap size={13} style={{
+                    color: data.overview.data_freshness_hours < 24 ? "#22c55e" : "#eab308",
+                  }} />,
+                  label: "Freshness",
+                  value: data.overview.data_freshness_hours < 1
+                    ? "Live"
+                    : `${data.overview.data_freshness_hours.toFixed(0)}h ago`,
+                  valueColor: data.overview.data_freshness_hours < 24 ? "#22c55e" : "#eab308",
+                  sub: data.overview.last_updated ? "last updated" : null,
+                },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-xl border p-4"
+                  style={{ background: "#111119", borderColor: "#1c1c2a" }}
+                >
+                  <div className="flex items-center gap-1.5 mb-2">
+                    {stat.icon}
+                    <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>
+                      {stat.label}
+                    </span>
                   </div>
-                )
-              }
-              const heatPct = Math.min(100, (stat.heat_score / 30) * 100)
-              return (
-                <Link
-                  key={brand}
-                  href={`/brands/${slug}`}
-                  className="rounded-xl border p-4 flex flex-col min-h-[160px] transition-all hover:scale-[1.02]"
+                  <p
+                    className="text-lg font-black font-mono truncate"
+                    style={{ color: ("valueColor" in stat && stat.valueColor) ? stat.valueColor : "#fff" }}
+                  >
+                    {stat.value}
+                  </p>
+                  {stat.sub && (
+                    <p className="text-[10px] mt-0.5 truncate" style={{ color: "#475569" }}>{stat.sub}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* ── B: Top Collections (OpenSea-style ranked table) ──────────── */}
+            <section>
+              <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+                  <h2 className="text-base font-black text-white">Top Collections</h2>
+                  <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                    Ranked by market heat · click to explore brand
+                  </p>
+                </div>
+
+                {/* Table header */}
+                <div
+                  className="hidden md:grid px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider"
                   style={{
-                    background: "#111119",
-                    borderColor: "#1c1c2a",
-                    boxShadow: "0 1px 3px rgba(0,0,0,.3)",
+                    background: "#0b0b14",
+                    color: "#64748b",
+                    gridTemplateColumns: "28px 2fr 1fr 1fr 1fr 80px 140px 1fr",
                   }}
                 >
-                  {/* Brand name + trend */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        className="inline-block w-2 h-2 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: color }}
-                      />
-                      <span className="text-xs font-black truncate text-white">{brand}</span>
-                    </div>
-                    <PriceChangeBadge change={stat.change_30d} />
+                  <div>#</div>
+                  <div>Brand</div>
+                  <div className="text-right">Floor</div>
+                  <div className="text-right">Avg</div>
+                  <div className="text-right">30d</div>
+                  <div className="text-right"># Listed</div>
+                  <div>Heat</div>
+                  <div className="text-right">Volume</div>
+                </div>
+
+                {rankedBrands.length === 0 ? (
+                  <div className="px-5 py-10 text-center text-sm" style={{ color: "#475569" }}>
+                    No brand data yet.
                   </div>
-
-                  {/* Floor / Avg / Ceiling */}
-                  <div className="grid grid-cols-3 gap-1 mb-3">
-                    {[
-                      { label: "Floor", val: stat.floor_price },
-                      { label: "Avg", val: stat.avg_price },
-                      { label: "Ceil", val: stat.ceiling_price },
-                    ].map(({ label, val }) => (
-                      <div key={label}>
-                        <p className="text-[9px] font-bold uppercase" style={{ color: "#475569" }}>
-                          {label}
-                        </p>
-                        <p className="text-[11px] font-black font-mono text-white">
-                          {formatCompact(val)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Listings + refs */}
-                  <p className="text-[10px] mb-2" style={{ color: "#64748b" }}>
-                    {stat.total_listings.toLocaleString()} listings · {stat.refs_count} refs
-                  </p>
-
-                  {/* Heat bar */}
-                  <div className="mt-auto">
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "#1c1c2a" }}>
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{ width: `${heatPct}%`, backgroundColor: color }}
-                      />
-                    </div>
-                    <p className="text-[9px] mt-1 font-mono" style={{ color }}>
-                      Heat: {stat.heat_score.toFixed(1)}
-                    </p>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        </section>
-
-        {/* ── Section 3: Market Pulse ─────────────────────────────────────── */}
-        <section>
-          <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "#64748b" }}>
-            Market Pulse
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              {
-                icon: <BarChart2 size={18} style={{ color: "#2081E2" }} />,
-                label: "Most Listed Ref",
-                value: mostListedRef ? mostListedRef.ref_number : "—",
-                sub: mostListedRef
-                  ? `${mostListedRef.listings} listings · ${mostListedRef.brand}`
-                  : "No data",
-                href: mostListedRef ? `/ref/${mostListedRef.ref_number}` : undefined,
-              },
-              {
-                icon: <DollarSign size={18} style={{ color: "#22c55e" }} />,
-                label: "Highest Floor",
-                value: highestFloorRef ? formatCompact(highestFloorRef.floor) : "—",
-                sub: highestFloorRef
-                  ? `${highestFloorRef.ref_number} · ${highestFloorRef.brand}`
-                  : "No data",
-                href: highestFloorRef ? `/ref/${highestFloorRef.ref_number}` : undefined,
-              },
-              {
-                icon: <ArrowUpDown size={18} style={{ color: "#f59e0b" }} />,
-                label: "Widest Spread",
-                value: widestSpreadRef ? formatCompact(widestSpreadRef.spread) : "—",
-                sub: widestSpreadRef
-                  ? `${widestSpreadRef.ref_number} · ${widestSpreadRef.spread_pct.toFixed(0)}% range`
-                  : "No data",
-                href: widestSpreadRef ? `/ref/${widestSpreadRef.ref_number}` : undefined,
-              },
-              {
-                icon: <Flame size={18} style={{ color: "#ef4444" }} />,
-                label: "Hottest Brand",
-                value: hottestBrand ? hottestBrand.brand : "—",
-                sub: hottestBrand
-                  ? `Heat: ${hottestBrand.heat_score.toFixed(1)} · ${hottestBrand.total_listings} listings`
-                  : "No data",
-                href: hottestBrand ? `/brands/${BRAND_SLUGS[hottestBrand.brand]}` : undefined,
-              },
-            ].map((card) => (
-              <div key={card.label}>
-                {card.href ? (
-                  <Link
-                    href={card.href}
-                    className="rounded-xl border p-4 flex flex-col gap-1 hover:border-opacity-100 transition-all block"
-                    style={{ background: "#111119", borderColor: "#1c1c2a" }}
-                  >
-                    <div className="flex items-center gap-2 mb-1">{card.icon}
-                      <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>
-                        {card.label}
-                      </span>
-                    </div>
-                    <p className="text-xl font-black font-mono text-white truncate">{card.value}</p>
-                    <p className="text-[11px] truncate" style={{ color: "#8A939B" }}>{card.sub}</p>
-                  </Link>
                 ) : (
-                  <div
-                    className="rounded-xl border p-4 flex flex-col gap-1"
-                    style={{ background: "#111119", borderColor: "#1c1c2a" }}
-                  >
-                    <div className="flex items-center gap-2 mb-1">{card.icon}
-                      <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>
-                        {card.label}
-                      </span>
-                    </div>
-                    <p className="text-xl font-black font-mono text-white truncate">{card.value}</p>
-                    <p className="text-[11px] truncate" style={{ color: "#8A939B" }}>{card.sub}</p>
-                  </div>
+                  rankedBrands.map((stat, i) => {
+                    const color = BRAND_COLORS[stat.brand] ?? "#94a3b8"
+                    const slug = BRAND_SLUGS[stat.brand]
+                    const heatPct = Math.min(100, (stat.heat_score / 30) * 100)
+                    const volume = stat.avg_price * stat.total_listings
+                    return (
+                      <Link
+                        key={stat.brand}
+                        href={`/brands/${slug}`}
+                        className="border-t flex flex-col md:grid px-4 py-3 gap-2 md:gap-0 md:items-center transition-colors hover:opacity-90"
+                        style={{
+                          borderColor: "#1c1c2a",
+                          background: i % 2 === 0 ? "#111119" : "#0d0d15",
+                          gridTemplateColumns: "28px 2fr 1fr 1fr 1fr 80px 140px 1fr",
+                        }}
+                      >
+                        {/* Rank */}
+                        <div className="hidden md:block">
+                          <span className="text-[11px] font-bold font-mono" style={{ color: "#475569" }}>
+                            {i + 1}
+                          </span>
+                        </div>
+                        {/* Brand name */}
+                        <div className="flex items-center gap-2">
+                          <span className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: color }} />
+                          <span className="text-sm font-black text-white">{stat.brand}</span>
+                          <span className="text-[10px] md:hidden" style={{ color: "#64748b" }}>
+                            #{i + 1}
+                          </span>
+                        </div>
+                        {/* Floor */}
+                        <div className="hidden md:block text-right">
+                          <span className="text-xs font-mono text-white">{formatCompact(stat.floor_price)}</span>
+                        </div>
+                        {/* Avg */}
+                        <div className="hidden md:block text-right">
+                          <span className="text-xs font-black font-mono text-white">{formatCompact(stat.avg_price)}</span>
+                        </div>
+                        {/* 30d */}
+                        <div className="hidden md:block text-right">
+                          <PriceChangeBadge change={stat.change_30d} />
+                        </div>
+                        {/* # Listed */}
+                        <div className="hidden md:block text-right">
+                          <span className="text-xs font-mono text-white">{stat.total_listings.toLocaleString()}</span>
+                        </div>
+                        {/* Heat bar */}
+                        <div className="hidden md:flex items-center gap-2">
+                          <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "#1c1c2a" }}>
+                            <div className="h-full rounded-full" style={{ width: `${heatPct}%`, backgroundColor: color }} />
+                          </div>
+                          <span className="text-[10px] font-mono w-8 text-right" style={{ color }}>{stat.heat_score.toFixed(0)}</span>
+                        </div>
+                        {/* Volume */}
+                        <div className="hidden md:block text-right">
+                          <span className="text-xs font-mono" style={{ color: "#8A939B" }}>{formatCompact(volume)}</span>
+                        </div>
+                        {/* Mobile summary */}
+                        <div className="flex items-center justify-between md:hidden">
+                          <PriceChangeBadge change={stat.change_30d} />
+                          <span className="text-xs font-mono text-white">{stat.total_listings} listed</span>
+                          <span className="text-xs font-black font-mono text-white">avg {formatCompact(stat.avg_price)}</span>
+                        </div>
+                      </Link>
+                    )
+                  })
                 )}
               </div>
-            ))}
-          </div>
-        </section>
+            </section>
 
-        {/* ── Section 4: Price Distribution Chart ────────────────────────── */}
-        <section>
-          <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-            <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
-              <h2 className="text-base font-black text-white">Price Distribution by Brand</h2>
-              <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
-                Number of listings per price range
-              </p>
-            </div>
-            <div className="p-5">
-              {distributionChartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={distributionChartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1c1c2a" vertical={false} />
-                    <XAxis
-                      dataKey="bucket"
-                      stroke="#1c1c2a"
-                      tick={{ fill: "#64748b", fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      stroke="#1c1c2a"
-                      tick={{ fill: "#64748b", fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
-                      width={35}
-                    />
-                    <Tooltip content={<DistributionTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
-                    <Legend
-                      wrapperStyle={{ fontSize: 12, paddingTop: 16 }}
-                      iconType="circle"
-                      iconSize={8}
-                    />
-                    {TARGET_BRANDS.map((brand) => (
-                      <Bar
-                        key={brand}
-                        dataKey={brand}
-                        fill={BRAND_COLORS[brand]}
-                        radius={[3, 3, 0, 0]}
-                        maxBarSize={40}
-                      />
-                    ))}
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-64 flex items-center justify-center" style={{ color: "#475569" }}>
-                  No distribution data available
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* ── Section 5: Top Refs Table ───────────────────────────────────── */}
-        <section>
-          <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-            <div className="px-5 py-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-              style={{ borderColor: "#1c1c2a" }}>
-              <div>
-                <h2 className="text-base font-black text-white">All Tracked References</h2>
-                <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
-                  {sortedRefs.length} refs · sorted by {sortField.replace("_", " ")}
-                </p>
-              </div>
-              {/* Brand filter tabs */}
-              <div className="flex gap-1 flex-wrap">
-                {["All", ...TARGET_BRANDS].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                    style={
-                      activeTab === tab
-                        ? { background: "#2081E2", color: "#fff" }
-                        : { background: "#0b0b14", color: "#8A939B" }
-                    }
-                  >
-                    {tab === "Audemars Piguet" ? "AP" : tab === "Vacheron Constantin" ? "VC" : tab}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Table header */}
-            <div
-              className="hidden md:grid px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider"
-              style={{
-                background: "#0b0b14",
-                color: "#64748b",
-                gridTemplateColumns: "2fr 2fr 1fr 1fr 1fr 1fr 1.5fr 1fr 1fr 1fr",
-              }}
-            >
-              <div>Ref</div>
-              <div>Model</div>
-              <SortHeader field="floor" label="Floor" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="justify-end" />
-              <SortHeader field="avg" label="Avg" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="justify-end" />
-              <div className="text-right">Ceiling</div>
-              <SortHeader field="spread" label="Spread" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="justify-end" />
-              <div className="text-right">Grey Mkt</div>
-              <SortHeader field="listings" label="# Listed" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="justify-end" />
-              <div className="text-right">30d</div>
-              <SortHeader field="heat_score" label="Heat" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="justify-end" />
-            </div>
-
-            {sortedRefs.length === 0 ? (
-              <div className="px-5 py-10 text-center text-sm" style={{ color: "#475569" }}>
-                No references found for this filter.
-              </div>
-            ) : (
-              sortedRefs.map((ref, i) => {
-                const brandColor = BRAND_COLORS[ref.brand] ?? "#94a3b8"
-                return (
-                  <Link
-                    key={`${ref.ref_number}-${i}`}
-                    href={`/ref/${encodeURIComponent(ref.ref_number)}`}
-                    className="border-t px-4 py-3 transition-colors flex flex-col md:grid gap-2 md:gap-0 md:items-center hover:opacity-90"
-                    style={{
-                      borderColor: "#1c1c2a",
-                      background: i % 2 === 0 ? "#111119" : "#0d0d15",
-                      gridTemplateColumns: "2fr 2fr 1fr 1fr 1fr 1fr 1.5fr 1fr 1fr 1fr",
-                    }}
-                  >
-                    {/* Mobile layout */}
-                    <div className="flex items-start justify-between md:contents">
-                      <div className="flex flex-col md:block">
-                        <span className="text-xs font-black font-mono text-white">{ref.ref_number}</span>
-                        <span className="text-[10px] md:hidden mt-0.5" style={{ color: brandColor }}>
-                          {ref.brand}
+            {/* ── Market Pulse ─────────────────────────────────────────────── */}
+            <section>
+              <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "#64748b" }}>
+                Market Pulse
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  {
+                    icon: <BarChart2 size={18} style={{ color: "#2081E2" }} />,
+                    label: "Most Listed Ref",
+                    value: mostListedRef ? mostListedRef.ref_number : "—",
+                    sub: mostListedRef ? `${mostListedRef.listings} listings · ${mostListedRef.brand}` : "No data",
+                    href: mostListedRef ? `/ref/${mostListedRef.ref_number}` : undefined,
+                  },
+                  {
+                    icon: <DollarSign size={18} style={{ color: "#22c55e" }} />,
+                    label: "Highest Floor",
+                    value: highestFloorRef ? formatCompact(highestFloorRef.floor) : "—",
+                    sub: highestFloorRef ? `${highestFloorRef.ref_number} · ${highestFloorRef.brand}` : "No data",
+                    href: highestFloorRef ? `/ref/${highestFloorRef.ref_number}` : undefined,
+                  },
+                  {
+                    icon: <ArrowUpDown size={18} style={{ color: "#f59e0b" }} />,
+                    label: "Widest Spread",
+                    value: widestSpreadRef ? formatCompact(widestSpreadRef.spread) : "—",
+                    sub: widestSpreadRef ? `${widestSpreadRef.ref_number} · ${widestSpreadRef.spread_pct.toFixed(0)}% range` : "No data",
+                    href: widestSpreadRef ? `/ref/${widestSpreadRef.ref_number}` : undefined,
+                  },
+                  {
+                    icon: <Flame size={18} style={{ color: "#ef4444" }} />,
+                    label: "Hottest Brand",
+                    value: hottestBrand ? hottestBrand.brand : "—",
+                    sub: hottestBrand ? `Heat: ${hottestBrand.heat_score.toFixed(1)} · ${hottestBrand.total_listings} listings` : "No data",
+                    href: hottestBrand ? `/brands/${BRAND_SLUGS[hottestBrand.brand]}` : undefined,
+                  },
+                ].map((card) => {
+                  const inner = (
+                    <>
+                      <div className="flex items-center gap-2 mb-1">{card.icon}
+                        <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>
+                          {card.label}
                         </span>
                       </div>
-                      <div className="md:hidden flex items-center gap-2">
-                        <span className="text-sm font-black font-mono text-white">{formatCompact(ref.avg)}</span>
-                        <PriceChangeBadge change={ref.change_30d} />
-                      </div>
-                    </div>
-
-                    {/* Desktop cells */}
-                    <div className="hidden md:flex flex-col">
-                      <span className="text-xs font-semibold text-white truncate">
-                        {ref.model ?? "—"}
-                      </span>
-                      <span className="text-[10px]" style={{ color: brandColor }}>{ref.brand}</span>
-                    </div>
-                    <div className="hidden md:block text-right">
-                      <span className="text-xs font-mono text-white">{formatCompact(ref.floor)}</span>
-                    </div>
-                    <div className="hidden md:block text-right">
-                      <span className="text-xs font-black font-mono text-white">{formatCompact(ref.avg)}</span>
-                    </div>
-                    <div className="hidden md:block text-right">
-                      <span className="text-xs font-mono" style={{ color: "#94a3b8" }}>{formatCompact(ref.ceiling)}</span>
-                    </div>
-                    <div className="hidden md:block text-right">
-                      <span className="text-xs font-mono" style={{ color: "#eab308" }}>
-                        {formatCompact(ref.spread)}
-                      </span>
-                    </div>
-                    <div className="hidden md:block text-right">
-                      {ref.grey_market_premium_pct !== null ? (
-                        <GreyMarketBadge pct={ref.grey_market_premium_pct} />
+                      <p className="text-xl font-black font-mono text-white truncate">{card.value}</p>
+                      <p className="text-[11px] truncate" style={{ color: "#8A939B" }}>{card.sub}</p>
+                    </>
+                  )
+                  return (
+                    <div key={card.label}>
+                      {card.href ? (
+                        <Link href={card.href} className="rounded-xl border p-4 flex flex-col gap-1 transition-all block"
+                          style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                          {inner}
+                        </Link>
                       ) : (
-                        <span className="text-xs" style={{ color: "#475569" }}>—</span>
+                        <div className="rounded-xl border p-4 flex flex-col gap-1"
+                          style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                          {inner}
+                        </div>
                       )}
                     </div>
-                    <div className="hidden md:block text-right">
-                      <span className="text-xs font-mono text-white">{ref.listings}</span>
+                  )
+                })}
+              </div>
+            </section>
+
+            {/* ── C: Price Distribution Chart ──────────────────────────────── */}
+            <section>
+              <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+                  <h2 className="text-base font-black text-white">Price Distribution by Brand</h2>
+                  <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                    Number of listings per price range
+                  </p>
+                </div>
+                <div className="p-5">
+                  {distributionChartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={280}>
+                      <BarChart data={distributionChartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1c1c2a" vertical={false} />
+                        <XAxis dataKey="bucket" stroke="#1c1c2a"
+                          tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis stroke="#1c1c2a" tick={{ fill: "#64748b", fontSize: 11 }}
+                          axisLine={false} tickLine={false} width={35} />
+                        <Tooltip content={<DistributionTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+                        <Legend wrapperStyle={{ fontSize: 12, paddingTop: 16 }} iconType="circle" iconSize={8} />
+                        {TARGET_BRANDS.map((brand) => (
+                          <Bar key={brand} dataKey={brand} fill={BRAND_COLORS[brand]}
+                            radius={[3, 3, 0, 0]} maxBarSize={40} />
+                        ))}
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-64 flex items-center justify-center" style={{ color: "#475569" }}>
+                      No distribution data available
                     </div>
-                    <div className="hidden md:block text-right">
-                      <PriceChangeBadge change={ref.change_30d} />
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* ── D: Supply Analysis Chart ─────────────────────────────────── */}
+            <section>
+              <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+                  <h2 className="text-base font-black text-white">Supply by Reference (Top 15)</h2>
+                  <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                    Number of active listings per reference — higher = more liquid
+                  </p>
+                </div>
+                <div className="p-5">
+                  {supplyChartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={Math.max(300, supplyChartData.length * 32)}>
+                      <BarChart data={supplyChartData} layout="vertical"
+                        margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1c1c2a" horizontal={false} />
+                        <XAxis type="number" stroke="#1c1c2a"
+                          tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis type="category" dataKey="ref_number" width={120}
+                          tick={{ fill: "#e2e8f0", fontSize: 11, fontFamily: "ui-monospace, monospace" }}
+                          axisLine={false} tickLine={false} />
+                        <Tooltip content={<SupplyTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+                        <Bar dataKey="count" radius={[0, 4, 4, 0]} maxBarSize={20}>
+                          {supplyChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={BRAND_COLORS[entry.brand] ?? "#6b7280"} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-64 flex items-center justify-center" style={{ color: "#475569" }}>
+                      No supply data available
                     </div>
-                    <div className="hidden md:block text-right">
-                      <HeatDot score={ref.heat_score} />
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* ── Grey Market Premium Table ─────────────────────────────────── */}
+            {greyMarketRefs.length > 0 && (
+              <section>
+                <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                  <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+                    <h2 className="text-base font-black text-white">Grey Market vs. Retail</h2>
+                    <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                      Asking-price premium above manufacturer retail — sorted by highest premium
+                    </p>
+                  </div>
+                  <div className="hidden md:grid px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider"
+                    style={{ background: "#0b0b14", color: "#64748b", gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr 1fr" }}>
+                    <div>Watch</div>
+                    <div>Ref</div>
+                    <div className="text-right">Retail MSRP</div>
+                    <div className="text-right">Market Avg</div>
+                    <div className="text-right">Premium</div>
+                    <div className="text-right"># Listed</div>
+                  </div>
+                  {greyMarketRefs.map((ref, i) => {
+                    const info = MSRP_INFO[ref.ref_number]
+                    const brandColor = BRAND_COLORS[ref.brand] ?? "#94a3b8"
+                    return (
+                      <Link key={`${ref.ref_number}-gm-${i}`}
+                        href={`/ref/${encodeURIComponent(ref.ref_number)}`}
+                        className="border-t px-4 py-3 transition-colors flex flex-col md:grid gap-2 md:gap-0 md:items-center hover:opacity-90"
+                        style={{
+                          borderColor: "#1c1c2a",
+                          background: i % 2 === 0 ? "#111119" : "#0d0d15",
+                          gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr 1fr",
+                        }}
+                      >
+                        <div>
+                          <p className="text-sm font-bold text-white">{info?.name ?? ref.model ?? ref.ref_number}</p>
+                          <p className="text-[11px]" style={{ color: brandColor }}>{ref.brand}</p>
+                        </div>
+                        <div className="hidden md:block">
+                          <span className="text-xs font-mono font-bold text-white">{ref.ref_number}</span>
+                        </div>
+                        <div className="hidden md:block text-right">
+                          <span className="text-xs font-mono" style={{ color: "#94a3b8" }}>
+                            {ref.msrp ? formatCurrency(ref.msrp) : "—"}
+                          </span>
+                        </div>
+                        <div className="hidden md:block text-right">
+                          <span className="text-xs font-black font-mono text-white">{formatCurrency(ref.avg)}</span>
+                        </div>
+                        <div className="hidden md:block text-right">
+                          {ref.grey_market_premium_pct !== null ? (
+                            <GreyMarketBadge pct={ref.grey_market_premium_pct} />
+                          ) : (
+                            <span className="text-xs" style={{ color: "#475569" }}>—</span>
+                          )}
+                        </div>
+                        <div className="hidden md:block text-right">
+                          <span className="text-xs font-mono text-white">{ref.listings}</span>
+                        </div>
+                        <div className="flex items-center justify-between md:hidden">
+                          <span className="text-xs font-mono" style={{ color: "#64748b" }}>{ref.ref_number}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs font-mono" style={{ color: "#64748b" }}>
+                              MSRP {ref.msrp ? formatCompact(ref.msrp) : "—"}
+                            </span>
+                            <span className="text-xs font-black font-mono text-white">avg {formatCompact(ref.avg)}</span>
+                            {ref.grey_market_premium_pct !== null && (
+                              <GreyMarketBadge pct={ref.grey_market_premium_pct} />
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* ── Data Coverage ─────────────────────────────────────────────── */}
+            <section>
+              <div className="rounded-xl border p-5" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "#64748b" }}>
+                  Data Coverage
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    {
+                      label: "Asking Prices",
+                      value: `${data.overview.total_listings.toLocaleString()} Chrono24 listings`,
+                      color: "#22c55e",
+                    },
+                    {
+                      label: "Confirmed Sales",
+                      value: "0 (eBay API key needed)",
+                      color: "#ef4444",
+                    },
+                    {
+                      label: "Last Sync",
+                      value: data.overview.last_updated
+                        ? `${data.overview.data_freshness_hours}h ago`
+                        : "Never",
+                      color: data.overview.data_freshness_hours < 24 ? "#22c55e" : "#eab308",
+                    },
+                    {
+                      label: "Refs Tracked",
+                      value: `${data.overview.refs_tracked} unique references`,
+                      color: "#2081E2",
+                    },
+                  ].map((item) => (
+                    <div key={item.label}>
+                      <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "#64748b" }}>
+                        {item.label}
+                      </p>
+                      <p className="text-sm font-bold" style={{ color: item.color }}>{item.value}</p>
                     </div>
-                  </Link>
-                )
-              })
+                  ))}
+                </div>
+              </div>
+            </section>
+
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            TAB: SENTIMENT
+            ═══════════════════════════════════════════════════════════════════ */}
+        {mainTab === "sentiment" && (
+          <div className="space-y-6">
+
+            {/* Header row */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h2 className="text-xl font-black text-white flex items-center gap-2">
+                  <Brain size={20} style={{ color: "#2081E2" }} />
+                  Market Sentiment
+                </h2>
+                {sentimentData && sentimentData.length > 0 && (
+                  <SentimentBadge sentiment={overallSentiment} lg />
+                )}
+                {lastSentimentUpdate && (
+                  <span className="text-xs" style={{ color: "#64748b" }}>
+                    Last updated {shortTimeAgo(lastSentimentUpdate)}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={handleSentimentRefresh}
+                disabled={sentimentRefreshing || sentimentLoading}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold text-white transition-opacity disabled:opacity-50 self-start sm:self-auto"
+                style={{ background: "#1c1c2a" }}
+              >
+                <RefreshCw size={14} className={sentimentRefreshing ? "animate-spin" : ""} />
+                {sentimentRefreshing ? "Generating…" : "Refresh"}
+              </button>
+            </div>
+
+            {sentimentLoading && (
+              <div className="space-y-4 animate-pulse">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="rounded-xl h-48" style={{ background: "#111119" }} />
+                ))}
+              </div>
+            )}
+
+            {sentimentError && !sentimentLoading && (
+              <div className="rounded-xl border p-8 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                <AlertTriangle className="mx-auto mb-3" size={28} style={{ color: "#ef4444" }} />
+                <p className="text-white font-bold mb-1">Failed to load sentiment data</p>
+                <p className="text-sm mb-4" style={{ color: "#8A939B" }}>{sentimentError}</p>
+                <button onClick={fetchSentiment}
+                  className="px-4 py-2 rounded-lg text-sm font-bold text-white"
+                  style={{ background: "#2081E2" }}>
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {!sentimentLoading && !sentimentError && sentimentData !== null && sentimentData.length === 0 && (
+              <div className="rounded-xl border p-12 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                <Brain className="mx-auto mb-4" size={36} style={{ color: "#64748b" }} />
+                <p className="text-white font-bold text-lg mb-2">No sentiment data yet</p>
+                <p className="text-sm mb-6" style={{ color: "#8A939B" }}>
+                  Run the daily research script to populate market sentiment analysis.
+                </p>
+                <button
+                  onClick={handleSentimentRefresh}
+                  disabled={sentimentRefreshing}
+                  className="px-5 py-2.5 rounded-lg text-sm font-bold text-white transition-opacity disabled:opacity-50"
+                  style={{ background: "#2081E2" }}
+                >
+                  {sentimentRefreshing ? "Generating…" : "Generate Sentiment Report"}
+                </button>
+              </div>
+            )}
+
+            {!sentimentLoading && sentimentData && sentimentData.length > 0 && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                {/* Section A: Discontinued Watches */}
+                <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: "#1c1c2a" }}>
+                    <span className="text-base">🚫</span>
+                    <h3 className="text-sm font-black text-white">Discontinued</h3>
+                    <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded"
+                      style={{ background: "#1c1c2a", color: "#64748b" }}>
+                      {discontinuedReports.length}
+                    </span>
+                  </div>
+                  <div className="divide-y" style={{ borderColor: "#1c1c2a" }}>
+                    {discontinuedReports.length === 0 ? (
+                      <p className="px-4 py-6 text-sm text-center" style={{ color: "#475569" }}>
+                        No discontinued watch data
+                      </p>
+                    ) : (
+                      discontinuedReports.map((report) => (
+                        <div key={report.id} className="p-4">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-white leading-tight">{report.title}</p>
+                              {report.brand && (
+                                <p className="text-[11px] mt-0.5" style={{ color: BRAND_COLORS[report.brand] ?? "#94a3b8" }}>
+                                  {report.brand}
+                                </p>
+                              )}
+                            </div>
+                            <SentimentBadge sentiment={report.sentiment} />
+                          </div>
+                          <p className="text-xs leading-relaxed" style={{ color: "#8A939B" }}>{report.summary}</p>
+                          {report.ref_numbers.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {report.ref_numbers.map((ref) => (
+                                <Link key={ref} href={`/ref/${encodeURIComponent(ref)}`}
+                                  className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded hover:opacity-80 transition-opacity"
+                                  style={{ background: "rgba(32,129,226,0.12)", color: "#60a5fa" }}>
+                                  {ref}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                          {report.event_date && (
+                            <p className="text-[10px] mt-2" style={{ color: "#475569" }}>
+                              {report.event_date}
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Section B: New Releases */}
+                <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: "#1c1c2a" }}>
+                    <span className="text-base">🆕</span>
+                    <h3 className="text-sm font-black text-white">New Releases</h3>
+                    <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded"
+                      style={{ background: "#1c1c2a", color: "#64748b" }}>
+                      {newReleaseReports.length}
+                    </span>
+                  </div>
+                  <div className="divide-y" style={{ borderColor: "#1c1c2a" }}>
+                    {newReleaseReports.length === 0 ? (
+                      <p className="px-4 py-6 text-sm text-center" style={{ color: "#475569" }}>
+                        No new release data
+                      </p>
+                    ) : (
+                      newReleaseReports.map((report) => (
+                        <div key={report.id} className="p-4">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-white leading-tight">{report.title}</p>
+                              {report.brand && (
+                                <p className="text-[11px] mt-0.5" style={{ color: BRAND_COLORS[report.brand] ?? "#94a3b8" }}>
+                                  {report.brand}
+                                </p>
+                              )}
+                            </div>
+                            <SentimentBadge sentiment={report.sentiment} />
+                          </div>
+                          <p className="text-xs leading-relaxed" style={{ color: "#8A939B" }}>{report.summary}</p>
+                          {report.ref_numbers.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {report.ref_numbers.map((ref) => (
+                                <Link key={ref} href={`/ref/${encodeURIComponent(ref)}`}
+                                  className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded hover:opacity-80 transition-opacity"
+                                  style={{ background: "rgba(32,129,226,0.12)", color: "#60a5fa" }}>
+                                  {ref}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                          {report.event_date && (
+                            <p className="text-[10px] mt-2" style={{ color: "#475569" }}>
+                              {report.event_date}
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Section C: Market News */}
+                <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: "#1c1c2a" }}>
+                    <span className="text-base">📰</span>
+                    <h3 className="text-sm font-black text-white">Market News</h3>
+                    <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded"
+                      style={{ background: "#1c1c2a", color: "#64748b" }}>
+                      {newsReports.length}
+                    </span>
+                  </div>
+                  <div className="divide-y" style={{ borderColor: "#1c1c2a" }}>
+                    {newsReports.length === 0 ? (
+                      <p className="px-4 py-6 text-sm text-center" style={{ color: "#475569" }}>
+                        No market news
+                      </p>
+                    ) : (
+                      newsReports.map((report) => (
+                        <div key={report.id} className="p-4">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-white leading-tight">{report.title}</p>
+                            </div>
+                            <SentimentBadge sentiment={report.sentiment} />
+                          </div>
+                          <p className="text-xs leading-relaxed" style={{ color: "#8A939B" }}>{report.summary}</p>
+                          {report.ref_numbers.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {report.ref_numbers.map((ref) => (
+                                <Link key={ref} href={`/ref/${encodeURIComponent(ref)}`}
+                                  className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded hover:opacity-80 transition-opacity"
+                                  style={{ background: "rgba(32,129,226,0.12)", color: "#60a5fa" }}>
+                                  {ref}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                          {report.source_url && (
+                            <a href={report.source_url} target="_blank" rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-[10px] mt-2 hover:opacity-80 transition-opacity"
+                              style={{ color: "#2081E2" }}>
+                              Source <ExternalLink size={9} />
+                            </a>
+                          )}
+                          {report.event_date && (
+                            <p className="text-[10px] mt-1" style={{ color: "#475569" }}>
+                              {report.event_date}
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+              </div>
             )}
           </div>
-        </section>
+        )}
 
-        {/* ── Section 6: Hot Deals Feed ───────────────────────────────────── */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-base font-black text-white flex items-center gap-2">
-                <span className="text-lg">🔥</span> Potential Deals
-              </h2>
-              <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
-                Listings priced below market average for their reference
-              </p>
-            </div>
-          </div>
-
-          {data.deals.length === 0 ? (
-            <div
-              className="rounded-xl border p-8 text-center"
-              style={{ background: "#111119", borderColor: "#1c1c2a" }}
-            >
-              <p className="font-bold text-white mb-1">No deals detected</p>
-              <p className="text-sm" style={{ color: "#64748b" }}>
-                Market is fairly priced right now — all listings are within 8% of their reference average.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-              {data.deals.map((deal, i) => {
-                const brandColor = BRAND_COLORS[deal.brand] ?? "#94a3b8"
-                const msrpInfo = MSRP_INFO[deal.ref_number]
-                return (
-                  <div
-                    key={i}
-                    className="rounded-xl border overflow-hidden"
-                    style={{ background: "#111119", borderColor: "#1c1c2a" }}
-                  >
-                    <div
-                      className="px-4 py-2 text-xs font-bold uppercase tracking-wider"
-                      style={{ background: "rgba(34,197,94,0.08)", color: "#22c55e" }}
-                    >
-                      -{deal.discount_pct}% below market
-                    </div>
-                    <div className="p-4">
-                      <div className="flex items-start justify-between gap-2 mb-3">
-                        <div>
-                          <p className="text-xs font-black font-mono text-white">
-                            {deal.ref_number}
-                          </p>
-                          <p className="text-sm font-bold text-white mt-0.5">
-                            {deal.model ?? msrpInfo?.name ?? deal.ref_number}
-                          </p>
-                          <p className="text-[11px] mt-0.5" style={{ color: brandColor }}>
-                            {deal.brand}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-black font-mono" style={{ color: "#22c55e" }}>
-                            {formatCurrency(deal.price)}
-                          </p>
-                          <p className="text-xs line-through" style={{ color: "#64748b" }}>
-                            avg {formatCurrency(deal.ref_avg)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="text-[10px] px-1.5 py-0.5 rounded font-bold capitalize"
-                            style={{ background: "rgba(32,129,226,0.12)", color: "#60a5fa" }}
-                          >
-                            {deal.source}
-                          </span>
-                          <span className="text-[10px]" style={{ color: "#475569" }}>
-                            {shortTimeAgo(deal.scraped_at)}
-                          </span>
-                        </div>
-                        {deal.listing_url && (
-                          <a
-                            href={deal.listing_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-xs font-bold hover:opacity-80 transition-opacity"
-                            style={{ color: "#2081E2" }}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            View listing <ExternalLink size={11} />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* ── Section 7: Supply Analysis Chart ───────────────────────────── */}
-        <section>
-          <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-            <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
-              <h2 className="text-base font-black text-white">Supply by Reference (Top 15)</h2>
-              <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
-                Number of active listings per reference — higher = more liquid
-              </p>
-            </div>
-            <div className="p-5">
-              {supplyChartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={Math.max(300, supplyChartData.length * 32)}>
-                  <BarChart
-                    data={supplyChartData}
-                    layout="vertical"
-                    margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1c1c2a" horizontal={false} />
-                    <XAxis
-                      type="number"
-                      stroke="#1c1c2a"
-                      tick={{ fill: "#64748b", fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      type="category"
-                      dataKey="ref_number"
-                      width={120}
-                      tick={{ fill: "#e2e8f0", fontSize: 11, fontFamily: "ui-monospace, monospace" }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <Tooltip content={<SupplyTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
-                    <Bar dataKey="count" radius={[0, 4, 4, 0]} maxBarSize={20}>
-                      {supplyChartData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={BRAND_COLORS[entry.brand] ?? "#6b7280"}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-64 flex items-center justify-center" style={{ color: "#475569" }}>
-                  No supply data available
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* ── Section 8: Grey Market Premium Table ───────────────────────── */}
-        {greyMarketRefs.length > 0 && (
-          <section>
+        {/* ═══════════════════════════════════════════════════════════════════
+            TAB: TRENDING
+            ═══════════════════════════════════════════════════════════════════ */}
+        {mainTab === "trending" && (
+          <div>
             <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-              <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
-                <h2 className="text-base font-black text-white">Grey Market vs. Retail</h2>
-                <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
-                  Asking-price premium above manufacturer retail — sorted by highest premium
-                </p>
+              <div className="px-5 py-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                style={{ borderColor: "#1c1c2a" }}>
+                <div>
+                  <h2 className="text-base font-black text-white">All Tracked References</h2>
+                  <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                    {sortedRefs.length} refs · sorted by {sortField.replace("_", " ")}
+                  </p>
+                </div>
+                {/* Brand filter tabs */}
+                <div className="flex gap-1 flex-wrap">
+                  {["All", ...TARGET_BRANDS].map((tab) => (
+                    <button key={tab} onClick={() => setActiveBrandTab(tab)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                      style={
+                        activeBrandTab === tab
+                          ? { background: "#2081E2", color: "#fff" }
+                          : { background: "#0b0b14", color: "#8A939B" }
+                      }>
+                      {tab === "Audemars Piguet" ? "AP" : tab === "Vacheron Constantin" ? "VC" : tab}
+                    </button>
+                  ))}
+                </div>
               </div>
 
+              {/* Table header — with sparkline column replacing ceiling */}
               <div
                 className="hidden md:grid px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider"
                 style={{
                   background: "#0b0b14",
                   color: "#64748b",
-                  gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr 1fr",
+                  gridTemplateColumns: "2fr 2fr 70px 1fr 1fr 1fr 1.5fr 1fr 1fr 1fr",
                 }}
               >
-                <div>Watch</div>
                 <div>Ref</div>
-                <div className="text-right">Retail MSRP</div>
-                <div className="text-right">Market Avg</div>
-                <div className="text-right">Premium</div>
-                <div className="text-right"># Listed</div>
+                <div>Model</div>
+                <div>7d</div>
+                <SortHeader field="floor" label="Floor" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="justify-end" />
+                <SortHeader field="avg" label="Avg" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="justify-end" />
+                <SortHeader field="spread" label="Spread" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="justify-end" />
+                <div className="text-right">Grey Mkt</div>
+                <SortHeader field="listings" label="# Listed" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="justify-end" />
+                <div className="text-right">30d</div>
+                <SortHeader field="heat_score" label="Heat" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="justify-end" />
               </div>
 
-              {greyMarketRefs.map((ref, i) => {
-                const info = MSRP_INFO[ref.ref_number]
-                const brandColor = BRAND_COLORS[ref.brand] ?? "#94a3b8"
-                return (
-                  <Link
-                    key={`${ref.ref_number}-gm-${i}`}
-                    href={`/ref/${encodeURIComponent(ref.ref_number)}`}
-                    className="border-t px-4 py-3 transition-colors flex flex-col md:grid gap-2 md:gap-0 md:items-center hover:opacity-90"
-                    style={{
-                      borderColor: "#1c1c2a",
-                      background: i % 2 === 0 ? "#111119" : "#0d0d15",
-                      gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr 1fr",
-                    }}
-                  >
-                    <div>
-                      <p className="text-sm font-bold text-white">
-                        {info?.name ?? ref.model ?? ref.ref_number}
-                      </p>
-                      <p className="text-[11px]" style={{ color: brandColor }}>{ref.brand}</p>
-                    </div>
-                    <div className="hidden md:block">
-                      <span className="text-xs font-mono font-bold text-white">{ref.ref_number}</span>
-                    </div>
-                    <div className="hidden md:block text-right">
-                      <span className="text-xs font-mono" style={{ color: "#94a3b8" }}>
-                        {ref.msrp ? formatCurrency(ref.msrp) : "—"}
-                      </span>
-                    </div>
-                    <div className="hidden md:block text-right">
-                      <span className="text-xs font-black font-mono text-white">
-                        {formatCurrency(ref.avg)}
-                      </span>
-                    </div>
-                    <div className="hidden md:block text-right">
-                      {ref.grey_market_premium_pct !== null ? (
-                        <GreyMarketBadge pct={ref.grey_market_premium_pct} />
-                      ) : (
-                        <span className="text-xs" style={{ color: "#475569" }}>—</span>
-                      )}
-                    </div>
-                    <div className="hidden md:block text-right">
-                      <span className="text-xs font-mono text-white">{ref.listings}</span>
-                    </div>
+              {sortedRefs.length === 0 ? (
+                <div className="px-5 py-10 text-center text-sm" style={{ color: "#475569" }}>
+                  No references found for this filter.
+                </div>
+              ) : (
+                sortedRefs.map((ref, i) => {
+                  const brandColor = BRAND_COLORS[ref.brand] ?? "#94a3b8"
+                  return (
+                    <Link
+                      key={`${ref.ref_number}-${i}`}
+                      href={`/ref/${encodeURIComponent(ref.ref_number)}`}
+                      className="border-t px-4 py-3 transition-colors flex flex-col md:grid gap-2 md:gap-0 md:items-center hover:opacity-90"
+                      style={{
+                        borderColor: "#1c1c2a",
+                        background: i % 2 === 0 ? "#111119" : "#0d0d15",
+                        gridTemplateColumns: "2fr 2fr 70px 1fr 1fr 1fr 1.5fr 1fr 1fr 1fr",
+                      }}
+                    >
+                      {/* Mobile layout */}
+                      <div className="flex items-start justify-between md:contents">
+                        <div className="flex flex-col md:block">
+                          <span className="text-xs font-black font-mono text-white">{ref.ref_number}</span>
+                          <span className="text-[10px] md:hidden mt-0.5" style={{ color: brandColor }}>
+                            {ref.brand}
+                          </span>
+                        </div>
+                        <div className="md:hidden flex items-center gap-2">
+                          <span className="text-sm font-black font-mono text-white">{formatCompact(ref.avg)}</span>
+                          <PriceChangeBadge change={ref.change_30d} />
+                        </div>
+                      </div>
 
-                    {/* Mobile summary */}
-                    <div className="flex items-center justify-between md:hidden">
-                      <span className="text-xs font-mono" style={{ color: "#64748b" }}>{ref.ref_number}</span>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs font-mono" style={{ color: "#64748b" }}>
-                          MSRP {ref.msrp ? formatCompact(ref.msrp) : "—"}
-                        </span>
-                        <span className="text-xs font-black font-mono text-white">
-                          avg {formatCompact(ref.avg)}
-                        </span>
-                        {ref.grey_market_premium_pct !== null && (
-                          <GreyMarketBadge pct={ref.grey_market_premium_pct} />
+                      {/* Desktop cells */}
+                      <div className="hidden md:flex flex-col">
+                        <span className="text-xs font-semibold text-white truncate">{ref.model ?? "—"}</span>
+                        <span className="text-[10px]" style={{ color: brandColor }}>{ref.brand}</span>
+                      </div>
+                      {/* Sparkline */}
+                      <div className="hidden md:flex items-center">
+                        {ref.sparkline_data && ref.sparkline_data.length >= 2 ? (
+                          <Sparkline data={ref.sparkline_data} width={60} height={24} />
+                        ) : (
+                          <span style={{ color: "#475569", fontSize: 10 }}>—</span>
                         )}
                       </div>
-                    </div>
-                  </Link>
-                )
-              })}
+                      <div className="hidden md:block text-right">
+                        <span className="text-xs font-mono text-white">{formatCompact(ref.floor)}</span>
+                      </div>
+                      <div className="hidden md:block text-right">
+                        <span className="text-xs font-black font-mono text-white">{formatCompact(ref.avg)}</span>
+                      </div>
+                      <div className="hidden md:block text-right">
+                        <span className="text-xs font-mono" style={{ color: "#eab308" }}>
+                          {formatCompact(ref.spread)}
+                        </span>
+                      </div>
+                      <div className="hidden md:block text-right">
+                        {ref.grey_market_premium_pct !== null ? (
+                          <GreyMarketBadge pct={ref.grey_market_premium_pct} />
+                        ) : (
+                          <span className="text-xs" style={{ color: "#475569" }}>—</span>
+                        )}
+                      </div>
+                      <div className="hidden md:block text-right">
+                        <span className="text-xs font-mono text-white">{ref.listings}</span>
+                      </div>
+                      <div className="hidden md:block text-right">
+                        <PriceChangeBadge change={ref.change_30d} />
+                      </div>
+                      <div className="hidden md:block text-right">
+                        <HeatDot score={ref.heat_score} />
+                      </div>
+                    </Link>
+                  )
+                })
+              )}
             </div>
-          </section>
+          </div>
         )}
 
-        {/* ── Section 9: Data Coverage ────────────────────────────────────── */}
-        <section>
-          <div
-            className="rounded-xl border p-5"
-            style={{ background: "#111119", borderColor: "#1c1c2a" }}
-          >
-            <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "#64748b" }}>
-              Data Coverage
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-              {[
-                {
-                  label: "Asking Prices",
-                  value: `${data.overview.total_listings.toLocaleString()} Chrono24 listings`,
-                  color: "#22c55e",
-                },
-                {
-                  label: "Confirmed Sales",
-                  value: "0 (eBay API key needed)",
-                  color: "#ef4444",
-                },
-                {
-                  label: "Last Sync",
-                  value: data.overview.last_updated
-                    ? `${data.overview.data_freshness_hours}h ago`
-                    : "Never",
-                  color: data.overview.data_freshness_hours < 24 ? "#22c55e" : "#eab308",
-                },
-                {
-                  label: "Refs Tracked",
-                  value: `${data.overview.refs_tracked} unique references`,
-                  color: "#2081E2",
-                },
-              ].map((item) => (
-                <div key={item.label}>
-                  <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "#64748b" }}>
-                    {item.label}
-                  </p>
-                  <p className="text-sm font-bold" style={{ color: item.color }}>
-                    {item.value}
-                  </p>
-                </div>
-              ))}
+        {/* ═══════════════════════════════════════════════════════════════════
+            TAB: DEALS
+            ═══════════════════════════════════════════════════════════════════ */}
+        {mainTab === "deals" && (
+          <div className="space-y-6">
+
+            {/* Stats header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h2 className="text-xl font-black text-white flex items-center gap-2">
+                  <span className="text-xl">🔥</span> Potential Deals
+                </h2>
+                <span className="text-sm font-mono" style={{ color: "#64748b" }}>
+                  {data.deals.length} deals detected
+                  {data.deals.length > 0 && (
+                    <> · avg <span style={{ color: "#22c55e" }}>{avgDiscount}%</span> below market</>
+                  )}
+                  {lastDealScraped && (
+                    <> · last refreshed {shortTimeAgo(lastDealScraped)}</>
+                  )}
+                </span>
+              </div>
             </div>
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold text-white transition-opacity disabled:opacity-50"
-              style={{ background: "#1c1c2a" }}
-            >
-              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
-              {refreshing ? "Refreshing…" : "Refresh Data"}
-            </button>
+
+            <p className="text-xs" style={{ color: "#64748b" }}>
+              Listings priced below market average for their reference
+            </p>
+
+            {data.deals.length === 0 ? (
+              <div className="rounded-xl border p-8 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                <p className="font-bold text-white mb-1">No deals detected</p>
+                <p className="text-sm" style={{ color: "#64748b" }}>
+                  Market is fairly priced right now — all listings are within 8% of their reference average.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                {data.deals.map((deal, i) => {
+                  const brandColor = BRAND_COLORS[deal.brand] ?? "#94a3b8"
+                  const msrpInfo = MSRP_INFO[deal.ref_number]
+                  return (
+                    <div key={i} className="rounded-xl border overflow-hidden"
+                      style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                      <div className="px-4 py-2 text-xs font-bold uppercase tracking-wider"
+                        style={{ background: "rgba(34,197,94,0.08)", color: "#22c55e" }}>
+                        -{deal.discount_pct}% below market
+                      </div>
+                      <div className="p-4">
+                        <div className="flex items-start justify-between gap-2 mb-3">
+                          <div>
+                            <p className="text-xs font-black font-mono text-white">{deal.ref_number}</p>
+                            <p className="text-sm font-bold text-white mt-0.5">
+                              {deal.model ?? msrpInfo?.name ?? deal.ref_number}
+                            </p>
+                            <p className="text-[11px] mt-0.5" style={{ color: brandColor }}>{deal.brand}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-black font-mono" style={{ color: "#22c55e" }}>
+                              {formatCurrency(deal.price)}
+                            </p>
+                            <p className="text-xs line-through" style={{ color: "#64748b" }}>
+                              avg {formatCurrency(deal.ref_avg)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded font-bold capitalize"
+                              style={{ background: "rgba(32,129,226,0.12)", color: "#60a5fa" }}>
+                              {deal.source}
+                            </span>
+                            <span className="text-[10px]" style={{ color: "#475569" }}>
+                              {shortTimeAgo(deal.scraped_at)}
+                            </span>
+                          </div>
+                          {deal.listing_url && (
+                            <a href={deal.listing_url} target="_blank" rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-xs font-bold hover:opacity-80 transition-opacity"
+                              style={{ color: "#2081E2" }}
+                              onClick={(e) => e.stopPropagation()}>
+                              View listing <ExternalLink size={11} />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
-        </section>
+        )}
 
       </div>
     </AppLayout>
