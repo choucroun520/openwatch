@@ -80,7 +80,7 @@ export default function InquiryDialog({ listing }: InquiryDialogProps) {
       <DialogContent className="bg-bg-card border-border sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-foreground">
-            Inquiry — {listing.brand.name} {listing.model.name}{" "}
+            Inquiry — {listing.brand.name} {listing.model?.name}{" "}
             {listing.reference_number}
           </DialogTitle>
         </DialogHeader>

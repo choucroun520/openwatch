@@ -155,7 +155,7 @@ export default async function ListingPage({
           </Link>
           <span>/</span>
           <span className="text-foreground">
-            {listing.model.name} {listing.reference_number}
+            {listing.model?.name} {listing.reference_number}
           </span>
         </nav>
 
@@ -256,7 +256,7 @@ export default async function ListingPage({
             {/* Title */}
             <div>
               <h1 className="text-2xl font-black text-foreground leading-tight">
-                {listing.model.name} · {listing.reference_number}
+                {listing.model?.name} · {listing.reference_number}
               </h1>
               <p className="text-muted-foreground text-sm mt-1 flex items-center gap-2 flex-wrap">
                 {listing.year && <span>{listing.year}</span>}
@@ -311,7 +311,7 @@ export default async function ListingPage({
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { label: "Brand", value: listing.brand.name },
-                  { label: "Model", value: listing.model.name },
+                  { label: "Model", value: listing.model?.name },
                   { label: "Reference", value: listing.reference_number },
                   { label: "Material", value: listing.material },
                   { label: "Dial Color", value: listing.dial_color },

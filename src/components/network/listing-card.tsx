@@ -98,7 +98,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
 
           {/* Model name */}
           <p className="text-[13px] font-bold text-foreground leading-tight">
-            {listing.model.name || listing.notes?.slice(0, 40) || "Watch"}
+            {listing.model?.name || listing.notes?.slice(0, 40) || "Watch"}
           </p>
 
           {/* Ref · Year */}
