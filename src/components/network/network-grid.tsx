@@ -381,7 +381,7 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
   const [hasPapers, setHasPapers] = useState(false)
   const [minPrice, setMinPrice] = useState<string>("")
   const [maxPrice, setMaxPrice] = useState<string>("")
-  const [sort, setSort] = useState<string>("newest")
+  const [sort, setSort] = useState<"newest" | "price-asc" | "price-desc" | "oldest" | "brand">("newest")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [marketStats, setMarketStats] = useState<Record<string, MarketStats>>({})
@@ -513,6 +513,9 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
             new Date(a.listed_at).getTime() - new Date(b.listed_at).getTime()
         )
         break
+      case "brand":
+        result.sort((a, b) => (a.brand?.name ?? "").localeCompare(b.brand?.name ?? ""))
+        break
     }
 
     return result
@@ -613,7 +616,7 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
 
           {/* Sort + View toggle — right side */}
           <div className="flex items-center gap-2 ml-auto">
-            <Select value={sort} onValueChange={setSort}>
+            <Select value={sort} onValueChange={(v) => setSort(v as "newest" | "price-asc" | "price-desc" | "oldest" | "brand")}>
               <SelectTrigger className="w-40 h-8 text-sm" style={{ background: "var(--ow-bg-elevated)", borderColor: "var(--ow-border-light)" }}>
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
@@ -648,6 +651,31 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Sort chips */}
+        <div className="flex gap-2 mb-4 flex-wrap">
+          {(
+            [
+              { label: "Price Low", value: "price-asc" },
+              { label: "Price High", value: "price-desc" },
+              { label: "Newest", value: "newest" },
+              { label: "Brand", value: "brand" },
+            ] as const
+          ).map((chip) => (
+            <button
+              key={chip.value}
+              onClick={() => setSort(chip.value)}
+              className="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150"
+              style={
+                sort === chip.value
+                  ? { background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }
+                  : { background: "var(--ow-bg-elevated)", color: "var(--ow-text-muted)", border: "1px solid var(--ow-border)" }
+              }
+            >
+              {chip.label}
+            </button>
+          ))}
         </div>
 
         {/* Grid / List */}
