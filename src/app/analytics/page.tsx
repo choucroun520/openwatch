@@ -592,7 +592,6 @@ export default function AnalyticsPage() {
   async function handleSentimentRefresh() {
     setSentimentRefreshing(true)
     try {
-      await fetch("/api/analytics/sentiment", { method: "POST", cache: "no-store" })
       await fetchSentiment()
     } catch (e) {
       setSentimentError(e instanceof Error ? e.message : "Failed to refresh")
@@ -1302,20 +1301,12 @@ export default function AnalyticsPage() {
             )}
 
             {!sentimentLoading && !sentimentError && sentimentData !== null && sentimentData.length === 0 && (
-              <div className="rounded-xl border p-12 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
-                <Brain className="mx-auto mb-4" size={36} style={{ color: "var(--ow-text-dim)" }} />
-                <p className="text-white font-bold text-lg mb-2">No sentiment data yet</p>
-                <p className="text-sm mb-6" style={{ color: "#8A939B" }}>
-                  Run the daily research script to populate market sentiment analysis.
+              <div style={{ border: "1px dashed var(--ow-border)", borderRadius: 12, padding: "48px 24px", textAlign: "center" }}>
+                <Brain size={32} style={{ color: "var(--ow-text-dim)", margin: "0 auto 12px" }} />
+                <p style={{ color: "var(--ow-text-muted)", fontWeight: 600, marginBottom: 4 }}>No sentiment reports yet</p>
+                <p style={{ color: "var(--ow-text-dim)", fontSize: 13 }}>
+                  Sentiment analysis runs automatically when market data is refreshed.
                 </p>
-                <button
-                  onClick={handleSentimentRefresh}
-                  disabled={sentimentRefreshing}
-                  className="px-5 py-2.5 rounded-lg text-sm font-bold text-white transition-opacity disabled:opacity-50"
-                  style={{ background: "#2081E2" }}
-                >
-                  {sentimentRefreshing ? "Generating…" : "Generate Sentiment Report"}
-                </button>
               </div>
             )}
 
@@ -1907,10 +1898,12 @@ export default function AnalyticsPage() {
 
                   {/* Main Table */}
                   {arbData.length === 0 ? (
-                    <div className="rounded-xl border p-12 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
-                      <p className="text-white font-bold text-lg mb-2">No arbitrage data</p>
-                      <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>
-                        Run the arbitrage scanner to populate cross-market opportunities.
+                    <div style={{ border: "1px dashed var(--ow-border)", borderRadius: 12, padding: "48px 24px", textAlign: "center" }}>
+                      <Globe size={32} style={{ color: "var(--ow-text-dim)", margin: "0 auto 12px" }} />
+                      <p style={{ color: "var(--ow-text-muted)", fontWeight: 600, marginBottom: 4 }}>No cross-market arbitrage opportunities found</p>
+                      <p style={{ color: "var(--ow-text-dim)", fontSize: 13 }}>
+                        Arbitrage analysis requires price data from multiple currency markets. Add EU/JP/CH market data sources in{" "}
+                        <a href="/settings" style={{ color: "#60a5fa" }}>Settings</a>.
                       </p>
                     </div>
                   ) : (
@@ -2155,9 +2148,12 @@ export default function AnalyticsPage() {
                   </div>
 
                   {trendsData.length === 0 ? (
-                    <div className="rounded-xl border p-12 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
-                      <p className="text-white font-bold text-lg mb-2">No trend data</p>
-                      <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>Run the momentum tracker to populate trend analysis.</p>
+                    <div style={{ border: "1px dashed var(--ow-border)", borderRadius: 12, padding: "48px 24px", textAlign: "center" }}>
+                      <BarChart2 size={32} style={{ color: "var(--ow-text-dim)", margin: "0 auto 12px" }} />
+                      <p style={{ color: "var(--ow-text-muted)", fontWeight: 600, marginBottom: 4 }}>Price trend data accumulates daily</p>
+                      <p style={{ color: "var(--ow-text-dim)", fontSize: 13 }}>
+                        Check back tomorrow for 7-day and 30-day momentum charts.
+                      </p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

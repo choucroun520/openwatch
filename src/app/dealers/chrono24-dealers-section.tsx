@@ -132,12 +132,13 @@ export default function Chrono24DealersSection() {
           ))}
         </div>
       ) : dealers.length === 0 ? (
-        <div className="py-12 text-center rounded-2xl" style={{ background: "#1E1E2E", border: "1px solid #333333" }}>
-          <p style={{ color: "#8A939B" }} className="text-sm">
-            No Chrono24 dealers tracked yet. Add one above.
+        <div style={{ border: "1px dashed #333333", borderRadius: 12, padding: "48px 24px", textAlign: "center" }}>
+          <p style={{ color: "#8A939B", fontWeight: 600, marginBottom: 4, fontSize: 14 }}>
+            Dealer intelligence database is being built
           </p>
-          <p className="text-xs mt-1" style={{ color: "#555" }}>
-            Example slug: <code className="font-mono">jewelsintimeofboca</code>
+          <p style={{ color: "#555", fontSize: 13 }}>
+            Run the Chrono24 dealer scraper to populate. Example:{" "}
+            <code className="font-mono" style={{ color: "#2081E2" }}>jewelsintimeofboca</code>
           </p>
         </div>
       ) : (
