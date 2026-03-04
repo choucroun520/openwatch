@@ -13,6 +13,13 @@ interface ListingCardProps {
   isSoldOnChrono24?: boolean
 }
 
+const BRAND_TOP_COLORS: Record<string, string> = {
+  "Rolex": "#006039",
+  "Patek Philippe": "#1e3a5f",
+  "Audemars Piguet": "#1a1a8c",
+  "Vacheron Constantin": "#0e7490",
+}
+
 export default function ListingCard({ listing, marketStats, isSoldOnChrono24 }: ListingCardProps) {
   const price = parseFloat(listing.wholesale_price)
   const hasPriceOnRequest = price === 0
@@ -21,6 +28,7 @@ export default function ListingCard({ listing, marketStats, isSoldOnChrono24 }: 
   const dealerInitial = isRcCrown ? "RC" : companyName[0]?.toUpperCase() ?? "?"
   const dealerBg = isRcCrown ? "#006039" : "linear-gradient(135deg, #2563eb, #7c3aed)"
   const isC24 = listing.source === 'chrono24'
+  const brandTopColor = BRAND_TOP_COLORS[listing.brand?.name ?? ""] ?? "#475569"
 
   // C24 listings open on Chrono24; OpenWatch listings open internal detail page
   const CardWrapper = ({ children }: { children: React.ReactNode }) =>
@@ -37,21 +45,31 @@ export default function ListingCard({ listing, marketStats, isSoldOnChrono24 }: 
   return (
     <CardWrapper>
       <div
-        className="relative overflow-hidden cursor-pointer transition-all duration-150"
+        className="relative overflow-hidden cursor-pointer"
         style={{
           background: "#1E1E2E",
           borderRadius: 12,
-          border: "1px solid transparent",
+          borderTop: `3px solid ${brandTopColor}`,
+          borderRight: "1px solid transparent",
+          borderBottom: "1px solid transparent",
+          borderLeft: "1px solid transparent",
+          transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = "#333333"
-          e.currentTarget.style.transform = "translateY(-2px)"
-          e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.4)"
+          const el = e.currentTarget as HTMLDivElement
+          el.style.borderRightColor = "#333333"
+          el.style.borderBottomColor = "#333333"
+          el.style.borderLeftColor = "#333333"
+          el.style.transform = "scale(1.02)"
+          el.style.boxShadow = `0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px ${brandTopColor}40`
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = "transparent"
-          e.currentTarget.style.transform = "translateY(0)"
-          e.currentTarget.style.boxShadow = "none"
+          const el = e.currentTarget as HTMLDivElement
+          el.style.borderRightColor = "transparent"
+          el.style.borderBottomColor = "transparent"
+          el.style.borderLeftColor = "transparent"
+          el.style.transform = "scale(1.0)"
+          el.style.boxShadow = "none"
         }}
       >
         {/* Image area — WHITE background */}
