@@ -55,19 +55,20 @@ function NavRow({ item, isActive }: NavRowProps) {
     <Link
       href={item.href}
       className={cn(
-        "group/row relative flex items-center h-11 px-4 gap-3 rounded-lg transition-colors duration-150",
-        "hover:bg-[var(--ow-bg-hover)]",
-        isActive ? "text-white" : "text-[#8A939B] hover:text-white"
+        "group/row relative flex items-center h-11 px-4 gap-3 rounded-lg transition-all duration-150",
+        isActive
+          ? "text-[#60a5fa] font-bold"
+          : "text-[#8A939B] hover:text-white hover:bg-[var(--ow-bg-hover)]"
       )}
+      style={
+        isActive
+          ? {
+              background: "rgba(37,99,235,0.1)",
+              borderLeft: "3px solid #2563eb",
+            }
+          : {}
+      }
     >
-      {/* Active left-border indicator */}
-      {isActive && (
-        <span
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-6 rounded-r"
-          style={{ backgroundColor: "#2081E2" }}
-        />
-      )}
-
       {/* Icon — always visible, centered when collapsed */}
       <span className="shrink-0 flex items-center justify-center w-5">
         <Icon size={20} strokeWidth={isActive ? 2.2 : 1.8} />
@@ -76,7 +77,8 @@ function NavRow({ item, isActive }: NavRowProps) {
       {/* Label — hidden when collapsed, shown via group-hover */}
       <span
         className={cn(
-          "text-[14px] font-medium whitespace-nowrap overflow-hidden transition-all duration-200",
+          "text-[14px] whitespace-nowrap overflow-hidden transition-all duration-200",
+          isActive ? "font-bold" : "font-medium",
           // parent sidebar uses `group`, so label appears on sidebar hover
           "max-w-0 opacity-0 group-hover:max-w-[160px] group-hover:opacity-100"
         )}
@@ -177,30 +179,46 @@ export default function Sidebar() {
         </div>
 
         {/* ── Top nav ─── */}
-        <nav className="flex flex-col gap-0.5 px-2 pt-2">
-          {TOP_NAV.map((item) => (
-            <NavRow
-              key={item.href}
-              item={item}
-              isActive={isActive(item.href)}
-            />
-          ))}
-        </nav>
+        <div className="px-2 pt-2">
+          <p
+            className="px-2 text-[10px] font-bold uppercase tracking-widest mb-1 whitespace-nowrap overflow-hidden max-w-0 opacity-0 group-hover:max-w-[160px] group-hover:opacity-100 transition-all duration-200"
+            style={{ color: "var(--ow-text-faint)" }}
+          >
+            MARKET
+          </p>
+          <nav className="flex flex-col gap-0.5">
+            {TOP_NAV.map((item) => (
+              <NavRow
+                key={item.href}
+                item={item}
+                isActive={isActive(item.href)}
+              />
+            ))}
+          </nav>
+        </div>
 
         <SidebarSeparator />
 
         {/* ── Bottom nav ─── */}
-        <nav className="flex flex-col gap-0.5 px-2">
-          {BOTTOM_NAV.filter(
-            (item) => !item.adminOnly || isAdmin
-          ).map((item) => (
-            <NavRow
-              key={item.href}
-              item={item}
-              isActive={isActive(item.href)}
-            />
-          ))}
-        </nav>
+        <div className="px-2">
+          <p
+            className="px-2 text-[10px] font-bold uppercase tracking-widest mb-1 whitespace-nowrap overflow-hidden max-w-0 opacity-0 group-hover:max-w-[160px] group-hover:opacity-100 transition-all duration-200"
+            style={{ color: "var(--ow-text-faint)" }}
+          >
+            TOOLS
+          </p>
+          <nav className="flex flex-col gap-0.5">
+            {BOTTOM_NAV.filter(
+              (item) => !item.adminOnly || isAdmin
+            ).map((item) => (
+              <NavRow
+                key={item.href}
+                item={item}
+                isActive={isActive(item.href)}
+              />
+            ))}
+          </nav>
+        </div>
 
         {/* ── Spacer ─── */}
         <div className="flex-1" />
