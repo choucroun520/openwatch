@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,9 +22,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.variable} antialiased`} style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif" }}>
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Inline script to apply theme before first paint — prevents flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t=localStorage.getItem('ow-theme')||'dark';document.documentElement.classList.add(t);document.documentElement.setAttribute('data-theme',t);})();`,
+          }}
+        />
+      </head>
+      <body
+        className={`${inter.variable} antialiased`}
+        style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif" }}
+      >
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

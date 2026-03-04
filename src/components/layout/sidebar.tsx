@@ -93,7 +93,7 @@ function SidebarSeparator() {
   return (
     <div
       className="mx-3 my-2 h-px"
-      style={{ backgroundColor: "#333333" }}
+      style={{ backgroundColor: "var(--border)" }}
     />
   )
 }
@@ -153,7 +153,7 @@ export default function Sidebar() {
           "transition-[width] duration-200 ease-in-out",
           "overflow-hidden"
         )}
-        style={{ backgroundColor: "#121212" }}
+        style={{ backgroundColor: "var(--background)" }}
       >
         {/* ── Logo area ─── */}
         <div className="flex items-center h-[56px] px-4 shrink-0 overflow-hidden">
@@ -225,8 +225,8 @@ export default function Sidebar() {
       <nav
         className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around"
         style={{
-          backgroundColor: "#121212",
-          borderTop: "1px solid #333333",
+          backgroundColor: "var(--background)",
+          borderTop: "1px solid var(--border)",
           height: "60px",
         }}
       >

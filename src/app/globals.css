@@ -87,8 +87,10 @@
   --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, monospace;
 }
 
-/* ─── Force dark theme (OpenWatch is always dark) ─── */
-:root {
+/* ─── Dark theme (default) ─── */
+:root,
+.dark {
+  color-scheme: dark;
   --radius: 0.625rem;
   --background: #121212;
   --foreground: #ffffff;
@@ -121,6 +123,67 @@
   --sidebar-accent-foreground: #e2e8f0;
   --sidebar-border: #1c1c2a;
   --sidebar-ring: #2563eb;
+
+  /* OpenWatch palette — dark */
+  --ow-bg:         #0b0b14;
+  --ow-bg-card:    #111119;
+  --ow-bg-elevated:#161622;
+  --ow-bg-hover:   #1a1a28;
+  --ow-border:     #1c1c2a;
+  --ow-border-light:#22222e;
+  --ow-text:       #e2e8f0;
+  --ow-text-muted: #94a3b8;
+  --ow-text-dim:   #64748b;
+  --ow-text-faint: #475569;
+}
+
+/* ─── Light theme ─── */
+.light {
+  color-scheme: light;
+  --radius: 0.625rem;
+  --background: #f8f9fc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #eff6ff;
+  --accent-foreground: #1e40af;
+  --destructive: #dc2626;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #2563eb;
+  --chart-1: #2563eb;
+  --chart-2: #16a34a;
+  --chart-3: #ca8a04;
+  --chart-4: #7c3aed;
+  --chart-5: #dc2626;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #2563eb;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #2563eb;
+
+  /* OpenWatch palette — light */
+  --ow-bg:          #f0f4f8;
+  --ow-bg-card:     #ffffff;
+  --ow-bg-elevated: #f8fafc;
+  --ow-bg-hover:    #f1f5f9;
+  --ow-border:      #e2e8f0;
+  --ow-border-light:#f1f5f9;
+  --ow-text:        #0f172a;
+  --ow-text-muted:  #475569;
+  --ow-text-dim:    #64748b;
+  --ow-text-faint:  #94a3b8;
 }
 
 /* ─── Base styles ─── */
@@ -130,33 +193,26 @@
     box-sizing: border-box;
   }
 
-  html {
-    color-scheme: dark;
-  }
-
   body {
-    background-color: #121212;
-    color: #ffffff;
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   /* Dark scrollbar */
-  ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #0b0b14;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #22222e;
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #2563eb;
-  }
+  .dark ::-webkit-scrollbar { width: 5px; height: 5px; }
+  .dark ::-webkit-scrollbar-track { background: #0b0b14; }
+  .dark ::-webkit-scrollbar-thumb { background: #22222e; border-radius: 3px; }
+  .dark ::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+
+  /* Light scrollbar */
+  .light ::-webkit-scrollbar { width: 5px; height: 5px; }
+  .light ::-webkit-scrollbar-track { background: #f1f5f9; }
+  .light ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  .light ::-webkit-scrollbar-thumb:hover { background: #2563eb; }
 
   /* Input focus ring */
   input:focus,
@@ -188,9 +244,9 @@
     animation: shimmer 2s infinite linear;
     background: linear-gradient(
       to right,
-      #111119 4%,
-      #1a1a28 25%,
-      #111119 36%
+      var(--ow-bg-card) 4%,
+      var(--ow-bg-hover) 25%,
+      var(--ow-bg-card) 36%
     );
     background-size: 1000px 100%;
   }

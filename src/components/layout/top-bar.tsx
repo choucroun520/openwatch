@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import CommandSearch from "@/components/search/command-search"
+import { ThemeToggle } from "@/components/theme/theme-toggle"
 import type { Profile } from "@/lib/types"
 
 function getCompanyInitial(profile: Profile | null): string {
@@ -62,8 +63,8 @@ export default function TopBar() {
       className="sticky top-0 z-30 shrink-0 flex items-center gap-3 px-4 sm:px-6"
       style={{
         height: "56px",
-        backgroundColor: "#121212",
-        borderBottom: "1px solid #222222",
+        backgroundColor: "var(--background)",
+        borderBottom: "1px solid var(--border)",
       }}
     >
       {/* ── Search ── */}
@@ -74,6 +75,9 @@ export default function TopBar() {
 
       {/* ── Right side actions ── */}
       <div className="flex items-center gap-3 shrink-0">
+        {/* Theme toggle */}
+        <ThemeToggle />
+
         {/* Dealer avatar */}
         <Link
           href="/profile"
