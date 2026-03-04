@@ -467,9 +467,7 @@ export default function AnalyticsPage() {
   const [trendsLoading, setTrendsLoading] = useState(false)
   const [trendsFetched, setTrendsFetched] = useState(false)
 
-  // ── FX rates state ───────────────────────────────────────────────────────────
-  const [fxRates, setFxRates] = useState<FxRate[]>([])
-  const [fxLoading, setFxLoading] = useState(false)
+
 
   // ── Fetch functions ──────────────────────────────────────────────────────────
 
@@ -542,27 +540,6 @@ export default function AnalyticsPage() {
     }
   }
 
-  async function fetchFxRates() {
-    setFxLoading(true)
-    try {
-      const res = await fetch("/api/fx/rates", { cache: "no-store" })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const json = await res.json()
-      if (Array.isArray(json)) {
-        setFxRates(json as FxRate[])
-      } else if (json && typeof json === "object") {
-        // API returns { rates: { EUR: 0.86, ... }, fetched_at, ... }
-        const ratesObj = json.rates && typeof json.rates === "object" ? json.rates : json
-        const rates: FxRate[] = Object.entries(ratesObj)
-          .filter(([, v]) => typeof v === "number")
-          .map(([pair, rate]) => ({ pair, rate: rate as number }))
-        setFxRates(rates)
-      }
-    } catch { /* silent */ } finally {
-      setFxLoading(false)
-    }
-  }
-
   // Lazy-load tabs when first visited
   useEffect(() => {
     if (mainTab === "sentiment" && !sentimentFetched) {
@@ -583,14 +560,6 @@ export default function AnalyticsPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mainTab])
-
-  // FX rates: fetch on mount + refresh every 60s
-  useEffect(() => {
-    fetchFxRates()
-    const interval = setInterval(fetchFxRates, 60_000)
-    return () => clearInterval(interval)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   function handleSort(field: string) {
     if (sortField === field) {
@@ -795,42 +764,6 @@ export default function AnalyticsPage() {
             ═══════════════════════════════════════════════════════════════════ */}
         {mainTab === "market" && (
           <div className="space-y-8">
-
-            {/* ── FX Rates Widget ──────────────────────────────────────────── */}
-            <div className="rounded-xl border p-4" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
-              <div className="flex items-center gap-2 mb-3">
-                <Globe size={13} style={{ color: "#2081E2" }} />
-                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>
-                  Live FX Rates
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#22c55e" }} />
-                  <span className="text-[10px] font-bold" style={{ color: "#22c55e" }}>LIVE</span>
-                </span>
-                {fxLoading && <RefreshCw size={10} className="animate-spin ml-auto" style={{ color: "var(--ow-text-dim)" }} />}
-              </div>
-              <div className="flex flex-wrap gap-5">
-                {fxRates.length > 0
-                  ? fxRates.map((r) => (
-                    <div key={r.pair} className="flex flex-col gap-0.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>{r.pair}</span>
-                      <span className="text-sm font-black font-mono" style={{ color: "var(--ow-text)" }}>
-                        {r.rate.toFixed(4)}
-                      </span>
-                    </div>
-                  ))
-                  : FX_PAIRS.map((p) => (
-                    <div key={p.pair} className="flex flex-col gap-0.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>{p.pair}</span>
-                      <span className="text-sm font-black font-mono" style={{ color: "var(--ow-text-faint)" }}>—</span>
-                    </div>
-                  ))
-                }
-              </div>
-              <p className="text-[10px] mt-3" style={{ color: "var(--ow-text-faint)" }}>
-                Prices across markets auto-converted using live rates · Refreshes every 60s
-              </p>
-            </div>
 
             {/* ── A: Global Stats Bar ─────────────────────────────────────── */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
