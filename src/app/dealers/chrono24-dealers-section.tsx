@@ -197,7 +197,7 @@ export default function Chrono24DealersSection() {
                     </span>
                   ))}
                   {dealer.brands_carried.length > 4 && (
-                    <span className="text-[10px]" style={{ color: "#64748b" }}>
+                    <span className="text-[10px]" style={{ color: "var(--ow-text-dim)" }}>
                       +{dealer.brands_carried.length - 4} more
                     </span>
                   )}

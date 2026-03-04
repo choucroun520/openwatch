@@ -87,8 +87,8 @@ export default async function SoldPage({
             { label: "Low", value: minPrice > 0 ? formatCurrency(minPrice) : "—" },
             { label: "High", value: maxPrice > 0 ? formatCurrency(maxPrice) : "—" },
           ].map(s => (
-            <div key={s.label} className="rounded-xl border p-4" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-              <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>{s.label}</p>
+            <div key={s.label} className="rounded-xl border p-4" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+              <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>{s.label}</p>
               <p className="text-xl font-black font-mono text-white mt-1">{s.value}</p>
             </div>
           ))}
@@ -104,9 +104,9 @@ export default async function SoldPage({
                 href={b === "All" ? "/sold" : `/sold?brand=${encodeURIComponent(b)}`}
                 className="px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
                 style={{
-                  background: active ? "#2081E2" : "#111119",
+                  background: active ? "#2081E2" : "var(--ow-bg-card)",
                   color: active ? "#ffffff" : "#8A939B",
-                  border: `1px solid ${active ? "#2081E2" : "#1c1c2a"}`,
+                  border: `1px solid ${active ? "#2081E2" : "var(--ow-border)"}`,
                 }}
               >
                 {b}
@@ -116,10 +116,10 @@ export default async function SoldPage({
         </div>
 
         {/* Sales table */}
-        <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#1c1c2a" }}>
+        <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--ow-border)" }}>
           <div
             className="grid grid-cols-12 gap-3 px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider"
-            style={{ background: "#0b0b14", color: "#64748b" }}
+            style={{ background: "var(--ow-bg)", color: "var(--ow-text-dim)" }}
           >
             <div className="col-span-2">Ref</div>
             <div className="col-span-2">Brand</div>
@@ -132,12 +132,12 @@ export default async function SoldPage({
           </div>
 
           {error ? (
-            <div className="px-4 py-8 text-center text-sm" style={{ background: "#111119", color: "#ef4444" }}>
+            <div className="px-4 py-8 text-center text-sm" style={{ background: "var(--ow-bg-card)", color: "#ef4444" }}>
               Error loading sales data.
             </div>
           ) : sales.length === 0 ? (
-            <div className="px-4 py-12 text-center" style={{ background: "#111119" }}>
-              <p className="text-sm" style={{ color: "#64748b" }}>
+            <div className="px-4 py-12 text-center" style={{ background: "var(--ow-bg-card)" }}>
+              <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>
                 No confirmed sales data yet.{" "}
                 <code className="text-blue-400 text-xs">node scripts/scrape-ebay.mjs</code>
               </p>
@@ -147,7 +147,7 @@ export default async function SoldPage({
               <div
                 key={sale.id}
                 className="grid grid-cols-12 gap-3 px-4 py-3 border-t items-center"
-                style={{ borderColor: "#1c1c2a", background: i % 2 === 0 ? "#111119" : "#0d0d15" }}
+                style={{ borderColor: "var(--ow-border)", background: i % 2 === 0 ? "var(--ow-bg-card)" : "#0d0d15" }}
               >
                 <div className="col-span-2">
                   <Link
@@ -160,7 +160,7 @@ export default async function SoldPage({
                 <div className="col-span-2">
                   <p className="text-[11px] font-semibold truncate" style={{ color: "#60a5fa" }}>{sale.brand}</p>
                   {sale.model && (
-                    <p className="text-[10px] truncate" style={{ color: "#64748b" }}>{sale.model}</p>
+                    <p className="text-[10px] truncate" style={{ color: "var(--ow-text-dim)" }}>{sale.model}</p>
                   )}
                 </div>
                 <div className="col-span-2 text-right">
@@ -169,13 +169,13 @@ export default async function SoldPage({
                 <div className="col-span-2">
                   <span
                     className="text-[11px] capitalize"
-                    style={{ color: sale.condition === "unworn" ? "#22c55e" : sale.condition === "excellent" ? "#60a5fa" : "#94a3b8" }}
+                    style={{ color: sale.condition === "unworn" ? "#22c55e" : sale.condition === "excellent" ? "#60a5fa" : "var(--ow-text-muted)" }}
                   >
                     {sale.condition ?? "—"}
                   </span>
                 </div>
                 <div className="col-span-1">
-                  <span className="text-[11px]" style={{ color: "#64748b" }}>
+                  <span className="text-[11px]" style={{ color: "var(--ow-text-dim)" }}>
                     {sale.has_box && sale.has_papers ? "B+P" : sale.has_box ? "B" : sale.has_papers ? "P" : "—"}
                   </span>
                 </div>
@@ -188,12 +188,12 @@ export default async function SoldPage({
                   </span>
                 </div>
                 <div className="col-span-1">
-                  <p className="text-[10px] truncate" style={{ color: "#64748b" }}>
+                  <p className="text-[10px] truncate" style={{ color: "var(--ow-text-dim)" }}>
                     {sale.dealer_name ?? "—"}
                   </p>
                 </div>
                 <div className="col-span-1 text-right flex items-center justify-end gap-1.5">
-                  <p className="text-[10px]" style={{ color: "#64748b" }}>
+                  <p className="text-[10px]" style={{ color: "var(--ow-text-dim)" }}>
                     {sale.sold_at ? shortTimeAgo(sale.sold_at) : shortTimeAgo(sale.scraped_at)}
                   </p>
                   {sale.listing_url && (
@@ -202,7 +202,7 @@ export default async function SoldPage({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="transition-colors hover:text-blue-400 shrink-0"
-                      style={{ color: "#64748b" }}
+                      style={{ color: "var(--ow-text-dim)" }}
                     >
                       <ExternalLink size={11} />
                     </a>

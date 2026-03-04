@@ -15,7 +15,7 @@ export default function GlobalError({
   }, [error])
 
   return (
-    <div className="min-h-screen bg-[#0b0b14] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[var(--ow-bg)] flex items-center justify-center p-4">
       <div className="text-center space-y-4 max-w-md">
         <div className="w-16 h-16 rounded-full bg-red-500/15 flex items-center justify-center mx-auto">
           <span className="text-red-400 text-2xl">!</span>

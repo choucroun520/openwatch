@@ -264,7 +264,7 @@ export default async function ListingPage({
               className="relative rounded-2xl overflow-hidden border min-h-[420px] flex items-center justify-center"
               style={{
                 background: listing.brand.banner_gradient ?? getBrandGradientBySlug(listing.brand.slug),
-                borderColor: "#1c1c2a",
+                borderColor: "var(--ow-border)",
               }}
             >
               {listing.images && listing.images.length > 0 ? (
@@ -312,21 +312,21 @@ export default async function ListingPage({
             <div className="flex items-center gap-2 mt-3 px-1">
               <button
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-bg-elevated border transition-colors"
-                style={{ borderColor: "#1c1c2a" }}
+                style={{ borderColor: "var(--ow-border)" }}
               >
                 <Share2 size={12} />
                 Share
               </button>
               <button
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-bg-elevated border transition-colors"
-                style={{ borderColor: "#1c1c2a" }}
+                style={{ borderColor: "var(--ow-border)" }}
               >
                 <RefreshCw size={12} />
                 Refresh
               </button>
               <button
                 className="ml-auto p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-bg-elevated border transition-colors"
-                style={{ borderColor: "#1c1c2a" }}
+                style={{ borderColor: "var(--ow-border)" }}
               >
                 <MoreHorizontal size={16} />
               </button>
@@ -345,7 +345,7 @@ export default async function ListingPage({
                     "rounded-xl p-3 text-center border",
                     item.value ? "bg-green-500/10 border-green-500/20" : ""
                   )}
-                  style={!item.value ? { background: "#111119", borderColor: "#1c1c2a" } : undefined}
+                  style={!item.value ? { background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" } : undefined}
                 >
                   <p
                     className={cn(
@@ -397,8 +397,8 @@ export default async function ListingPage({
             <div
               className="flex items-center gap-3 rounded-xl border p-3.5"
               style={{
-                background: isRCCrown ? "rgba(0,96,57,0.08)" : "#111119",
-                borderColor: isRCCrown ? "rgba(0,96,57,0.3)" : "#1c1c2a",
+                background: isRCCrown ? "rgba(0,96,57,0.08)" : "var(--ow-bg-card)",
+                borderColor: isRCCrown ? "rgba(0,96,57,0.3)" : "var(--ow-border)",
               }}
             >
               <div
@@ -461,13 +461,13 @@ export default async function ListingPage({
               </p>
               <div
                 className="rounded-xl border divide-y overflow-hidden"
-                style={{ borderColor: "#1c1c2a" }}
+                style={{ borderColor: "var(--ow-border)" }}
               >
                 {specRows.map((row) => (
                   <div
                     key={row.label}
                     className="flex items-start px-3 py-2 gap-3"
-                    style={{ borderColor: "#1c1c2a" }}
+                    style={{ borderColor: "var(--ow-border)" }}
                   >
                     <span className="text-xs text-muted-foreground w-28 shrink-0 pt-0.5">
                       {row.label}
@@ -486,7 +486,7 @@ export default async function ListingPage({
                 {/* Has Box row */}
                 <div
                   className="flex items-start px-3 py-2 gap-3"
-                  style={{ borderColor: "#1c1c2a" }}
+                  style={{ borderColor: "var(--ow-border)" }}
                 >
                   <span className="text-xs text-muted-foreground w-28 shrink-0 pt-0.5">Has Box</span>
                   <span
@@ -502,7 +502,7 @@ export default async function ListingPage({
                 {/* Has Papers row */}
                 <div
                   className="flex items-start px-3 py-2 gap-3"
-                  style={{ borderColor: "#1c1c2a" }}
+                  style={{ borderColor: "var(--ow-border)" }}
                 >
                   <span className="text-xs text-muted-foreground w-28 shrink-0 pt-0.5">Has Papers</span>
                   <span
@@ -519,7 +519,7 @@ export default async function ListingPage({
                 {listing.source && listing.source !== "openwatch" && (
                   <div
                     className="flex items-start px-3 py-2 gap-3"
-                    style={{ borderColor: "#1c1c2a" }}
+                    style={{ borderColor: "var(--ow-border)" }}
                   >
                     <span className="text-xs text-muted-foreground w-28 shrink-0 pt-0.5">Source</span>
                     <span className="text-xs font-semibold">
@@ -565,7 +565,7 @@ export default async function ListingPage({
                     <span
                       key={c}
                       className="text-xs px-2 py-1 rounded-lg border font-medium"
-                      style={{ background: "#161622", borderColor: "#22222e", color: "#94a3b8" }}
+                      style={{ background: "var(--ow-bg-elevated)", borderColor: "var(--ow-border-light)", color: "var(--ow-text-muted)" }}
                     >
                       {c}
                     </span>
@@ -578,8 +578,8 @@ export default async function ListingPage({
             <div
               className="rounded-2xl border p-5"
               style={{
-                background: isRCCrown ? "rgba(0,96,57,0.06)" : "#111119",
-                borderColor: isRCCrown ? "rgba(0,96,57,0.25)" : "#1c1c2a",
+                background: isRCCrown ? "rgba(0,96,57,0.06)" : "var(--ow-bg-card)",
+                borderColor: isRCCrown ? "rgba(0,96,57,0.25)" : "var(--ow-border)",
               }}
             >
               <div className="flex items-center justify-between mb-1">
@@ -679,7 +679,7 @@ export default async function ListingPage({
                 )}
                 <button
                   className="px-4 h-10 rounded-lg border text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-bg-elevated transition-colors flex items-center gap-1.5"
-                  style={{ borderColor: "#1c1c2a" }}
+                  style={{ borderColor: "var(--ow-border)" }}
                 >
                   <Bookmark size={14} />
                   Save
@@ -700,7 +700,7 @@ export default async function ListingPage({
             {listing.notes && (
               <div
                 className="rounded-xl border p-4"
-                style={{ background: "#111119", borderColor: "#1c1c2a" }}
+                style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
               >
                 <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-2">
                   Dealer Notes
@@ -716,7 +716,7 @@ export default async function ListingPage({
           <section className="mt-10">
             <div
               className="rounded-2xl border p-6"
-              style={{ background: "#0d1117", borderColor: "#1c1c2a" }}
+              style={{ background: "#0d1117", borderColor: "var(--ow-border)" }}
             >
               <div className="flex items-center justify-between mb-5">
                 <div>
@@ -743,7 +743,7 @@ export default async function ListingPage({
               {compPrices.length > 0 && !hasPriceOnRequest && (
                 <div
                   className="rounded-xl border p-4 mb-5 grid grid-cols-2 sm:grid-cols-4 gap-4"
-                  style={{ background: "#111119", borderColor: "#1c1c2a" }}
+                  style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
                 >
                   <div>
                     <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
@@ -751,7 +751,7 @@ export default async function ListingPage({
                     </p>
                     <p
                       className="text-base font-black font-mono mt-0.5"
-                      style={{ color: isRCCrown ? "#4ade80" : "#e2e8f0" }}
+                      style={{ color: isRCCrown ? "#4ade80" : "var(--ow-text)" }}
                     >
                       {formatCurrency(currentPrice)}
                     </p>
@@ -803,7 +803,7 @@ export default async function ListingPage({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex items-center gap-2.5 rounded-xl border px-3 py-2.5 transition-all hover:border-blue-500/40 hover:bg-blue-500/5"
-                    style={{ background: "#111119", borderColor: "#1c1c2a" }}
+                    style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
                   >
                     <span className="text-lg leading-none">{link.emoji}</span>
                     <div className="flex-1 min-w-0">

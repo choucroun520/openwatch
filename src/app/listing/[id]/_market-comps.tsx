@@ -27,7 +27,7 @@ function ChartTooltip({ active, payload, label }: any) {
   return (
     <div
       className="rounded-lg border p-3 text-sm shadow-xl"
-      style={{ background: "#161622", borderColor: "#22222e" }}
+      style={{ background: "var(--ow-bg-elevated)", borderColor: "var(--ow-border-light)" }}
     >
       <p className="text-muted-foreground text-xs mb-1">{label}</p>
       <p className="font-bold font-mono text-foreground">
@@ -46,7 +46,7 @@ export default function MarketCompsSection({
     return (
       <div
         className="rounded-2xl border p-5"
-        style={{ background: "#111119", borderColor: "#1c1c2a" }}
+        style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
       >
         <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-1">
           eBay Recent Sales
@@ -94,7 +94,7 @@ export default function MarketCompsSection({
   return (
     <div
       className="rounded-2xl border p-5 space-y-4"
-      style={{ background: "#111119", borderColor: "#1c1c2a" }}
+      style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -124,7 +124,7 @@ export default function MarketCompsSection({
           <div
             key={s.label}
             className="rounded-xl p-3 text-center border"
-            style={{ background: "#161622", borderColor: "#22222e" }}
+            style={{ background: "var(--ow-bg-elevated)", borderColor: "var(--ow-border-light)" }}
           >
             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
               {s.label}
@@ -153,16 +153,16 @@ export default function MarketCompsSection({
                   <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1c1c2a" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--ow-border)" vertical={false} />
               <XAxis
                 dataKey="label"
-                tick={{ fill: "#475569", fontSize: 10 }}
+                tick={{ fill: "var(--ow-text-faint)", fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
                 interval="preserveStartEnd"
               />
               <YAxis
-                tick={{ fill: "#475569", fontSize: 10 }}
+                tick={{ fill: "var(--ow-text-faint)", fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
@@ -172,12 +172,12 @@ export default function MarketCompsSection({
               {askingPrice > 0 && (
                 <ReferenceLine
                   y={askingPrice}
-                  stroke="#94a3b8"
+                  stroke="var(--ow-text-muted)"
                   strokeDasharray="4 4"
                   strokeWidth={1.5}
                   label={{
                     value: "Ask",
-                    fill: "#94a3b8",
+                    fill: "var(--ow-text-muted)",
                     fontSize: 10,
                     position: "insideTopRight",
                   }}
@@ -200,12 +200,12 @@ export default function MarketCompsSection({
       {/* Recent comps table */}
       <div>
         <p className="text-xs text-muted-foreground font-medium mb-2">Recent Sales</p>
-        <div className="space-y-0 rounded-xl overflow-hidden border" style={{ borderColor: "#22222e" }}>
+        <div className="space-y-0 rounded-xl overflow-hidden border" style={{ borderColor: "var(--ow-border-light)" }}>
           {tableComps.map((comp) => (
             <div
               key={comp.id}
               className="flex items-center justify-between px-3 py-2 border-b last:border-b-0 hover:bg-bg-elevated transition-colors"
-              style={{ borderColor: "#22222e" }}
+              style={{ borderColor: "var(--ow-border-light)" }}
             >
               <div className="flex-1 min-w-0 mr-3">
                 <p className="text-xs text-foreground truncate">

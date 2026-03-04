@@ -18,7 +18,7 @@ const EVENT_CONFIG: Record<string, { label: string; color: string; bg: string }>
 }
 
 function getEventConfig(type: string) {
-  return EVENT_CONFIG[type] ?? { label: type.replace(/_/g, " "), color: "#94a3b8", bg: "rgba(148,163,184,0.1)" }
+  return EVENT_CONFIG[type] ?? { label: type.replace(/_/g, " "), color: "var(--ow-text-muted)", bg: "rgba(148,163,184,0.1)" }
 }
 
 export default async function ActivityPage() {
@@ -72,7 +72,7 @@ export default async function ActivityPage() {
         <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
           {eventTypes.map((type) => {
             const cfg = type === "all"
-              ? { label: "All Events", color: "#e2e8f0", bg: "rgba(255,255,255,0.06)" }
+              ? { label: "All Events", color: "var(--ow-text)", bg: "rgba(255,255,255,0.06)" }
               : getEventConfig(type)
             return (
               <span
@@ -87,12 +87,12 @@ export default async function ActivityPage() {
         </div>
 
         {/* Activity table */}
-        <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#1c1c2a" }}>
+        <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--ow-border)" }}>
           {/* Table header */}
           <div
             className="grid gap-4 px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground"
             style={{
-              background: "#0b0b14",
+              background: "var(--ow-bg)",
               gridTemplateColumns: "100px 1fr 140px 140px 100px",
             }}
           >
@@ -106,7 +106,7 @@ export default async function ActivityPage() {
           {(events ?? []).length === 0 && (
             <div
               className="px-5 py-12 text-center text-sm text-muted-foreground border-t"
-              style={{ borderColor: "#1c1c2a" }}
+              style={{ borderColor: "var(--ow-border)" }}
             >
               No activity yet. Listings, inquiries, and price changes will appear here.
             </div>
@@ -124,7 +124,7 @@ export default async function ActivityPage() {
                 key={event.id}
                 className="grid gap-4 px-5 py-4 border-t hover:bg-bg-elevated transition-colors items-center"
                 style={{
-                  borderColor: "#1c1c2a",
+                  borderColor: "var(--ow-border)",
                   gridTemplateColumns: "100px 1fr 140px 140px 100px",
                 }}
               >

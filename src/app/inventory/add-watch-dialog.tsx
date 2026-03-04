@@ -646,7 +646,7 @@ function Step5({
   return (
     <div className="space-y-5 py-4 min-h-[300px]">
       <div className="bg-bg-elevated rounded-lg border border-border p-4 space-y-1">
-        <p className="text-xs text-[#475569] uppercase tracking-wider font-semibold mb-3">
+        <p className="text-xs text-[var(--ow-text-faint)] uppercase tracking-wider font-semibold mb-3">
           Watch Details
         </p>
         <Row label="Brand" value={brand?.name ?? "—"} />
@@ -677,7 +677,7 @@ function Step5({
       </div>
 
       <div className="bg-bg-elevated rounded-lg border border-border p-4 space-y-1">
-        <p className="text-xs text-[#475569] uppercase tracking-wider font-semibold mb-3">
+        <p className="text-xs text-[var(--ow-text-faint)] uppercase tracking-wider font-semibold mb-3">
           Pricing & Completeness
         </p>
         <Row

@@ -334,7 +334,7 @@ export default function InventoryTable({
             ].map((h) => (
               <TableHead
                 key={h}
-                className="text-xs text-[#475569] uppercase tracking-wider"
+                className="text-xs text-[var(--ow-text-faint)] uppercase tracking-wider"
               >
                 {h}
               </TableHead>

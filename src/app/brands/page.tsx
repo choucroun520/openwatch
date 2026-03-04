@@ -28,7 +28,7 @@ function brandToSlug(name: string): string {
 }
 
 function PriceChange({ change }: { change: number | null }) {
-  if (change === null) return <span className="text-xs" style={{ color: "#64748b" }}>—</span>
+  if (change === null) return <span className="text-xs" style={{ color: "var(--ow-text-dim)" }}>—</span>
   if (change > 0.5) return (
     <span className="flex items-center gap-0.5 text-sm font-bold" style={{ color: "#22c55e" }}>
       <TrendingUp size={13} />+{change.toFixed(1)}%
@@ -40,7 +40,7 @@ function PriceChange({ change }: { change: number | null }) {
     </span>
   )
   return (
-    <span className="flex items-center gap-0.5 text-sm font-bold" style={{ color: "#64748b" }}>
+    <span className="flex items-center gap-0.5 text-sm font-bold" style={{ color: "var(--ow-text-dim)" }}>
       <Minus size={13} />—
     </span>
   )
@@ -118,8 +118,8 @@ export default async function BrandsPage() {
               href={`/brands/${brand.slug}`}
               className="rounded-2xl border p-6 flex flex-col gap-4 transition-all duration-150 hover:-translate-y-0.5 hover:border-[#2081E2]"
               style={{
-                background: "#111119",
-                borderColor: "#1c1c2a",
+                background: "var(--ow-bg-card)",
+                borderColor: "var(--ow-border)",
                 boxShadow: "0 1px 3px rgba(0,0,0,.3)",
               }}
             >
@@ -137,19 +137,19 @@ export default async function BrandsPage() {
               {/* Stats row */}
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: "#64748b" }}>Floor</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: "var(--ow-text-dim)" }}>Floor</p>
                   <p className="text-sm font-black font-mono text-white">
                     {brand.floor_price ? formatCurrency(brand.floor_price) : "—"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: "#64748b" }}>Avg</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: "var(--ow-text-dim)" }}>Avg</p>
                   <p className="text-sm font-black font-mono text-white">
                     {brand.avg_price ? formatCurrency(brand.avg_price) : "—"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: "#64748b" }}>Listed</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: "var(--ow-text-dim)" }}>Listed</p>
                   <p className="text-sm font-black font-mono text-white">
                     {brand.total_listings.toLocaleString()}
                   </p>
@@ -157,9 +157,9 @@ export default async function BrandsPage() {
               </div>
 
               {/* Footer: trend badge + CTA */}
-              <div className="flex items-center justify-between mt-auto pt-2 border-t" style={{ borderColor: "#1c1c2a" }}>
+              <div className="flex items-center justify-between mt-auto pt-2 border-t" style={{ borderColor: "var(--ow-border)" }}>
                 <div className="flex items-center gap-1">
-                  <span className="text-[11px]" style={{ color: "#64748b" }}>30d</span>
+                  <span className="text-[11px]" style={{ color: "var(--ow-text-dim)" }}>30d</span>
                   <PriceChange change={brand.change_30d} />
                 </div>
                 <span className="text-sm font-semibold" style={{ color: "#2081E2" }}>

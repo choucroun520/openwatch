@@ -115,7 +115,7 @@ export default async function CollectionPage({
         <div className="relative -mt-10 flex items-end gap-4 mb-4">
           <div
             className="rounded-full border-4 shrink-0 z-10"
-            style={{ borderColor: "#0b0b14" }}
+            style={{ borderColor: "var(--ow-bg)" }}
           >
             <BrandAvatar brandName={brand.name} size="xl" />
           </div>
@@ -147,7 +147,7 @@ export default async function CollectionPage({
         {/* Stats bar */}
         <div
           className="grid grid-cols-2 sm:grid-cols-5 gap-px rounded-xl overflow-hidden border mb-6"
-          style={{ borderColor: "#1c1c2a" }}
+          style={{ borderColor: "var(--ow-border)" }}
         >
           {[
             { label: "Floor Price", value: floorPrice > 0 ? formatCurrency(floorPrice) : "—" },
@@ -159,7 +159,7 @@ export default async function CollectionPage({
             <div
               key={stat.label}
               className="px-4 py-3 text-center"
-              style={{ background: i % 2 === 0 ? "#111119" : "#111119" }}
+              style={{ background: i % 2 === 0 ? "var(--ow-bg-card)" : "var(--ow-bg-card)" }}
             >
               <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
                 {stat.label}
@@ -172,7 +172,7 @@ export default async function CollectionPage({
         </div>
 
         {/* ── TABS: Items / Activity ── */}
-        <div className="flex gap-0 border-b mb-0" style={{ borderColor: "#1c1c2a" }}>
+        <div className="flex gap-0 border-b mb-0" style={{ borderColor: "var(--ow-border)" }}>
           <button className="px-4 py-2.5 text-sm font-semibold text-foreground border-b-2 border-blue-500">
             Items
           </button>
@@ -195,7 +195,7 @@ export default async function CollectionPage({
       {(recentEvents ?? []).length > 0 && (
         <div className="max-w-[1400px] mx-auto px-4 pb-12 mt-8">
           <h2 className="text-lg font-black text-foreground mb-4">Recent Activity</h2>
-          <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+          <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {((recentEvents ?? []) as any[]).map((event: any) => {
               const ev = event

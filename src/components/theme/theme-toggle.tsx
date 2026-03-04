@@ -13,9 +13,9 @@ export function ThemeToggle() {
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
       className="relative flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 hover:scale-105"
       style={{
-        background: isDark ? "#1c1c2a" : "#f1f5f9",
-        border: `1px solid ${isDark ? "#2a2a3a" : "#e2e8f0"}`,
-        color: isDark ? "#94a3b8" : "#475569",
+        background: isDark ? "var(--ow-border)" : "#f1f5f9",
+        border: `1px solid ${isDark ? "#2a2a3a" : "var(--ow-text)"}`,
+        color: isDark ? "var(--ow-text-muted)" : "var(--ow-text-faint)",
       }}
     >
       {isDark ? (

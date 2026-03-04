@@ -4,7 +4,7 @@ function Bone({ w, h, className = "" }: { w?: string; h?: string; className?: st
   return (
     <div
       className={`rounded-lg animate-pulse ${className}`}
-      style={{ width: w, height: h ?? "1rem", background: "#1a1a28" }}
+      style={{ width: w, height: h ?? "1rem", background: "var(--ow-bg-hover)" }}
     />
   )
 }
@@ -31,7 +31,7 @@ export default function AnalyticsLoading() {
               <div
                 key={i}
                 className="rounded-xl animate-pulse"
-                style={{ height: 160, background: "#111119", border: "1px solid #1c1c2a" }}
+                style={{ height: 160, background: "var(--ow-bg-card)", border: "1px solid var(--ow-border)" }}
               >
                 <div className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
@@ -62,7 +62,7 @@ export default function AnalyticsLoading() {
               <div
                 key={i}
                 className="rounded-xl p-4 space-y-2 animate-pulse"
-                style={{ background: "#111119", border: "1px solid #1c1c2a" }}
+                style={{ background: "var(--ow-bg-card)", border: "1px solid var(--ow-border)" }}
               >
                 <Bone w="120px" h="12px" />
                 <Bone w="80px" h="24px" />
@@ -75,9 +75,9 @@ export default function AnalyticsLoading() {
         {/* Price Distribution Chart */}
         <div
           className="rounded-xl animate-pulse"
-          style={{ background: "#111119", border: "1px solid #1c1c2a" }}
+          style={{ background: "var(--ow-bg-card)", border: "1px solid var(--ow-border)" }}
         >
-          <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+          <div className="px-5 py-4 border-b" style={{ borderColor: "var(--ow-border)" }}>
             <Bone w="220px" h="16px" className="mb-2" />
             <Bone w="180px" h="12px" />
           </div>
@@ -92,7 +92,7 @@ export default function AnalyticsLoading() {
                       style={{
                         width: "22%",
                         height: `${20 + Math.random() * 60}%`,
-                        background: "#1c1c2a",
+                        background: "var(--ow-border)",
                       }}
                     />
                   ))}
@@ -105,9 +105,9 @@ export default function AnalyticsLoading() {
         {/* Top Refs Table */}
         <div
           className="rounded-xl overflow-hidden animate-pulse"
-          style={{ background: "#111119", border: "1px solid #1c1c2a" }}
+          style={{ background: "var(--ow-bg-card)", border: "1px solid var(--ow-border)" }}
         >
-          <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor: "#1c1c2a" }}>
+          <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor: "var(--ow-border)" }}>
             <div>
               <Bone w="180px" h="16px" className="mb-2" />
               <Bone w="120px" h="12px" />
@@ -121,7 +121,7 @@ export default function AnalyticsLoading() {
           {/* Table header */}
           <div
             className="px-4 py-2.5"
-            style={{ background: "#0b0b14", borderBottom: "1px solid #1c1c2a" }}
+            style={{ background: "var(--ow-bg)", borderBottom: "1px solid var(--ow-border)" }}
           >
             <Bone w="100%" h="12px" />
           </div>
@@ -129,7 +129,7 @@ export default function AnalyticsLoading() {
             <div
               key={i}
               className="px-4 py-3 border-t flex items-center gap-4"
-              style={{ borderColor: "#1c1c2a", background: i % 2 === 0 ? "#111119" : "#0d0d15" }}
+              style={{ borderColor: "var(--ow-border)", background: i % 2 === 0 ? "var(--ow-bg-card)" : "#0d0d15" }}
             >
               <Bone w="80px" h="12px" />
               <Bone w="120px" h="12px" />
@@ -152,9 +152,9 @@ export default function AnalyticsLoading() {
               <div
                 key={i}
                 className="rounded-xl overflow-hidden animate-pulse"
-                style={{ background: "#111119", border: "1px solid #1c1c2a" }}
+                style={{ background: "var(--ow-bg-card)", border: "1px solid var(--ow-border)" }}
               >
-                <div className="h-8" style={{ background: "#1a1a28" }} />
+                <div className="h-8" style={{ background: "var(--ow-bg-hover)" }} />
                 <div className="p-4 space-y-3">
                   <div className="flex justify-between">
                     <div className="space-y-1">
@@ -180,9 +180,9 @@ export default function AnalyticsLoading() {
         {/* Supply chart */}
         <div
           className="rounded-xl animate-pulse"
-          style={{ background: "#111119", border: "1px solid #1c1c2a" }}
+          style={{ background: "var(--ow-bg-card)", border: "1px solid var(--ow-border)" }}
         >
-          <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+          <div className="px-5 py-4 border-b" style={{ borderColor: "var(--ow-border)" }}>
             <Bone w="240px" h="16px" className="mb-2" />
             <Bone w="200px" h="12px" />
           </div>
@@ -190,7 +190,7 @@ export default function AnalyticsLoading() {
             {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3">
                 <Bone w="100px" h="12px" />
-                <div className="flex-1 h-5 rounded-r" style={{ background: "#1c1c2a", width: `${15 + Math.random() * 60}%` }} />
+                <div className="flex-1 h-5 rounded-r" style={{ background: "var(--ow-border)", width: `${15 + Math.random() * 60}%` }} />
               </div>
             ))}
           </div>
@@ -199,7 +199,7 @@ export default function AnalyticsLoading() {
         {/* Data coverage */}
         <div
           className="rounded-xl p-5 animate-pulse"
-          style={{ background: "#111119", border: "1px solid #1c1c2a" }}
+          style={{ background: "var(--ow-bg-card)", border: "1px solid var(--ow-border)" }}
         >
           <Bone w="120px" h="12px" className="mb-4" />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">

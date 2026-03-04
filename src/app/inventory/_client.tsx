@@ -128,7 +128,7 @@ export default function InventoryClient({
                 <Icon size={16} className={card.color} />
               </div>
               <div className="min-w-0">
-                <p className="text-xs text-[#475569] uppercase tracking-wider leading-none mb-1">
+                <p className="text-xs text-[var(--ow-text-faint)] uppercase tracking-wider leading-none mb-1">
                   {card.label}
                 </p>
                 <p className="text-lg font-bold font-mono text-foreground leading-none">

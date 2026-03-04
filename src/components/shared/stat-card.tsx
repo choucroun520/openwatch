@@ -18,7 +18,7 @@ export function StatCard({ label, value, sub, icon, change, className, valueClas
         "rounded-xl p-4 border flex flex-col gap-1",
         className
       )}
-      style={{ background: "#111119", borderColor: "#1c1c2a" }}
+      style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
     >
       {icon && (
         <div className="mb-1 text-muted-foreground">{icon}</div>

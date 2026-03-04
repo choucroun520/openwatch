@@ -129,7 +129,7 @@ export default function InquiriesClient({
                 (h) => (
                   <TableHead
                     key={h}
-                    className="text-xs text-[#475569] uppercase tracking-wider"
+                    className="text-xs text-[var(--ow-text-faint)] uppercase tracking-wider"
                   >
                     {h}
                   </TableHead>
@@ -183,7 +183,7 @@ export default function InquiriesClient({
                   <TableCell>
                     <StatusBadge status={inquiry.status} />
                   </TableCell>
-                  <TableCell className="text-xs text-[#475569] whitespace-nowrap">
+                  <TableCell className="text-xs text-[var(--ow-text-faint)] whitespace-nowrap">
                     {timeAgo(inquiry.created_at)}
                   </TableCell>
                   {isReceived && (
@@ -213,7 +213,7 @@ export default function InquiriesClient({
                           </>
                         )}
                         {inquiry.status === "closed" && (
-                          <span className="text-xs text-[#475569]">Closed</span>
+                          <span className="text-xs text-[var(--ow-text-faint)]">Closed</span>
                         )}
                       </div>
                     </TableCell>
@@ -280,7 +280,7 @@ export default function InquiriesClient({
 
               {/* Original message */}
               <div className="rounded-lg bg-bg-elevated border border-border p-3">
-                <p className="text-xs text-[#475569] uppercase tracking-wider mb-1">
+                <p className="text-xs text-[var(--ow-text-faint)] uppercase tracking-wider mb-1">
                   Original Message
                 </p>
                 <p className="text-sm text-muted-foreground">
@@ -295,7 +295,7 @@ export default function InquiriesClient({
 
               {/* Reply textarea */}
               <div className="space-y-2">
-                <label className="text-xs text-[#475569] uppercase tracking-wider">
+                <label className="text-xs text-[var(--ow-text-faint)] uppercase tracking-wider">
                   Your Reply
                 </label>
                 <Textarea

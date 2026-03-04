@@ -32,7 +32,7 @@ export default function RefSearchPage() {
             onChange={e => setQuery(e.target.value)}
             placeholder="e.g. 126610LN, 5711/1A, 15202ST"
             className="flex-1 px-4 py-3 rounded-xl text-sm font-mono text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
-            style={{ background: "#111119", border: "1px solid #1c1c2a" }}
+            style={{ background: "var(--ow-bg-card)", border: "1px solid var(--ow-border)" }}
             autoFocus
           />
           <button
@@ -46,7 +46,7 @@ export default function RefSearchPage() {
         </form>
 
         <div className="mt-8 text-center">
-          <p className="text-xs mb-3" style={{ color: "#64748b" }}>Popular references</p>
+          <p className="text-xs mb-3" style={{ color: "var(--ow-text-dim)" }}>Popular references</p>
           <div className="flex flex-wrap justify-center gap-2">
             {[
               "126610LN", "126600", "116500LN", "126710BLRO",
@@ -58,7 +58,7 @@ export default function RefSearchPage() {
                 key={ref}
                 onClick={() => router.push(`/ref/${encodeURIComponent(ref)}`)}
                 className="px-3 py-1 rounded-lg text-xs font-mono font-bold transition-colors hover:opacity-80"
-                style={{ background: "#111119", color: "#94a3b8", border: "1px solid #1c1c2a" }}
+                style={{ background: "var(--ow-bg-card)", color: "var(--ow-text-muted)", border: "1px solid var(--ow-border)" }}
               >
                 {ref}
               </button>

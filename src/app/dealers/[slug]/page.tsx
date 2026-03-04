@@ -164,14 +164,14 @@ export default async function DealerProfilePage({
         <div className="max-w-7xl mx-auto space-y-6">
 
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm" style={{ color: "#64748b" }}>
+          <nav className="flex items-center gap-2 text-sm" style={{ color: "var(--ow-text-dim)" }}>
             <Link href="/dealers" className="hover:text-white transition-colors">Dealers</Link>
             <span>/</span>
             <span className="text-white font-semibold">{companyName}</span>
           </nav>
 
           {/* Dealer header */}
-          <div className="rounded-2xl border p-6" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+          <div className="rounded-2xl border p-6" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
             <div className="flex items-start gap-4 flex-wrap">
               {/* Avatar */}
               <div
@@ -198,23 +198,23 @@ export default async function DealerProfilePage({
             </div>
 
             {/* Stats row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t" style={{ borderColor: "#1c1c2a" }}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t" style={{ borderColor: "var(--ow-border)" }}>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>Total Listed</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>Total Listed</p>
                 <p className="text-xl font-black font-mono text-white mt-0.5">{(allRows?.length ?? 0).toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>Brands</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>Brands</p>
                 <p className="text-xl font-black font-mono text-white mt-0.5">{allBrands.length}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>Avg Price</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>Avg Price</p>
                 <p className="text-xl font-black font-mono text-white mt-0.5">
                   {avgPrice ? formatCurrency(avgPrice) : "—"}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>Price Range</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>Price Range</p>
                 <p className="text-sm font-black font-mono text-white mt-0.5">
                   {minPrice && maxPrice
                     ? `${formatCurrency(minPrice)} – ${formatCurrency(maxPrice)}`
@@ -250,9 +250,9 @@ export default async function DealerProfilePage({
                     href={owFilterUrl({ brand: b })}
                     className="px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
                     style={{
-                      background: active ? "#2081E2" : "#111119",
+                      background: active ? "#2081E2" : "var(--ow-bg-card)",
                       color: active ? "#ffffff" : "#8A939B",
-                      border: `1px solid ${active ? "#2081E2" : "#1c1c2a"}`,
+                      border: `1px solid ${active ? "#2081E2" : "var(--ow-border)"}`,
                     }}
                   >
                     {b}
@@ -269,7 +269,7 @@ export default async function DealerProfilePage({
               {brandFilter !== "All" ? ` · ${brandFilter}` : ""}
             </p>
             <div className="flex items-center gap-2">
-              <span className="text-xs" style={{ color: "#64748b" }}>Sort</span>
+              <span className="text-xs" style={{ color: "var(--ow-text-dim)" }}>Sort</span>
               {(["price_asc", "price_desc", "newest"] as const).map(s => {
                 const label = s === "price_asc" ? "Price ↑" : s === "price_desc" ? "Price ↓" : "Newest"
                 return (
@@ -278,8 +278,8 @@ export default async function DealerProfilePage({
                     href={owFilterUrl({ sort: s })}
                     className="px-2 py-1 rounded text-[11px] font-semibold transition-colors"
                     style={{
-                      background: sort === s ? "#1c1c2a" : "transparent",
-                      color: sort === s ? "#ffffff" : "#64748b",
+                      background: sort === s ? "var(--ow-border)" : "transparent",
+                      color: sort === s ? "#ffffff" : "var(--ow-text-dim)",
                       border: `1px solid ${sort === s ? "#333333" : "transparent"}`,
                     }}
                   >
@@ -292,8 +292,8 @@ export default async function DealerProfilePage({
 
           {/* Inventory grid */}
           {owListings.length === 0 ? (
-            <div className="rounded-xl border py-16 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-              <p className="text-sm" style={{ color: "#64748b" }}>
+            <div className="rounded-xl border py-16 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+              <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>
                 {brandFilter !== "All"
                   ? `No listings found for ${companyName} in ${brandFilter}.`
                   : `No active listings found for ${companyName}.`}
@@ -314,19 +314,19 @@ export default async function DealerProfilePage({
                 <Link
                   href={owPageUrl(page - 1)}
                   className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity hover:opacity-80"
-                  style={{ background: "#111119", color: "#8A939B", border: "1px solid #1c1c2a" }}
+                  style={{ background: "var(--ow-bg-card)", color: "#8A939B", border: "1px solid var(--ow-border)" }}
                 >
                   ← Prev
                 </Link>
               )}
-              <span className="text-sm" style={{ color: "#64748b" }}>
+              <span className="text-sm" style={{ color: "var(--ow-text-dim)" }}>
                 Page {page} of {totalPages}
               </span>
               {page < totalPages && (
                 <Link
                   href={owPageUrl(page + 1)}
                   className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity hover:opacity-80"
-                  style={{ background: "#111119", color: "#8A939B", border: "1px solid #1c1c2a" }}
+                  style={{ background: "var(--ow-bg-card)", color: "#8A939B", border: "1px solid var(--ow-border)" }}
                 >
                   Next →
                 </Link>
@@ -417,14 +417,14 @@ export default async function DealerProfilePage({
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm" style={{ color: "#64748b" }}>
+        <nav className="flex items-center gap-2 text-sm" style={{ color: "var(--ow-text-dim)" }}>
           <Link href="/dealers" className="hover:text-white transition-colors">Dealers</Link>
           <span>/</span>
           <span className="text-white font-semibold">{dealerName}</span>
         </nav>
 
         {/* Dealer header */}
-        <div className="rounded-2xl border p-6" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+        <div className="rounded-2xl border p-6" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-4">
               {/* Avatar */}
@@ -450,7 +450,7 @@ export default async function DealerProfilePage({
                   <p className="text-sm mt-0.5" style={{ color: "#8A939B" }}>{c24Dealer.country}</p>
                 )}
                 {c24Dealer?.last_scraped_at && (
-                  <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--ow-text-dim)" }}>
                     Last synced {shortTimeAgo(c24Dealer.last_scraped_at)}
                   </p>
                 )}
@@ -471,23 +471,23 @@ export default async function DealerProfilePage({
           </div>
 
           {/* Stats row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t" style={{ borderColor: "#1c1c2a" }}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t" style={{ borderColor: "var(--ow-border)" }}>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>Total Listed</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>Total Listed</p>
               <p className="text-xl font-black font-mono text-white mt-0.5">{(allRows?.length ?? 0).toLocaleString()}</p>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>Brands</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>Brands</p>
               <p className="text-xl font-black font-mono text-white mt-0.5">{allBrands.length}</p>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>Avg Price</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>Avg Price</p>
               <p className="text-xl font-black font-mono text-white mt-0.5">
                 {avgPrice ? formatCurrency(avgPrice) : "—"}
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>Price Range</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>Price Range</p>
               <p className="text-sm font-black font-mono text-white mt-0.5">
                 {minPrice && maxPrice
                   ? `${formatCurrency(minPrice)} – ${formatCurrency(maxPrice)}`
@@ -514,7 +514,7 @@ export default async function DealerProfilePage({
                 </Link>
               ))}
               {allRefs.length > 0 && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ color: "#64748b" }}>
+                <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ color: "var(--ow-text-dim)" }}>
                   {allRefs.length} references
                 </span>
               )}
@@ -532,9 +532,9 @@ export default async function DealerProfilePage({
                 href={filterUrl({ brand: b === "All" ? "All" : b })}
                 className="px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
                 style={{
-                  background: active ? "#2081E2" : "#111119",
+                  background: active ? "#2081E2" : "var(--ow-bg-card)",
                   color: active ? "#ffffff" : "#8A939B",
-                  border: `1px solid ${active ? "#2081E2" : "#1c1c2a"}`,
+                  border: `1px solid ${active ? "#2081E2" : "var(--ow-border)"}`,
                 }}
               >
                 {b}
@@ -550,7 +550,7 @@ export default async function DealerProfilePage({
             {brandFilter !== "All" ? ` · ${brandFilter}` : ""}
           </p>
           <div className="flex items-center gap-2">
-            <span className="text-xs" style={{ color: "#64748b" }}>Sort</span>
+            <span className="text-xs" style={{ color: "var(--ow-text-dim)" }}>Sort</span>
             {(["price_asc", "price_desc", "newest"] as const).map(s => {
               const label = s === "price_asc" ? "Price ↑" : s === "price_desc" ? "Price ↓" : "Newest"
               return (
@@ -559,8 +559,8 @@ export default async function DealerProfilePage({
                   href={filterUrl({ sort: s })}
                   className="px-2 py-1 rounded text-[11px] font-semibold transition-colors"
                   style={{
-                    background: sort === s ? "#1c1c2a" : "transparent",
-                    color: sort === s ? "#ffffff" : "#64748b",
+                    background: sort === s ? "var(--ow-border)" : "transparent",
+                    color: sort === s ? "#ffffff" : "var(--ow-text-dim)",
                     border: `1px solid ${sort === s ? "#333333" : "transparent"}`,
                   }}
                 >
@@ -573,8 +573,8 @@ export default async function DealerProfilePage({
 
         {/* Inventory grid */}
         {allListings.length === 0 ? (
-          <div className="rounded-xl border py-16 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-            <p className="text-sm" style={{ color: "#64748b" }}>
+          <div className="rounded-xl border py-16 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+            <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>
               {brandFilter !== "All"
                 ? `No listings found for ${dealerName} in ${brandFilter}.`
                 : `No active listings found for ${dealerName}.`}
@@ -601,19 +601,19 @@ export default async function DealerProfilePage({
               <Link
                 href={pageUrl(page - 1)}
                 className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity hover:opacity-80"
-                style={{ background: "#111119", color: "#8A939B", border: "1px solid #1c1c2a" }}
+                style={{ background: "var(--ow-bg-card)", color: "#8A939B", border: "1px solid var(--ow-border)" }}
               >
                 ← Prev
               </Link>
             )}
-            <span className="text-sm" style={{ color: "#64748b" }}>
+            <span className="text-sm" style={{ color: "var(--ow-text-dim)" }}>
               Page {page} of {totalPages}
             </span>
             {page < totalPages && (
               <Link
                 href={pageUrl(page + 1)}
                 className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity hover:opacity-80"
-                style={{ background: "#111119", color: "#8A939B", border: "1px solid #1c1c2a" }}
+                style={{ background: "var(--ow-bg-card)", color: "#8A939B", border: "1px solid var(--ow-border)" }}
               >
                 Next →
               </Link>

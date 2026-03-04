@@ -34,7 +34,7 @@ export function MarketBadge({ askingPrice, marketStats }: MarketBadgeProps) {
     badge = {
       label: "At market",
       bg: "rgba(148,163,184,0.1)",
-      color: "#94a3b8",
+      color: "var(--ow-text-muted)",
       border: "rgba(148,163,184,0.2)",
     }
   }
@@ -51,7 +51,7 @@ export function MarketBadge({ askingPrice, marketStats }: MarketBadgeProps) {
       >
         {badge.label}
       </span>
-      <p className="text-[10px]" style={{ color: "#64748b" }}>
+      <p className="text-[10px]" style={{ color: "var(--ow-text-dim)" }}>
         eBay: {formatCurrency(marketStats.avg)} avg &middot; {marketStats.sold_30d} sold/30d
       </p>
     </div>

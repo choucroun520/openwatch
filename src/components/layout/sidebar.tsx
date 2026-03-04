@@ -56,7 +56,7 @@ function NavRow({ item, isActive }: NavRowProps) {
       href={item.href}
       className={cn(
         "group/row relative flex items-center h-11 px-4 gap-3 rounded-lg transition-colors duration-150",
-        "hover:bg-[#1a1a1a]",
+        "hover:bg-[var(--ow-bg-hover)]",
         isActive ? "text-white" : "text-[#8A939B] hover:text-white"
       )}
     >

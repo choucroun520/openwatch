@@ -289,14 +289,14 @@ function PriceChangeBadge({ change }: { change: number }) {
       </span>
     )
   return (
-    <span className="inline-flex items-center gap-0.5 text-xs font-bold" style={{ color: "#64748b" }}>
+    <span className="inline-flex items-center gap-0.5 text-xs font-bold" style={{ color: "var(--ow-text-dim)" }}>
       <Minus size={11} />—
     </span>
   )
 }
 
 function HeatDot({ score }: { score: number }) {
-  const color = score > 50 ? "#ef4444" : score > 20 ? "#eab308" : "#475569"
+  const color = score > 50 ? "#ef4444" : score > 20 ? "#eab308" : "var(--ow-text-faint)"
   return (
     <span className="inline-flex items-center gap-1.5 text-xs font-bold font-mono" style={{ color }}>
       <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
@@ -344,7 +344,7 @@ function SortHeader({
   return (
     <button
       className={`flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider hover:text-white transition-colors ${className}`}
-      style={{ color: active ? "#e2e8f0" : "#64748b" }}
+      style={{ color: active ? "var(--ow-text)" : "var(--ow-text-dim)" }}
       onClick={() => onSort(field)}
     >
       {label}
@@ -361,7 +361,7 @@ function DistributionTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
     <div className="rounded-lg border p-3 text-xs shadow-xl"
-      style={{ background: "#1a1a2e", borderColor: "#1c1c2a", minWidth: 180 }}>
+      style={{ background: "#1a1a2e", borderColor: "var(--ow-border)", minWidth: 180 }}>
       <p className="font-bold text-white mb-2">{label}</p>
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {payload.map((p: any) => (
@@ -382,10 +382,10 @@ function SupplyTooltip({ active, payload }: any) {
   const info = MSRP_INFO[d.ref_number]
   return (
     <div className="rounded-lg border p-3 text-xs shadow-xl"
-      style={{ background: "#1a1a2e", borderColor: "#1c1c2a" }}>
+      style={{ background: "#1a1a2e", borderColor: "var(--ow-border)" }}>
       <p className="font-mono font-bold text-white">{d.ref_number}</p>
-      {info && <p className="text-[10px] mt-0.5" style={{ color: "#94a3b8" }}>{info.name}</p>}
-      <p className="mt-0.5" style={{ color: BRAND_COLORS[d.brand] ?? "#94a3b8" }}>{d.brand}</p>
+      {info && <p className="text-[10px] mt-0.5" style={{ color: "var(--ow-text-muted)" }}>{info.name}</p>}
+      <p className="mt-0.5" style={{ color: BRAND_COLORS[d.brand] ?? "var(--ow-text-muted)" }}>{d.brand}</p>
       <p className="font-bold text-white mt-1">{d.count} listings</p>
     </div>
   )
@@ -711,16 +711,16 @@ export default function AnalyticsPage() {
       <AppLayout>
         <div className="max-w-7xl mx-auto space-y-8 animate-pulse">
           <div>
-            <div className="h-9 w-72 rounded-lg mb-2" style={{ background: "#111119" }} />
-            <div className="h-4 w-96 rounded" style={{ background: "#111119" }} />
+            <div className="h-9 w-72 rounded-lg mb-2" style={{ background: "var(--ow-bg-card)" }} />
+            <div className="h-4 w-96 rounded" style={{ background: "var(--ow-bg-card)" }} />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-xl p-5 h-24" style={{ background: "#111119" }} />
+              <div key={i} className="rounded-xl p-5 h-24" style={{ background: "var(--ow-bg-card)" }} />
             ))}
           </div>
-          <div className="rounded-xl h-64" style={{ background: "#111119" }} />
-          <div className="rounded-xl h-80" style={{ background: "#111119" }} />
+          <div className="rounded-xl h-64" style={{ background: "var(--ow-bg-card)" }} />
+          <div className="rounded-xl h-80" style={{ background: "var(--ow-bg-card)" }} />
         </div>
       </AppLayout>
     )
@@ -731,7 +731,7 @@ export default function AnalyticsPage() {
       <AppLayout>
         <div className="max-w-7xl mx-auto">
           <div className="rounded-xl border p-8 text-center"
-            style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+            style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
             <AlertTriangle className="mx-auto mb-3" size={32} style={{ color: "#ef4444" }} />
             <p className="text-white font-bold mb-1">Failed to load analytics</p>
             <p className="text-sm mb-4" style={{ color: "#8A939B" }}>{error ?? "Unknown error"}</p>
@@ -755,7 +755,7 @@ export default function AnalyticsPage() {
         {/* ── Page Header ─────────────────────────────────────────────────── */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
           <div>
-            <h1 className="text-3xl font-black tracking-tight" style={{ color: "#e2e8f0" }}>
+            <h1 className="text-3xl font-black tracking-tight" style={{ color: "var(--ow-text)" }}>
               MARKET INTELLIGENCE
             </h1>
             <p className="text-sm mt-1" style={{ color: "#8A939B" }}>
@@ -766,7 +766,7 @@ export default function AnalyticsPage() {
             onClick={handleRefresh}
             disabled={refreshing}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold text-white transition-opacity disabled:opacity-50 self-start sm:self-auto"
-            style={{ background: "#1c1c2a" }}
+            style={{ background: "var(--ow-border)" }}
           >
             <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
             {refreshing ? "Refreshing…" : "Refresh"}
@@ -774,13 +774,13 @@ export default function AnalyticsPage() {
         </div>
 
         {/* ── Tab Bar ─────────────────────────────────────────────────────── */}
-        <div className="flex gap-0 border-b mb-8" style={{ borderColor: "#1c1c2a" }}>
+        <div className="flex gap-0 border-b mb-8" style={{ borderColor: "var(--ow-border)" }}>
           {MAIN_TABS.map((tab) => (
             <button
               key={tab}
               onClick={() => setMainTab(tab)}
               className="px-5 py-3 text-sm font-bold capitalize transition-colors relative"
-              style={{ color: mainTab === tab ? "#fff" : "#64748b" }}
+              style={{ color: mainTab === tab ? "#fff" : "var(--ow-text-dim)" }}
             >
               {tab}
               {mainTab === tab && (
@@ -797,37 +797,37 @@ export default function AnalyticsPage() {
           <div className="space-y-8">
 
             {/* ── FX Rates Widget ──────────────────────────────────────────── */}
-            <div className="rounded-xl border p-4" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+            <div className="rounded-xl border p-4" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
               <div className="flex items-center gap-2 mb-3">
                 <Globe size={13} style={{ color: "#2081E2" }} />
-                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>
+                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>
                   Live FX Rates
                 </span>
                 <span className="flex items-center gap-1">
                   <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#22c55e" }} />
                   <span className="text-[10px] font-bold" style={{ color: "#22c55e" }}>LIVE</span>
                 </span>
-                {fxLoading && <RefreshCw size={10} className="animate-spin ml-auto" style={{ color: "#64748b" }} />}
+                {fxLoading && <RefreshCw size={10} className="animate-spin ml-auto" style={{ color: "var(--ow-text-dim)" }} />}
               </div>
               <div className="flex flex-wrap gap-5">
                 {fxRates.length > 0
                   ? fxRates.map((r) => (
                     <div key={r.pair} className="flex flex-col gap-0.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>{r.pair}</span>
-                      <span className="text-sm font-black font-mono" style={{ color: "#e2e8f0" }}>
+                      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>{r.pair}</span>
+                      <span className="text-sm font-black font-mono" style={{ color: "var(--ow-text)" }}>
                         {r.rate.toFixed(4)}
                       </span>
                     </div>
                   ))
                   : FX_PAIRS.map((p) => (
                     <div key={p.pair} className="flex flex-col gap-0.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>{p.pair}</span>
-                      <span className="text-sm font-black font-mono" style={{ color: "#475569" }}>—</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>{p.pair}</span>
+                      <span className="text-sm font-black font-mono" style={{ color: "var(--ow-text-faint)" }}>—</span>
                     </div>
                   ))
                 }
               </div>
-              <p className="text-[10px] mt-3" style={{ color: "#475569" }}>
+              <p className="text-[10px] mt-3" style={{ color: "var(--ow-text-faint)" }}>
                 Prices across markets auto-converted using live rates · Refreshes every 60s
               </p>
             </div>
@@ -880,11 +880,11 @@ export default function AnalyticsPage() {
                 <div
                   key={stat.label}
                   className="rounded-xl border p-4"
-                  style={{ background: "#111119", borderColor: "#1c1c2a" }}
+                  style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
                 >
                   <div className="flex items-center gap-1.5 mb-2">
                     {stat.icon}
-                    <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>
+                    <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>
                       {stat.label}
                     </span>
                   </div>
@@ -895,7 +895,7 @@ export default function AnalyticsPage() {
                     {stat.value}
                   </p>
                   {stat.sub && (
-                    <p className="text-[10px] mt-0.5 truncate" style={{ color: "#475569" }}>{stat.sub}</p>
+                    <p className="text-[10px] mt-0.5 truncate" style={{ color: "var(--ow-text-faint)" }}>{stat.sub}</p>
                   )}
                 </div>
               ))}
@@ -903,10 +903,10 @@ export default function AnalyticsPage() {
 
             {/* ── B: Top Collections (OpenSea-style ranked table) ──────────── */}
             <section>
-              <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+              <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                <div className="px-5 py-4 border-b" style={{ borderColor: "var(--ow-border)" }}>
                   <h2 className="text-base font-black text-white">Top Collections</h2>
-                  <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--ow-text-dim)" }}>
                     Ranked by market heat · click to explore brand
                   </p>
                 </div>
@@ -915,8 +915,8 @@ export default function AnalyticsPage() {
                 <div
                   className="hidden md:grid px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider"
                   style={{
-                    background: "#0b0b14",
-                    color: "#64748b",
+                    background: "var(--ow-bg)",
+                    color: "var(--ow-text-dim)",
                     gridTemplateColumns: "28px 2fr 1fr 1fr 1fr 80px 140px 1fr",
                   }}
                 >
@@ -931,12 +931,12 @@ export default function AnalyticsPage() {
                 </div>
 
                 {rankedBrands.length === 0 ? (
-                  <div className="px-5 py-10 text-center text-sm" style={{ color: "#475569" }}>
+                  <div className="px-5 py-10 text-center text-sm" style={{ color: "var(--ow-text-faint)" }}>
                     No brand data yet.
                   </div>
                 ) : (
                   rankedBrands.map((stat, i) => {
-                    const color = BRAND_COLORS[stat.brand] ?? "#94a3b8"
+                    const color = BRAND_COLORS[stat.brand] ?? "var(--ow-text-muted)"
                     const slug = BRAND_SLUGS[stat.brand]
                     const heatPct = Math.min(100, (stat.heat_score / 30) * 100)
                     const volume = stat.avg_price * stat.total_listings
@@ -946,14 +946,14 @@ export default function AnalyticsPage() {
                         href={`/brands/${slug}`}
                         className="border-t flex flex-col md:grid px-4 py-3 gap-2 md:gap-0 md:items-center transition-colors hover:opacity-90"
                         style={{
-                          borderColor: "#1c1c2a",
-                          background: i % 2 === 0 ? "#111119" : "#0d0d15",
+                          borderColor: "var(--ow-border)",
+                          background: i % 2 === 0 ? "var(--ow-bg-card)" : "#0d0d15",
                           gridTemplateColumns: "28px 2fr 1fr 1fr 1fr 80px 140px 1fr",
                         }}
                       >
                         {/* Rank */}
                         <div className="hidden md:block">
-                          <span className="text-[11px] font-bold font-mono" style={{ color: "#475569" }}>
+                          <span className="text-[11px] font-bold font-mono" style={{ color: "var(--ow-text-faint)" }}>
                             {i + 1}
                           </span>
                         </div>
@@ -962,7 +962,7 @@ export default function AnalyticsPage() {
                           <span className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
                             style={{ backgroundColor: color }} />
                           <span className="text-sm font-black text-white">{stat.brand}</span>
-                          <span className="text-[10px] md:hidden" style={{ color: "#64748b" }}>
+                          <span className="text-[10px] md:hidden" style={{ color: "var(--ow-text-dim)" }}>
                             #{i + 1}
                           </span>
                         </div>
@@ -984,7 +984,7 @@ export default function AnalyticsPage() {
                         </div>
                         {/* Heat bar */}
                         <div className="hidden md:flex items-center gap-2">
-                          <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "#1c1c2a" }}>
+                          <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--ow-border)" }}>
                             <div className="h-full rounded-full" style={{ width: `${heatPct}%`, backgroundColor: color }} />
                           </div>
                           <span className="text-[10px] font-mono w-8 text-right" style={{ color }}>{stat.heat_score.toFixed(0)}</span>
@@ -1008,7 +1008,7 @@ export default function AnalyticsPage() {
 
             {/* ── Market Pulse ─────────────────────────────────────────────── */}
             <section>
-              <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "#64748b" }}>
+              <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "var(--ow-text-dim)" }}>
                 Market Pulse
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1045,7 +1045,7 @@ export default function AnalyticsPage() {
                   const inner = (
                     <>
                       <div className="flex items-center gap-2 mb-1">{card.icon}
-                        <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>
+                        <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>
                           {card.label}
                         </span>
                       </div>
@@ -1057,12 +1057,12 @@ export default function AnalyticsPage() {
                     <div key={card.label}>
                       {card.href ? (
                         <Link href={card.href} className="rounded-xl border p-4 flex flex-col gap-1 transition-all block"
-                          style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                          style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
                           {inner}
                         </Link>
                       ) : (
                         <div className="rounded-xl border p-4 flex flex-col gap-1"
-                          style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                          style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
                           {inner}
                         </div>
                       )}
@@ -1074,10 +1074,10 @@ export default function AnalyticsPage() {
 
             {/* ── C: Price Distribution Chart ──────────────────────────────── */}
             <section>
-              <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+              <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                <div className="px-5 py-4 border-b" style={{ borderColor: "var(--ow-border)" }}>
                   <h2 className="text-base font-black text-white">Price Distribution by Brand</h2>
-                  <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--ow-text-dim)" }}>
                     Number of listings per price range
                   </p>
                 </div>
@@ -1085,10 +1085,10 @@ export default function AnalyticsPage() {
                   {distributionChartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={280}>
                       <BarChart data={distributionChartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1c1c2a" vertical={false} />
-                        <XAxis dataKey="bucket" stroke="#1c1c2a"
-                          tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} />
-                        <YAxis stroke="#1c1c2a" tick={{ fill: "#64748b", fontSize: 11 }}
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--ow-border)" vertical={false} />
+                        <XAxis dataKey="bucket" stroke="var(--ow-border)"
+                          tick={{ fill: "var(--ow-text-dim)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis stroke="var(--ow-border)" tick={{ fill: "var(--ow-text-dim)", fontSize: 11 }}
                           axisLine={false} tickLine={false} width={35} />
                         <Tooltip content={<DistributionTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
                         <Legend wrapperStyle={{ fontSize: 12, paddingTop: 16 }} iconType="circle" iconSize={8} />
@@ -1099,7 +1099,7 @@ export default function AnalyticsPage() {
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="h-64 flex items-center justify-center" style={{ color: "#475569" }}>
+                    <div className="h-64 flex items-center justify-center" style={{ color: "var(--ow-text-faint)" }}>
                       No distribution data available
                     </div>
                   )}
@@ -1109,10 +1109,10 @@ export default function AnalyticsPage() {
 
             {/* ── D: Supply Analysis Chart ─────────────────────────────────── */}
             <section>
-              <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+              <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                <div className="px-5 py-4 border-b" style={{ borderColor: "var(--ow-border)" }}>
                   <h2 className="text-base font-black text-white">Supply by Reference (Top 15)</h2>
-                  <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--ow-text-dim)" }}>
                     Number of active listings per reference — higher = more liquid
                   </p>
                 </div>
@@ -1121,11 +1121,11 @@ export default function AnalyticsPage() {
                     <ResponsiveContainer width="100%" height={Math.max(300, supplyChartData.length * 32)}>
                       <BarChart data={supplyChartData} layout="vertical"
                         margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1c1c2a" horizontal={false} />
-                        <XAxis type="number" stroke="#1c1c2a"
-                          tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--ow-border)" horizontal={false} />
+                        <XAxis type="number" stroke="var(--ow-border)"
+                          tick={{ fill: "var(--ow-text-dim)", fontSize: 11 }} axisLine={false} tickLine={false} />
                         <YAxis type="category" dataKey="ref_number" width={120}
-                          tick={{ fill: "#e2e8f0", fontSize: 11, fontFamily: "ui-monospace, monospace" }}
+                          tick={{ fill: "var(--ow-text)", fontSize: 11, fontFamily: "ui-monospace, monospace" }}
                           axisLine={false} tickLine={false} />
                         <Tooltip content={<SupplyTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
                         <Bar dataKey="count" radius={[0, 4, 4, 0]} maxBarSize={20}>
@@ -1136,7 +1136,7 @@ export default function AnalyticsPage() {
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="h-64 flex items-center justify-center" style={{ color: "#475569" }}>
+                    <div className="h-64 flex items-center justify-center" style={{ color: "var(--ow-text-faint)" }}>
                       No supply data available
                     </div>
                   )}
@@ -1147,15 +1147,15 @@ export default function AnalyticsPage() {
             {/* ── Grey Market Premium Table ─────────────────────────────────── */}
             {greyMarketRefs.length > 0 && (
               <section>
-                <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                  <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+                <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                  <div className="px-5 py-4 border-b" style={{ borderColor: "var(--ow-border)" }}>
                     <h2 className="text-base font-black text-white">Grey Market vs. Retail</h2>
-                    <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                    <p className="text-xs mt-0.5" style={{ color: "var(--ow-text-dim)" }}>
                       Asking-price premium above manufacturer retail — sorted by highest premium
                     </p>
                   </div>
                   <div className="hidden md:grid px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider"
-                    style={{ background: "#0b0b14", color: "#64748b", gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr 1fr" }}>
+                    style={{ background: "var(--ow-bg)", color: "var(--ow-text-dim)", gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr 1fr" }}>
                     <div>Watch</div>
                     <div>Ref</div>
                     <div className="text-right">Retail MSRP</div>
@@ -1165,14 +1165,14 @@ export default function AnalyticsPage() {
                   </div>
                   {greyMarketRefs.map((ref, i) => {
                     const info = MSRP_INFO[ref.ref_number]
-                    const brandColor = BRAND_COLORS[ref.brand] ?? "#94a3b8"
+                    const brandColor = BRAND_COLORS[ref.brand] ?? "var(--ow-text-muted)"
                     return (
                       <Link key={`${ref.ref_number}-gm-${i}`}
                         href={`/ref/${encodeURIComponent(ref.ref_number)}`}
                         className="border-t px-4 py-3 transition-colors flex flex-col md:grid gap-2 md:gap-0 md:items-center hover:opacity-90"
                         style={{
-                          borderColor: "#1c1c2a",
-                          background: i % 2 === 0 ? "#111119" : "#0d0d15",
+                          borderColor: "var(--ow-border)",
+                          background: i % 2 === 0 ? "var(--ow-bg-card)" : "#0d0d15",
                           gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr 1fr",
                         }}
                       >
@@ -1184,7 +1184,7 @@ export default function AnalyticsPage() {
                           <span className="text-xs font-mono font-bold text-white">{ref.ref_number}</span>
                         </div>
                         <div className="hidden md:block text-right">
-                          <span className="text-xs font-mono" style={{ color: "#94a3b8" }}>
+                          <span className="text-xs font-mono" style={{ color: "var(--ow-text-muted)" }}>
                             {ref.msrp ? formatCurrency(ref.msrp) : "—"}
                           </span>
                         </div>
@@ -1195,16 +1195,16 @@ export default function AnalyticsPage() {
                           {ref.grey_market_premium_pct !== null ? (
                             <GreyMarketBadge pct={ref.grey_market_premium_pct} />
                           ) : (
-                            <span className="text-xs" style={{ color: "#475569" }}>—</span>
+                            <span className="text-xs" style={{ color: "var(--ow-text-faint)" }}>—</span>
                           )}
                         </div>
                         <div className="hidden md:block text-right">
                           <span className="text-xs font-mono text-white">{ref.listings}</span>
                         </div>
                         <div className="flex items-center justify-between md:hidden">
-                          <span className="text-xs font-mono" style={{ color: "#64748b" }}>{ref.ref_number}</span>
+                          <span className="text-xs font-mono" style={{ color: "var(--ow-text-dim)" }}>{ref.ref_number}</span>
                           <div className="flex items-center gap-3">
-                            <span className="text-xs font-mono" style={{ color: "#64748b" }}>
+                            <span className="text-xs font-mono" style={{ color: "var(--ow-text-dim)" }}>
                               MSRP {ref.msrp ? formatCompact(ref.msrp) : "—"}
                             </span>
                             <span className="text-xs font-black font-mono text-white">avg {formatCompact(ref.avg)}</span>
@@ -1222,8 +1222,8 @@ export default function AnalyticsPage() {
 
             {/* ── Data Coverage ─────────────────────────────────────────────── */}
             <section>
-              <div className="rounded-xl border p-5" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "#64748b" }}>
+              <div className="rounded-xl border p-5" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "var(--ow-text-dim)" }}>
                   Data Coverage
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1252,7 +1252,7 @@ export default function AnalyticsPage() {
                     },
                   ].map((item) => (
                     <div key={item.label}>
-                      <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "#64748b" }}>
+                      <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--ow-text-dim)" }}>
                         {item.label}
                       </p>
                       <p className="text-sm font-bold" style={{ color: item.color }}>{item.value}</p>
@@ -1282,7 +1282,7 @@ export default function AnalyticsPage() {
                   <SentimentBadge sentiment={overallSentiment} lg />
                 )}
                 {lastSentimentUpdate && (
-                  <span className="text-xs" style={{ color: "#64748b" }}>
+                  <span className="text-xs" style={{ color: "var(--ow-text-dim)" }}>
                     Last updated {shortTimeAgo(lastSentimentUpdate)}
                   </span>
                 )}
@@ -1291,7 +1291,7 @@ export default function AnalyticsPage() {
                 onClick={handleSentimentRefresh}
                 disabled={sentimentRefreshing || sentimentLoading}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold text-white transition-opacity disabled:opacity-50 self-start sm:self-auto"
-                style={{ background: "#1c1c2a" }}
+                style={{ background: "var(--ow-border)" }}
               >
                 <RefreshCw size={14} className={sentimentRefreshing ? "animate-spin" : ""} />
                 {sentimentRefreshing ? "Generating…" : "Refresh"}
@@ -1301,13 +1301,13 @@ export default function AnalyticsPage() {
             {sentimentLoading && (
               <div className="space-y-4 animate-pulse">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="rounded-xl h-48" style={{ background: "#111119" }} />
+                  <div key={i} className="rounded-xl h-48" style={{ background: "var(--ow-bg-card)" }} />
                 ))}
               </div>
             )}
 
             {sentimentError && !sentimentLoading && (
-              <div className="rounded-xl border p-8 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+              <div className="rounded-xl border p-8 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
                 <AlertTriangle className="mx-auto mb-3" size={28} style={{ color: "#ef4444" }} />
                 <p className="text-white font-bold mb-1">Failed to load sentiment data</p>
                 <p className="text-sm mb-4" style={{ color: "#8A939B" }}>{sentimentError}</p>
@@ -1320,8 +1320,8 @@ export default function AnalyticsPage() {
             )}
 
             {!sentimentLoading && !sentimentError && sentimentData !== null && sentimentData.length === 0 && (
-              <div className="rounded-xl border p-12 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                <Brain className="mx-auto mb-4" size={36} style={{ color: "#64748b" }} />
+              <div className="rounded-xl border p-12 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                <Brain className="mx-auto mb-4" size={36} style={{ color: "var(--ow-text-dim)" }} />
                 <p className="text-white font-bold text-lg mb-2">No sentiment data yet</p>
                 <p className="text-sm mb-6" style={{ color: "#8A939B" }}>
                   Run the daily research script to populate market sentiment analysis.
@@ -1341,18 +1341,18 @@ export default function AnalyticsPage() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* Section A: Discontinued Watches */}
-                <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: "#1c1c2a" }}>
+                <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: "var(--ow-border)" }}>
                     <span className="text-base">🚫</span>
                     <h3 className="text-sm font-black text-white">Discontinued</h3>
                     <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded"
-                      style={{ background: "#1c1c2a", color: "#64748b" }}>
+                      style={{ background: "var(--ow-border)", color: "var(--ow-text-dim)" }}>
                       {discontinuedReports.length}
                     </span>
                   </div>
-                  <div className="divide-y" style={{ borderColor: "#1c1c2a" }}>
+                  <div className="divide-y" style={{ borderColor: "var(--ow-border)" }}>
                     {discontinuedReports.length === 0 ? (
-                      <p className="px-4 py-6 text-sm text-center" style={{ color: "#475569" }}>
+                      <p className="px-4 py-6 text-sm text-center" style={{ color: "var(--ow-text-faint)" }}>
                         No discontinued watch data
                       </p>
                     ) : (
@@ -1362,7 +1362,7 @@ export default function AnalyticsPage() {
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-bold text-white leading-tight">{report.title}</p>
                               {report.brand && (
-                                <p className="text-[11px] mt-0.5" style={{ color: BRAND_COLORS[report.brand] ?? "#94a3b8" }}>
+                                <p className="text-[11px] mt-0.5" style={{ color: BRAND_COLORS[report.brand] ?? "var(--ow-text-muted)" }}>
                                   {report.brand}
                                 </p>
                               )}
@@ -1382,7 +1382,7 @@ export default function AnalyticsPage() {
                             </div>
                           )}
                           {report.event_date && (
-                            <p className="text-[10px] mt-2" style={{ color: "#475569" }}>
+                            <p className="text-[10px] mt-2" style={{ color: "var(--ow-text-faint)" }}>
                               {report.event_date}
                             </p>
                           )}
@@ -1393,18 +1393,18 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Section B: New Releases */}
-                <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: "#1c1c2a" }}>
+                <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: "var(--ow-border)" }}>
                     <span className="text-base">🆕</span>
                     <h3 className="text-sm font-black text-white">New Releases</h3>
                     <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded"
-                      style={{ background: "#1c1c2a", color: "#64748b" }}>
+                      style={{ background: "var(--ow-border)", color: "var(--ow-text-dim)" }}>
                       {newReleaseReports.length}
                     </span>
                   </div>
-                  <div className="divide-y" style={{ borderColor: "#1c1c2a" }}>
+                  <div className="divide-y" style={{ borderColor: "var(--ow-border)" }}>
                     {newReleaseReports.length === 0 ? (
-                      <p className="px-4 py-6 text-sm text-center" style={{ color: "#475569" }}>
+                      <p className="px-4 py-6 text-sm text-center" style={{ color: "var(--ow-text-faint)" }}>
                         No new release data
                       </p>
                     ) : (
@@ -1414,7 +1414,7 @@ export default function AnalyticsPage() {
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-bold text-white leading-tight">{report.title}</p>
                               {report.brand && (
-                                <p className="text-[11px] mt-0.5" style={{ color: BRAND_COLORS[report.brand] ?? "#94a3b8" }}>
+                                <p className="text-[11px] mt-0.5" style={{ color: BRAND_COLORS[report.brand] ?? "var(--ow-text-muted)" }}>
                                   {report.brand}
                                 </p>
                               )}
@@ -1434,7 +1434,7 @@ export default function AnalyticsPage() {
                             </div>
                           )}
                           {report.event_date && (
-                            <p className="text-[10px] mt-2" style={{ color: "#475569" }}>
+                            <p className="text-[10px] mt-2" style={{ color: "var(--ow-text-faint)" }}>
                               {report.event_date}
                             </p>
                           )}
@@ -1445,18 +1445,18 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Section C: Market News */}
-                <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: "#1c1c2a" }}>
+                <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: "var(--ow-border)" }}>
                     <span className="text-base">📰</span>
                     <h3 className="text-sm font-black text-white">Market News</h3>
                     <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded"
-                      style={{ background: "#1c1c2a", color: "#64748b" }}>
+                      style={{ background: "var(--ow-border)", color: "var(--ow-text-dim)" }}>
                       {newsReports.length}
                     </span>
                   </div>
-                  <div className="divide-y" style={{ borderColor: "#1c1c2a" }}>
+                  <div className="divide-y" style={{ borderColor: "var(--ow-border)" }}>
                     {newsReports.length === 0 ? (
-                      <p className="px-4 py-6 text-sm text-center" style={{ color: "#475569" }}>
+                      <p className="px-4 py-6 text-sm text-center" style={{ color: "var(--ow-text-faint)" }}>
                         No market news
                       </p>
                     ) : (
@@ -1488,7 +1488,7 @@ export default function AnalyticsPage() {
                             </a>
                           )}
                           {report.event_date && (
-                            <p className="text-[10px] mt-1" style={{ color: "#475569" }}>
+                            <p className="text-[10px] mt-1" style={{ color: "var(--ow-text-faint)" }}>
                               {report.event_date}
                             </p>
                           )}
@@ -1508,12 +1508,12 @@ export default function AnalyticsPage() {
             ═══════════════════════════════════════════════════════════════════ */}
         {mainTab === "trending" && (
           <div>
-            <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+            <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
               <div className="px-5 py-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-                style={{ borderColor: "#1c1c2a" }}>
+                style={{ borderColor: "var(--ow-border)" }}>
                 <div>
                   <h2 className="text-base font-black text-white">All Tracked References</h2>
-                  <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--ow-text-dim)" }}>
                     {sortedRefs.length} refs · sorted by {sortField.replace("_", " ")}
                   </p>
                 </div>
@@ -1525,7 +1525,7 @@ export default function AnalyticsPage() {
                       style={
                         activeBrandTab === tab
                           ? { background: "#2081E2", color: "#fff" }
-                          : { background: "#0b0b14", color: "#8A939B" }
+                          : { background: "var(--ow-bg)", color: "#8A939B" }
                       }>
                       {tab === "Audemars Piguet" ? "AP" : tab === "Vacheron Constantin" ? "VC" : tab}
                     </button>
@@ -1537,8 +1537,8 @@ export default function AnalyticsPage() {
               <div
                 className="hidden md:grid px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider"
                 style={{
-                  background: "#0b0b14",
-                  color: "#64748b",
+                  background: "var(--ow-bg)",
+                  color: "var(--ow-text-dim)",
                   gridTemplateColumns: "2fr 2fr 70px 1fr 1fr 1fr 1.5fr 1fr 1fr 1fr",
                 }}
               >
@@ -1555,20 +1555,20 @@ export default function AnalyticsPage() {
               </div>
 
               {sortedRefs.length === 0 ? (
-                <div className="px-5 py-10 text-center text-sm" style={{ color: "#475569" }}>
+                <div className="px-5 py-10 text-center text-sm" style={{ color: "var(--ow-text-faint)" }}>
                   No references found for this filter.
                 </div>
               ) : (
                 sortedRefs.map((ref, i) => {
-                  const brandColor = BRAND_COLORS[ref.brand] ?? "#94a3b8"
+                  const brandColor = BRAND_COLORS[ref.brand] ?? "var(--ow-text-muted)"
                   return (
                     <Link
                       key={`${ref.ref_number}-${i}`}
                       href={`/ref/${encodeURIComponent(ref.ref_number)}`}
                       className="border-t px-4 py-3 transition-colors flex flex-col md:grid gap-2 md:gap-0 md:items-center hover:opacity-90"
                       style={{
-                        borderColor: "#1c1c2a",
-                        background: i % 2 === 0 ? "#111119" : "#0d0d15",
+                        borderColor: "var(--ow-border)",
+                        background: i % 2 === 0 ? "var(--ow-bg-card)" : "#0d0d15",
                         gridTemplateColumns: "2fr 2fr 70px 1fr 1fr 1fr 1.5fr 1fr 1fr 1fr",
                       }}
                     >
@@ -1596,7 +1596,7 @@ export default function AnalyticsPage() {
                         {ref.sparkline_data && ref.sparkline_data.length >= 2 ? (
                           <Sparkline data={ref.sparkline_data} width={60} height={24} />
                         ) : (
-                          <span style={{ color: "#475569", fontSize: 10 }}>—</span>
+                          <span style={{ color: "var(--ow-text-faint)", fontSize: 10 }}>—</span>
                         )}
                       </div>
                       <div className="hidden md:block text-right">
@@ -1614,7 +1614,7 @@ export default function AnalyticsPage() {
                         {ref.grey_market_premium_pct !== null ? (
                           <GreyMarketBadge pct={ref.grey_market_premium_pct} />
                         ) : (
-                          <span className="text-xs" style={{ color: "#475569" }}>—</span>
+                          <span className="text-xs" style={{ color: "var(--ow-text-faint)" }}>—</span>
                         )}
                       </div>
                       <div className="hidden md:block text-right">
@@ -1646,7 +1646,7 @@ export default function AnalyticsPage() {
                 <h2 className="text-xl font-black text-white flex items-center gap-2">
                   <span className="text-xl">🔥</span> Potential Deals
                 </h2>
-                <span className="text-sm font-mono" style={{ color: "#64748b" }}>
+                <span className="text-sm font-mono" style={{ color: "var(--ow-text-dim)" }}>
                   {data.deals.length} deals detected
                   {data.deals.length > 0 && (
                     <> · avg <span style={{ color: "#22c55e" }}>{avgDiscount}%</span> below market</>
@@ -1658,25 +1658,25 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            <p className="text-xs" style={{ color: "#64748b" }}>
+            <p className="text-xs" style={{ color: "var(--ow-text-dim)" }}>
               Listings priced below market average for their reference
             </p>
 
             {data.deals.length === 0 ? (
-              <div className="rounded-xl border p-8 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+              <div className="rounded-xl border p-8 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
                 <p className="font-bold text-white mb-1">No deals detected</p>
-                <p className="text-sm" style={{ color: "#64748b" }}>
+                <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>
                   Market is fairly priced right now — all listings are within 8% of their reference average.
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {data.deals.map((deal, i) => {
-                  const brandColor = BRAND_COLORS[deal.brand] ?? "#94a3b8"
+                  const brandColor = BRAND_COLORS[deal.brand] ?? "var(--ow-text-muted)"
                   const msrpInfo = MSRP_INFO[deal.ref_number]
                   return (
                     <div key={i} className="rounded-xl border overflow-hidden"
-                      style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                      style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
                       <div className="px-4 py-2 text-xs font-bold uppercase tracking-wider"
                         style={{ background: "rgba(34,197,94,0.08)", color: "#22c55e" }}>
                         -{deal.discount_pct}% below market
@@ -1694,7 +1694,7 @@ export default function AnalyticsPage() {
                             <p className="text-lg font-black font-mono" style={{ color: "#22c55e" }}>
                               {formatCurrency(deal.price)}
                             </p>
-                            <p className="text-xs line-through" style={{ color: "#64748b" }}>
+                            <p className="text-xs line-through" style={{ color: "var(--ow-text-dim)" }}>
                               avg {formatCurrency(deal.ref_avg)}
                             </p>
                           </div>
@@ -1705,7 +1705,7 @@ export default function AnalyticsPage() {
                               style={{ background: "rgba(32,129,226,0.12)", color: "#60a5fa" }}>
                               {deal.source}
                             </span>
-                            <span className="text-[10px]" style={{ color: "#475569" }}>
+                            <span className="text-[10px]" style={{ color: "var(--ow-text-faint)" }}>
                               {shortTimeAgo(deal.scraped_at)}
                             </span>
                           </div>
@@ -1780,7 +1780,7 @@ export default function AnalyticsPage() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <h2 className="text-xl font-black text-white">All Listings</h2>
-                  <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--ow-text-dim)" }}>
                     {filtered.length} watches · sorted by {listingsSort === "price-asc" ? "floor price" : listingsSort === "price-desc" ? "highest price" : "newest"}
                   </p>
                 </div>
@@ -1788,7 +1788,7 @@ export default function AnalyticsPage() {
                   value={listingsSort}
                   onChange={e => setListingsSort(e.target.value as typeof listingsSort)}
                   className="h-8 px-3 rounded-lg text-sm font-bold text-white border"
-                  style={{ background: "#161622", borderColor: "#22222e", color: "#e2e8f0" }}
+                  style={{ background: "var(--ow-bg-elevated)", borderColor: "var(--ow-border-light)", color: "var(--ow-text)" }}
                 >
                   <option value="price-asc">Price: Low → High</option>
                   <option value="price-desc">Price: High → Low</option>
@@ -1798,12 +1798,12 @@ export default function AnalyticsPage() {
 
               {/* Price Ladder */}
               {buckets.length > 0 && (
-                <div className="rounded-xl border p-4" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                  <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "#64748b" }}>Price Ladder</p>
+                <div className="rounded-xl border p-4" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                  <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "var(--ow-text-dim)" }}>Price Ladder</p>
                   <div className="flex flex-wrap gap-2">
                     {buckets.map(b => (
                       <div key={b.label} className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                        style={{ background: "#0b0b14", border: "1px solid #1c1c2a" }}>
+                        style={{ background: "var(--ow-bg)", border: "1px solid var(--ow-border)" }}>
                         <span className="text-xs font-bold text-white">{b.label}</span>
                         <span className="text-xs font-black font-mono" style={{ color: "#2081E2" }}>{b.count} watches</span>
                         {isFinite(b.floor) && b.floor > 0 && (
@@ -1824,7 +1824,7 @@ export default function AnalyticsPage() {
                     className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
                     style={listingsBrand === tab
                       ? { background: "#2081E2", color: "#fff" }
-                      : { background: "#111119", color: "#8A939B", border: "1px solid #1c1c2a" }
+                      : { background: "var(--ow-bg-card)", color: "#8A939B", border: "1px solid var(--ow-border)" }
                     }>
                     {tab}
                   </button>
@@ -1835,13 +1835,13 @@ export default function AnalyticsPage() {
               {listingsLoading ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <div key={i} className="rounded-xl animate-pulse" style={{ background: "#111119", aspectRatio: "3/4" }} />
+                    <div key={i} className="rounded-xl animate-pulse" style={{ background: "var(--ow-bg-card)", aspectRatio: "3/4" }} />
                   ))}
                 </div>
               ) : sorted.length === 0 ? (
-                <div className="rounded-xl border p-10 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                <div className="rounded-xl border p-10 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
                   <p className="text-white font-bold mb-1">No listings found</p>
-                  <p className="text-sm" style={{ color: "#64748b" }}>No active listings for this filter.</p>
+                  <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>No active listings for this filter.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -1872,7 +1872,7 @@ export default function AnalyticsPage() {
                 <h2 className="text-xl font-black text-white flex items-center gap-2">
                   <span>⚡</span> Arbitrage Opportunities
                 </h2>
-                <p className="text-xs mt-1" style={{ color: "#64748b" }}>
+                <p className="text-xs mt-1" style={{ color: "var(--ow-text-dim)" }}>
                   Buy cheaper in EU/CH markets, sell at US prices after import costs
                 </p>
               </div>
@@ -1881,10 +1881,10 @@ export default function AnalyticsPage() {
                 <div className="space-y-3 animate-pulse">
                   <div className="grid grid-cols-3 gap-3">
                     {[1, 2, 3].map(i => (
-                      <div key={i} className="rounded-xl h-20" style={{ background: "#111119" }} />
+                      <div key={i} className="rounded-xl h-20" style={{ background: "var(--ow-bg-card)" }} />
                     ))}
                   </div>
-                  <div className="rounded-xl h-64" style={{ background: "#111119" }} />
+                  <div className="rounded-xl h-64" style={{ background: "var(--ow-bg-card)" }} />
                 </div>
               )}
 
@@ -1913,29 +1913,29 @@ export default function AnalyticsPage() {
                       },
                     ].map((card) => (
                       <div key={card.label} className="rounded-xl border p-4"
-                        style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                        <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "#64748b" }}>
+                        style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                        <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--ow-text-dim)" }}>
                           {card.label}
                         </p>
                         <p className="text-2xl font-black font-mono" style={{ color: card.color }}>{card.value}</p>
-                        <p className="text-[11px] mt-0.5 truncate" style={{ color: "#475569" }}>{card.sub}</p>
+                        <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--ow-text-faint)" }}>{card.sub}</p>
                       </div>
                     ))}
                   </div>
 
                   {/* Main Table */}
                   {arbData.length === 0 ? (
-                    <div className="rounded-xl border p-12 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                    <div className="rounded-xl border p-12 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
                       <p className="text-white font-bold text-lg mb-2">No arbitrage data</p>
-                      <p className="text-sm" style={{ color: "#64748b" }}>
+                      <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>
                         Run the arbitrage scanner to populate cross-market opportunities.
                       </p>
                     </div>
                   ) : (
-                    <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                      <div className="px-5 py-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+                    <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                      <div className="px-5 py-4 border-b" style={{ borderColor: "var(--ow-border)" }}>
                         <h3 className="text-base font-black text-white">Arbitrage Opportunities</h3>
-                        <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                        <p className="text-xs mt-0.5" style={{ color: "var(--ow-text-dim)" }}>
                           Import costs include: shipping $350 · 9.8% US duty · $200 authentication
                         </p>
                       </div>
@@ -1944,8 +1944,8 @@ export default function AnalyticsPage() {
                       <div
                         className="hidden lg:grid px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider"
                         style={{
-                          background: "#0b0b14",
-                          color: "#64748b",
+                          background: "var(--ow-bg)",
+                          color: "var(--ow-text-dim)",
                           gridTemplateColumns: "2.5fr 2fr 1fr 1fr 1fr 1fr 1.2fr 100px",
                         }}
                       >
@@ -1976,8 +1976,8 @@ export default function AnalyticsPage() {
                             key={`${opp.ref_number}-${i}`}
                             className="border-t px-4 py-3 flex flex-col lg:grid gap-2 lg:gap-0 lg:items-center"
                             style={{
-                              borderColor: "#1c1c2a",
-                              background: i % 2 === 0 ? "#111119" : "#0d0d15",
+                              borderColor: "var(--ow-border)",
+                              background: i % 2 === 0 ? "var(--ow-bg-card)" : "#0d0d15",
                               gridTemplateColumns: "2.5fr 2fr 1fr 1fr 1fr 1fr 1.2fr 100px",
                             }}
                           >
@@ -1985,17 +1985,17 @@ export default function AnalyticsPage() {
                             <div>
                               <p className="text-xs font-black font-mono text-white">{opp.ref_number}</p>
                               <p className="text-sm font-bold text-white mt-0.5">{opp.model_name ?? opp.brand}</p>
-                              <p className="text-[11px]" style={{ color: BRAND_COLORS[opp.brand] ?? "#94a3b8" }}>{opp.brand}</p>
+                              <p className="text-[11px]" style={{ color: BRAND_COLORS[opp.brand] ?? "var(--ow-text-muted)" }}>{opp.brand}</p>
                             </div>
                             {/* Buy Market */}
                             <div className="flex items-start gap-1.5">
                               <span className="text-base leading-none mt-0.5">{flag}</span>
                               <div>
                                 <p className="text-xs font-bold text-white">{opp.buy_market}</p>
-                                <p className="text-xs font-mono" style={{ color: "#94a3b8" }}>
+                                <p className="text-xs font-mono" style={{ color: "var(--ow-text-muted)" }}>
                                   {opp.buy_currency} {opp.buy_price_local.toLocaleString()}
                                 </p>
-                                <p className="text-[10px]" style={{ color: "#64748b" }}>
+                                <p className="text-[10px]" style={{ color: "var(--ow-text-dim)" }}>
                                   {opp.buy_listing_count} listing{opp.buy_listing_count !== 1 ? "s" : ""}
                                 </p>
                               </div>
@@ -2007,7 +2007,7 @@ export default function AnalyticsPage() {
                             {/* Sell US */}
                             <div className="hidden lg:block text-right">
                               <span className="text-xs font-black font-mono text-white">{formatCurrency(opp.sell_price_usd)}</span>
-                              <p className="text-[10px]" style={{ color: "#64748b" }}>{opp.sell_listing_count} US listings</p>
+                              <p className="text-[10px]" style={{ color: "var(--ow-text-dim)" }}>{opp.sell_listing_count} US listings</p>
                             </div>
                             {/* Import Costs */}
                             <div className="hidden lg:block text-right">
@@ -2039,7 +2039,7 @@ export default function AnalyticsPage() {
                             </div>
                             {/* Mobile summary */}
                             <div className="flex items-center justify-between lg:hidden">
-                              <span className="text-xs font-mono" style={{ color: "#64748b" }}>
+                              <span className="text-xs font-mono" style={{ color: "var(--ow-text-dim)" }}>
                                 Buy {formatCurrency(opp.buy_price_usd)} · Sell {formatCurrency(opp.sell_price_usd)}
                               </span>
                               <span
@@ -2056,21 +2056,21 @@ export default function AnalyticsPage() {
                   )}
 
                   {/* Info note */}
-                  <div className="rounded-lg border px-4 py-3 text-xs" style={{ background: "#0b0b14", borderColor: "#1c1c2a", color: "#64748b" }}>
+                  <div className="rounded-lg border px-4 py-3 text-xs" style={{ background: "var(--ow-bg)", borderColor: "var(--ow-border)", color: "var(--ow-text-dim)" }}>
                     ℹ️ Import costs include: shipping ($350) + US import duty (9.8%) + authentication ($200). Net profit is after all costs.
                   </div>
 
                   {/* Explainer (collapsible) */}
-                  <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                  <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
                     <button
                       onClick={() => setArbExplainerOpen(o => !o)}
                       className="w-full flex items-center justify-between px-5 py-4 text-left transition-colors hover:opacity-90"
                     >
                       <span className="text-sm font-black text-white">How Arbitrage Works</span>
-                      <span className="text-xs" style={{ color: "#64748b" }}>{arbExplainerOpen ? "▲ collapse" : "▼ expand"}</span>
+                      <span className="text-xs" style={{ color: "var(--ow-text-dim)" }}>{arbExplainerOpen ? "▲ collapse" : "▼ expand"}</span>
                     </button>
                     {arbExplainerOpen && (
-                      <div className="px-5 pb-5 border-t" style={{ borderColor: "#1c1c2a" }}>
+                      <div className="px-5 pb-5 border-t" style={{ borderColor: "var(--ow-border)" }}>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                           {[
                             { step: "1", title: "Find cheaper abroad", desc: "Identify watches listed in EU/CH markets below the US asking price" },
@@ -2087,7 +2087,7 @@ export default function AnalyticsPage() {
                               </span>
                               <div>
                                 <p className="text-sm font-bold text-white">{item.title}</p>
-                                <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>{item.desc}</p>
+                                <p className="text-xs mt-0.5" style={{ color: "var(--ow-text-dim)" }}>{item.desc}</p>
                               </div>
                             </div>
                           ))}
@@ -2126,7 +2126,7 @@ export default function AnalyticsPage() {
                 <h2 className="text-xl font-black text-white flex items-center gap-2">
                   <TrendingUp size={20} style={{ color: "#10b981" }} /> Price Trends
                 </h2>
-                <p className="text-xs mt-1" style={{ color: "#64748b" }}>
+                <p className="text-xs mt-1" style={{ color: "var(--ow-text-dim)" }}>
                   7d · 30d · 90d momentum across all tracked references
                 </p>
               </div>
@@ -2135,12 +2135,12 @@ export default function AnalyticsPage() {
                 <div className="space-y-4 animate-pulse">
                   <div className="grid grid-cols-5 gap-3">
                     {[1, 2, 3, 4, 5].map(i => (
-                      <div key={i} className="rounded-xl h-20" style={{ background: "#111119" }} />
+                      <div key={i} className="rounded-xl h-20" style={{ background: "var(--ow-bg-card)" }} />
                     ))}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="rounded-xl h-80" style={{ background: "#111119" }} />
-                    <div className="rounded-xl h-80" style={{ background: "#111119" }} />
+                    <div className="rounded-xl h-80" style={{ background: "var(--ow-bg-card)" }} />
+                    <div className="rounded-xl h-80" style={{ background: "var(--ow-bg-card)" }} />
                   </div>
                 </div>
               )}
@@ -2152,11 +2152,11 @@ export default function AnalyticsPage() {
                     {[
                       { label: "Surging", emoji: "🔥", desc: ">5% 30d", count: surgingCount, color: "#ef4444", bg: "rgba(239,68,68,0.1)" },
                       { label: "Rising", emoji: "↑", desc: "2-5% 30d", count: risingCount, color: "#10b981", bg: "rgba(16,185,129,0.1)" },
-                      { label: "Stable", emoji: "→", desc: "±2% 30d", count: stableCount, color: "#64748b", bg: "rgba(100,116,139,0.1)" },
+                      { label: "Stable", emoji: "→", desc: "±2% 30d", count: stableCount, color: "var(--ow-text-dim)", bg: "rgba(100,116,139,0.1)" },
                       { label: "Cooling", emoji: "↓", desc: "-2 to -5% 30d", count: coolingCount, color: "#eab308", bg: "rgba(234,179,8,0.1)" },
                       { label: "Dropping", emoji: "💀", desc: "<-5% 30d", count: droppingCount, color: "#dc2626", bg: "rgba(220,38,38,0.08)" },
                     ].map((card) => (
-                      <div key={card.label} className="rounded-xl border p-4" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                      <div key={card.label} className="rounded-xl border p-4" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-base">{card.emoji}</span>
                           <span
@@ -2167,48 +2167,48 @@ export default function AnalyticsPage() {
                           </span>
                         </div>
                         <p className="text-2xl font-black font-mono" style={{ color: card.color }}>{card.count}</p>
-                        <p className="text-[10px] mt-0.5" style={{ color: "#475569" }}>{card.desc}</p>
+                        <p className="text-[10px] mt-0.5" style={{ color: "var(--ow-text-faint)" }}>{card.desc}</p>
                       </div>
                     ))}
                   </div>
 
                   {trendsData.length === 0 ? (
-                    <div className="rounded-xl border p-12 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+                    <div className="rounded-xl border p-12 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
                       <p className="text-white font-bold text-lg mb-2">No trend data</p>
-                      <p className="text-sm" style={{ color: "#64748b" }}>Run the momentum tracker to populate trend analysis.</p>
+                      <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>Run the momentum tracker to populate trend analysis.</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                       {/* LEFT: Biggest Movers */}
-                      <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                        <div className="px-4 py-3 border-b" style={{ borderColor: "#1c1c2a" }}>
+                      <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                        <div className="px-4 py-3 border-b" style={{ borderColor: "var(--ow-border)" }}>
                           <h3 className="text-sm font-black text-white">Biggest Movers (30d)</h3>
-                          <p className="text-[11px] mt-0.5" style={{ color: "#64748b" }}>Gainers first, then losers</p>
+                          <p className="text-[11px] mt-0.5" style={{ color: "var(--ow-text-dim)" }}>Gainers first, then losers</p>
                         </div>
-                        <div className="divide-y" style={{ borderColor: "#1c1c2a" }}>
+                        <div className="divide-y" style={{ borderColor: "var(--ow-border)" }}>
                           {biggestMovers.map((ref, i) => {
                             const isPositive = ref.momentum_30d >= 0
                             const color30d = isPositive ? "#10b981" : "#ef4444"
                             const trendConfig = {
                               surging: { color: "#ef4444", bg: "rgba(239,68,68,0.1)", label: "🔥 Surging" },
                               rising: { color: "#10b981", bg: "rgba(16,185,129,0.1)", label: "↑ Rising" },
-                              stable: { color: "#64748b", bg: "rgba(100,116,139,0.1)", label: "→ Stable" },
+                              stable: { color: "var(--ow-text-dim)", bg: "rgba(100,116,139,0.1)", label: "→ Stable" },
                               cooling: { color: "#eab308", bg: "rgba(234,179,8,0.1)", label: "↓ Cooling" },
                               dropping: { color: "#dc2626", bg: "rgba(220,38,38,0.08)", label: "💀 Dropping" },
-                            }[ref.trend_label] ?? { color: "#64748b", bg: "rgba(100,116,139,0.1)", label: ref.trend_label }
+                            }[ref.trend_label] ?? { color: "var(--ow-text-dim)", bg: "rgba(100,116,139,0.1)", label: ref.trend_label }
                             return (
                               <div key={`${ref.ref_number}-${i}`} className="px-4 py-3 flex items-center gap-3">
-                                <span className="text-[11px] font-bold font-mono w-5 text-right shrink-0" style={{ color: "#475569" }}>
+                                <span className="text-[11px] font-bold font-mono w-5 text-right shrink-0" style={{ color: "var(--ow-text-faint)" }}>
                                   {i + 1}
                                 </span>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-xs font-black font-mono text-white">{ref.ref_number}</p>
-                                  <p className="text-[11px]" style={{ color: BRAND_COLORS[ref.brand] ?? "#94a3b8" }}>{ref.brand}</p>
+                                  <p className="text-[11px]" style={{ color: BRAND_COLORS[ref.brand] ?? "var(--ow-text-muted)" }}>{ref.brand}</p>
                                 </div>
                                 <div className="flex items-center gap-1.5 shrink-0">
                                   <span className="text-[10px] font-mono px-1.5 py-0.5 rounded"
-                                    style={{ background: "rgba(100,116,139,0.1)", color: "#64748b" }}>
+                                    style={{ background: "rgba(100,116,139,0.1)", color: "var(--ow-text-dim)" }}>
                                     7d {ref.momentum_7d >= 0 ? "+" : ""}{ref.momentum_7d.toFixed(1)}%
                                   </span>
                                   <span className="text-[10px] font-mono px-1.5 py-0.5 rounded font-bold"
@@ -2216,7 +2216,7 @@ export default function AnalyticsPage() {
                                     30d {ref.momentum_30d >= 0 ? "+" : ""}{ref.momentum_30d.toFixed(1)}%
                                   </span>
                                   <span className="text-[10px] font-mono px-1.5 py-0.5 rounded"
-                                    style={{ background: "rgba(100,116,139,0.1)", color: "#64748b" }}>
+                                    style={{ background: "rgba(100,116,139,0.1)", color: "var(--ow-text-dim)" }}>
                                     90d {ref.momentum_90d >= 0 ? "+" : ""}{ref.momentum_90d.toFixed(1)}%
                                   </span>
                                 </div>
@@ -2231,20 +2231,20 @@ export default function AnalyticsPage() {
                       </div>
 
                       {/* RIGHT: Price Momentum Chart */}
-                      <div className="rounded-xl border overflow-hidden" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-                        <div className="px-4 py-3 border-b" style={{ borderColor: "#1c1c2a" }}>
+                      <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                        <div className="px-4 py-3 border-b" style={{ borderColor: "var(--ow-border)" }}>
                           <h3 className="text-sm font-black text-white">Price Momentum Chart</h3>
-                          <p className="text-[11px] mt-0.5" style={{ color: "#64748b" }}>Top 15 by 30d momentum · green = up, red = down</p>
+                          <p className="text-[11px] mt-0.5" style={{ color: "var(--ow-text-dim)" }}>Top 15 by 30d momentum · green = up, red = down</p>
                         </div>
                         <div className="p-4">
                           {chartData.length > 0 ? (
                             <ResponsiveContainer width="100%" height={Math.max(300, chartData.length * 28)}>
                               <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 50, left: 0, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1c1c2a" horizontal={false} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--ow-border)" horizontal={false} />
                                 <XAxis
                                   type="number"
-                                  stroke="#1c1c2a"
-                                  tick={{ fill: "#64748b", fontSize: 10 }}
+                                  stroke="var(--ow-border)"
+                                  tick={{ fill: "var(--ow-text-dim)", fontSize: 10 }}
                                   axisLine={false}
                                   tickLine={false}
                                   tickFormatter={(v: number) => `${v > 0 ? "+" : ""}${v}%`}
@@ -2253,7 +2253,7 @@ export default function AnalyticsPage() {
                                   type="category"
                                   dataKey="ref_number"
                                   width={110}
-                                  tick={{ fill: "#e2e8f0", fontSize: 10, fontFamily: "ui-monospace, monospace" }}
+                                  tick={{ fill: "var(--ow-text)", fontSize: 10, fontFamily: "ui-monospace, monospace" }}
                                   axisLine={false}
                                   tickLine={false}
                                 />
@@ -2265,9 +2265,9 @@ export default function AnalyticsPage() {
                                     const d = payload[0]?.payload as { ref_number: string; momentum_30d: number; brand: string }
                                     return (
                                       <div className="rounded-lg border p-2 text-xs shadow-xl"
-                                        style={{ background: "#1a1a2e", borderColor: "#1c1c2a" }}>
+                                        style={{ background: "#1a1a2e", borderColor: "var(--ow-border)" }}>
                                         <p className="font-mono font-bold text-white">{d.ref_number}</p>
-                                        <p className="text-[11px] mt-0.5" style={{ color: BRAND_COLORS[d.brand] ?? "#94a3b8" }}>{d.brand}</p>
+                                        <p className="text-[11px] mt-0.5" style={{ color: BRAND_COLORS[d.brand] ?? "var(--ow-text-muted)" }}>{d.brand}</p>
                                         <p className="font-bold mt-1"
                                           style={{ color: d.momentum_30d >= 0 ? "#10b981" : "#ef4444" }}>
                                           {d.momentum_30d >= 0 ? "+" : ""}{d.momentum_30d.toFixed(1)}% (30d)
@@ -2285,14 +2285,14 @@ export default function AnalyticsPage() {
                                   <LabelList
                                     dataKey="momentum_30d"
                                     position="right"
-                                    style={{ fill: "#94a3b8", fontSize: 9, fontFamily: "monospace" }}
+                                    style={{ fill: "var(--ow-text-muted)", fontSize: 9, fontFamily: "monospace" }}
                                     formatter={(v: unknown) => { const n = Number(v); return `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`; }}
                                   />
                                 </Bar>
                               </BarChart>
                             </ResponsiveContainer>
                           ) : (
-                            <div className="h-64 flex items-center justify-center" style={{ color: "#475569" }}>
+                            <div className="h-64 flex items-center justify-center" style={{ color: "var(--ow-text-faint)" }}>
                               No momentum data
                             </div>
                           )}

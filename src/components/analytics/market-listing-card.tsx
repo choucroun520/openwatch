@@ -42,7 +42,7 @@ function getSourceStyle(source: string) {
   const key = source.toLowerCase().replace(/[^a-z0-9]/g, "")
   return SOURCE_STYLES[key] ?? SOURCE_STYLES[source] ?? {
     bg: "rgba(100,116,139,0.15)",
-    color: "#94a3b8",
+    color: "var(--ow-text-muted)",
     label: source.slice(0, 4).toUpperCase(),
   }
 }
@@ -62,9 +62,9 @@ function ConditionBadge({ condition }: { condition: string | null }) {
   const color =
     condition === "unworn" ? "#22c55e"
     : condition === "excellent" ? "#60a5fa"
-    : condition === "very_good" ? "#94a3b8"
+    : condition === "very_good" ? "var(--ow-text-muted)"
     : condition === "good" ? "#fbbf24"
-    : "#64748b"
+    : "var(--ow-text-dim)"
   return (
     <span
       className="text-[10px] font-semibold px-1.5 py-0.5 rounded capitalize"
@@ -92,8 +92,8 @@ export function MarketListingCard({
     <div
       className="rounded-xl border flex flex-col overflow-hidden transition-all duration-150 hover:-translate-y-0.5"
       style={{
-        background: "#111119",
-        borderColor: "#1c1c2a",
+        background: "var(--ow-bg-card)",
+        borderColor: "var(--ow-border)",
         boxShadow: "0 1px 3px rgba(0,0,0,.3)",
       }}
     >
@@ -157,12 +157,12 @@ export function MarketListingCard({
             </span>
           )}
           {listing.has_box && !listing.has_papers && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "rgba(100,116,139,0.12)", color: "#94a3b8" }}>
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "rgba(100,116,139,0.12)", color: "var(--ow-text-muted)" }}>
               Box
             </span>
           )}
           {!listing.has_box && listing.has_papers && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "rgba(100,116,139,0.12)", color: "#94a3b8" }}>
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "rgba(100,116,139,0.12)", color: "var(--ow-text-muted)" }}>
               Papers
             </span>
           )}
@@ -186,7 +186,7 @@ export function MarketListingCard({
               </span>
             )
           ) : (
-            <span className="text-[10px]" style={{ color: "#64748b" }}>{timeLabel}</span>
+            <span className="text-[10px]" style={{ color: "var(--ow-text-dim)" }}>{timeLabel}</span>
           )}
 
           {listing.listing_url ? (

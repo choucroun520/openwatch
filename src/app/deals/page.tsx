@@ -113,7 +113,7 @@ function daysAgo(dateStr: string): number {
 }
 
 function sellerScoreColor(score: number | null): string {
-  if (score === null) return "#64748b"
+  if (score === null) return "var(--ow-text-dim)"
   if (score >= 70) return "#22c55e"
   if (score >= 40) return "#eab308"
   return "#ef4444"
@@ -167,8 +167,8 @@ function DealCard({
   return (
     <div
       style={{
-        backgroundColor: "#111119",
-        border: "1px solid #1c1c2a",
+        backgroundColor: "var(--ow-bg-card)",
+        border: "1px solid var(--ow-border)",
         borderRadius: "10px",
         padding: "14px",
         marginBottom: "10px",
@@ -179,7 +179,7 @@ function DealCard({
         ;(e.currentTarget as HTMLDivElement).style.borderColor = "#2563eb"
       }}
       onMouseLeave={(e) => {
-        ;(e.currentTarget as HTMLDivElement).style.borderColor = "#1c1c2a"
+        ;(e.currentTarget as HTMLDivElement).style.borderColor = "var(--ow-border)"
       }}
     >
       {/* Header row */}
@@ -192,17 +192,17 @@ function DealCard({
                 fontFamily: "ui-monospace, monospace",
                 fontSize: "13px",
                 fontWeight: 700,
-                color: "#e2e8f0",
+                color: "var(--ow-text)",
               }}
             >
               {deal.ref_number}
             </span>
             {deal.brand && (
-              <span style={{ fontSize: "11px", color: "#64748b" }}>· {deal.brand}</span>
+              <span style={{ fontSize: "11px", color: "var(--ow-text-dim)" }}>· {deal.brand}</span>
             )}
           </div>
           {deal.model && (
-            <div style={{ fontSize: "11px", color: "#94a3b8", marginTop: "2px" }}>{deal.model}</div>
+            <div style={{ fontSize: "11px", color: "var(--ow-text-muted)", marginTop: "2px" }}>{deal.model}</div>
           )}
         </div>
 
@@ -232,14 +232,14 @@ function DealCard({
             fontFamily: "ui-monospace, monospace",
             fontSize: "16px",
             fontWeight: 700,
-            color: "#e2e8f0",
+            color: "var(--ow-text)",
           }}
         >
           {formatUSD(deal.asking_price_usd)}
         </span>
         {deal.our_offer_usd && (
           <>
-            <span style={{ color: "#475569", fontSize: "12px" }}>→ offer</span>
+            <span style={{ color: "var(--ow-text-faint)", fontSize: "12px" }}>→ offer</span>
             <span
               style={{
                 fontFamily: "ui-monospace, monospace",
@@ -272,8 +272,8 @@ function DealCard({
         <span
           style={{
             fontSize: "11px",
-            color: "#94a3b8",
-            backgroundColor: "#1c1c2a",
+            color: "var(--ow-text-muted)",
+            backgroundColor: "var(--ow-border)",
             borderRadius: "4px",
             padding: "2px 6px",
           }}
@@ -283,7 +283,7 @@ function DealCard({
         <span
           style={{
             fontSize: "11px",
-            color: days > 7 ? "#eab308" : "#94a3b8",
+            color: days > 7 ? "#eab308" : "var(--ow-text-muted)",
             display: "flex",
             alignItems: "center",
             gap: "3px",
@@ -320,9 +320,9 @@ function DealCard({
             rel="noopener noreferrer"
             style={{
               fontSize: "11px",
-              color: "#94a3b8",
-              backgroundColor: "#161622",
-              border: "1px solid #1c1c2a",
+              color: "var(--ow-text-muted)",
+              backgroundColor: "var(--ow-bg-elevated)",
+              border: "1px solid var(--ow-border)",
               borderRadius: "6px",
               padding: "4px 8px",
               display: "flex",
@@ -341,9 +341,9 @@ function DealCard({
             onClick={handleCopy}
             style={{
               fontSize: "11px",
-              color: copied ? "#22c55e" : "#94a3b8",
-              backgroundColor: "#161622",
-              border: `1px solid ${copied ? "#22c55e44" : "#1c1c2a"}`,
+              color: copied ? "#22c55e" : "var(--ow-text-muted)",
+              backgroundColor: "var(--ow-bg-elevated)",
+              border: `1px solid ${copied ? "#22c55e44" : "var(--ow-border)"}`,
               borderRadius: "6px",
               padding: "4px 8px",
               display: "flex",
@@ -366,9 +366,9 @@ function DealCard({
           onClick={() => setExpanded((v) => !v)}
           style={{
             fontSize: "11px",
-            color: "#94a3b8",
-            backgroundColor: "#161622",
-            border: "1px solid #1c1c2a",
+            color: "var(--ow-text-muted)",
+            backgroundColor: "var(--ow-bg-elevated)",
+            border: "1px solid var(--ow-border)",
             borderRadius: "6px",
             padding: "4px 8px",
             display: "flex",
@@ -391,20 +391,20 @@ function DealCard({
           style={{
             marginTop: "12px",
             paddingTop: "12px",
-            borderTop: "1px solid #1c1c2a",
+            borderTop: "1px solid var(--ow-border)",
           }}
         >
           {deal.outreach_message && (
             <div style={{ marginBottom: "10px" }}>
-              <div style={{ fontSize: "11px", color: "#64748b", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <div style={{ fontSize: "11px", color: "var(--ow-text-dim)", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 Outreach Message
               </div>
               <div
                 style={{
                   fontSize: "12px",
-                  color: "#94a3b8",
-                  backgroundColor: "#161622",
-                  border: "1px solid #1c1c2a",
+                  color: "var(--ow-text-muted)",
+                  backgroundColor: "var(--ow-bg-elevated)",
+                  border: "1px solid var(--ow-border)",
                   borderRadius: "6px",
                   padding: "8px 10px",
                   lineHeight: "1.5",
@@ -418,14 +418,14 @@ function DealCard({
 
           {deal.seller_response && (
             <div style={{ marginBottom: "10px" }}>
-              <div style={{ fontSize: "11px", color: "#64748b", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <div style={{ fontSize: "11px", color: "var(--ow-text-dim)", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 Seller Response
               </div>
               <div
                 style={{
                   fontSize: "12px",
-                  color: "#e2e8f0",
-                  backgroundColor: "#161622",
+                  color: "var(--ow-text)",
+                  backgroundColor: "var(--ow-bg-elevated)",
                   border: "1px solid #22c55e44",
                   borderRadius: "6px",
                   padding: "8px 10px",
@@ -445,14 +445,14 @@ function DealCard({
                 : deal.ai_analysis
               return (
                 <div>
-                  <div style={{ fontSize: "11px", color: "#64748b", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  <div style={{ fontSize: "11px", color: "var(--ow-text-dim)", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                     AI Analysis
                   </div>
                   <div
                     style={{
                       fontSize: "12px",
-                      color: "#94a3b8",
-                      backgroundColor: "#0b0b14",
+                      color: "var(--ow-text-muted)",
+                      backgroundColor: "var(--ow-bg)",
                       border: "1px solid #2563eb44",
                       borderRadius: "6px",
                       padding: "8px 10px",
@@ -466,8 +466,8 @@ function DealCard({
                           color: analysis.classification === "SERIOUS" ? "#22c55e"
                             : analysis.classification === "BROKER" ? "#ef4444"
                             : analysis.classification === "FIRM_PRICE" ? "#eab308"
-                            : "#94a3b8",
-                          backgroundColor: "#1c1c2a",
+                            : "var(--ow-text-muted)",
+                          backgroundColor: "var(--ow-border)",
                           borderRadius: "4px",
                           padding: "2px 6px",
                         }}
@@ -481,7 +481,7 @@ function DealCard({
                           color: analysis.recommendation === "ACCEPT" ? "#22c55e"
                             : analysis.recommendation === "WALK_AWAY" ? "#ef4444"
                             : "#2563eb",
-                          backgroundColor: "#1c1c2a",
+                          backgroundColor: "var(--ow-border)",
                           borderRadius: "4px",
                           padding: "2px 6px",
                         }}
@@ -489,7 +489,7 @@ function DealCard({
                         → {analysis.recommendation}
                       </span>
                       {analysis.counter_offer_price && (
-                        <span style={{ fontSize: "11px", color: "#94a3b8", backgroundColor: "#1c1c2a", borderRadius: "4px", padding: "2px 6px" }}>
+                        <span style={{ fontSize: "11px", color: "var(--ow-text-muted)", backgroundColor: "var(--ow-border)", borderRadius: "4px", padding: "2px 6px" }}>
                           Counter: ${Number(analysis.counter_offer_price).toLocaleString()}
                         </span>
                       )}
@@ -500,7 +500,7 @@ function DealCard({
                       </div>
                     )}
                     {analysis.our_next_message && (
-                      <div style={{ fontSize: "12px", color: "#94a3b8", lineHeight: "1.5", fontStyle: "italic" }}>
+                      <div style={{ fontSize: "12px", color: "var(--ow-text-muted)", lineHeight: "1.5", fontStyle: "italic" }}>
                         &ldquo;{analysis.our_next_message}&rdquo;
                       </div>
                     )}
@@ -513,7 +513,7 @@ function DealCard({
           })()}
 
           {deal.notes && (
-            <div style={{ marginTop: "8px", fontSize: "12px", color: "#64748b", fontStyle: "italic" }}>
+            <div style={{ marginTop: "8px", fontSize: "12px", color: "var(--ow-text-dim)", fontStyle: "italic" }}>
               📝 {deal.notes}
             </div>
           )}
@@ -550,9 +550,9 @@ function StatusDropdown({
         onClick={() => setOpen((v) => !v)}
         style={{
           fontSize: "11px",
-          color: "#94a3b8",
-          backgroundColor: "#161622",
-          border: "1px solid #1c1c2a",
+          color: "var(--ow-text-muted)",
+          backgroundColor: "var(--ow-bg-elevated)",
+          border: "1px solid var(--ow-border)",
           borderRadius: "6px",
           padding: "4px 8px",
           cursor: "pointer",
@@ -580,8 +580,8 @@ function StatusDropdown({
               top: "100%",
               left: 0,
               marginTop: "4px",
-              backgroundColor: "#111119",
-              border: "1px solid #1c1c2a",
+              backgroundColor: "var(--ow-bg-card)",
+              border: "1px solid var(--ow-border)",
               borderRadius: "8px",
               padding: "4px",
               zIndex: 20,
@@ -601,8 +601,8 @@ function StatusDropdown({
                   width: "100%",
                   textAlign: "left",
                   fontSize: "12px",
-                  color: s.value === currentStatus ? "#e2e8f0" : "#94a3b8",
-                  backgroundColor: s.value === currentStatus ? "#1c1c2a" : "transparent",
+                  color: s.value === currentStatus ? "var(--ow-text)" : "var(--ow-text-muted)",
+                  backgroundColor: s.value === currentStatus ? "var(--ow-border)" : "transparent",
                   border: "none",
                   borderRadius: "4px",
                   padding: "6px 10px",
@@ -610,7 +610,7 @@ function StatusDropdown({
                 }}
                 onMouseEnter={(e) => {
                   if (s.value !== currentStatus) {
-                    ;(e.currentTarget as HTMLButtonElement).style.backgroundColor = "#161622"
+                    ;(e.currentTarget as HTMLButtonElement).style.backgroundColor = "var(--ow-bg-elevated)"
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -691,19 +691,19 @@ function NewDealModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
 
   const inputStyle: React.CSSProperties = {
     width: "100%",
-    backgroundColor: "#0b0b14",
-    border: "1px solid #1c1c2a",
+    backgroundColor: "var(--ow-bg)",
+    border: "1px solid var(--ow-border)",
     borderRadius: "8px",
     padding: "8px 12px",
     fontSize: "13px",
-    color: "#e2e8f0",
+    color: "var(--ow-text)",
     outline: "none",
     boxSizing: "border-box",
   }
 
   const labelStyle: React.CSSProperties = {
     fontSize: "12px",
-    color: "#94a3b8",
+    color: "var(--ow-text-muted)",
     marginBottom: "4px",
     display: "block",
   }
@@ -726,8 +726,8 @@ function NewDealModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
     >
       <div
         style={{
-          backgroundColor: "#111119",
-          border: "1px solid #1c1c2a",
+          backgroundColor: "var(--ow-bg-card)",
+          border: "1px solid var(--ow-border)",
           borderRadius: "14px",
           padding: "24px",
           width: "100%",
@@ -737,7 +737,7 @@ function NewDealModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#e2e8f0", margin: 0 }}>
+          <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--ow-text)", margin: 0 }}>
             Add New Deal
           </h2>
           <button
@@ -745,7 +745,7 @@ function NewDealModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
             style={{
               backgroundColor: "transparent",
               border: "none",
-              color: "#64748b",
+              color: "var(--ow-text-dim)",
               cursor: "pointer",
               padding: "4px",
               borderRadius: "4px",
@@ -895,10 +895,10 @@ function NewDealModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
               style={{
                 flex: 1,
                 padding: "10px",
-                backgroundColor: "#161622",
-                border: "1px solid #1c1c2a",
+                backgroundColor: "var(--ow-bg-elevated)",
+                border: "1px solid var(--ow-border)",
                 borderRadius: "8px",
-                color: "#94a3b8",
+                color: "var(--ow-text-muted)",
                 fontSize: "13px",
                 cursor: "pointer",
                 fontWeight: 600,
@@ -1018,10 +1018,10 @@ export default function DealsPage() {
       <div style={{ marginBottom: "24px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", flexWrap: "wrap" }}>
           <div>
-            <h1 style={{ fontSize: "24px", fontWeight: 800, color: "#e2e8f0", margin: 0 }}>
+            <h1 style={{ fontSize: "24px", fontWeight: 800, color: "var(--ow-text)", margin: 0 }}>
               Deal Pipeline
             </h1>
-            <p style={{ fontSize: "14px", color: "#64748b", margin: "4px 0 0" }}>
+            <p style={{ fontSize: "14px", color: "var(--ow-text-dim)", margin: "4px 0 0" }}>
               Track watch acquisition deals from spotted → purchased
             </p>
           </div>
@@ -1067,7 +1067,7 @@ export default function DealsPage() {
             },
           ].map((stat) => (
             <div key={stat.label} style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-              <div style={{ fontSize: "11px", color: "#64748b", display: "flex", alignItems: "center", gap: "4px" }}>
+              <div style={{ fontSize: "11px", color: "var(--ow-text-dim)", display: "flex", alignItems: "center", gap: "4px" }}>
                 <span style={{ color: stat.color }}>{stat.icon}</span>
                 {stat.label}
               </div>
@@ -1076,7 +1076,7 @@ export default function DealsPage() {
                   fontFamily: "ui-monospace, monospace",
                   fontSize: "18px",
                   fontWeight: 700,
-                  color: "#e2e8f0",
+                  color: "var(--ow-text)",
                 }}
               >
                 {stat.value}
@@ -1101,7 +1101,7 @@ export default function DealsPage() {
             left: "12px",
             top: "50%",
             transform: "translateY(-50%)",
-            color: "#64748b",
+            color: "var(--ow-text-dim)",
           }}
         />
         <input
@@ -1111,12 +1111,12 @@ export default function DealsPage() {
           onChange={(e) => setSearch(e.target.value)}
           style={{
             width: "100%",
-            backgroundColor: "#111119",
-            border: "1px solid #1c1c2a",
+            backgroundColor: "var(--ow-bg-card)",
+            border: "1px solid var(--ow-border)",
             borderRadius: "10px",
             padding: "9px 12px 9px 36px",
             fontSize: "13px",
-            color: "#e2e8f0",
+            color: "var(--ow-text)",
             outline: "none",
             boxSizing: "border-box",
           }}
@@ -1145,7 +1145,7 @@ export default function DealsPage() {
 
       {/* Loading */}
       {loading && (
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#64748b", padding: "40px 0" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--ow-text-dim)", padding: "40px 0" }}>
           <Loader2 size={18} className="animate-spin" />
           Loading deals...
         </div>
@@ -1178,8 +1178,8 @@ export default function DealsPage() {
                     justifyContent: "space-between",
                     marginBottom: "12px",
                     padding: "10px 14px",
-                    backgroundColor: "#111119",
-                    border: "1px solid #1c1c2a",
+                    backgroundColor: "var(--ow-bg-card)",
+                    border: "1px solid var(--ow-border)",
                     borderRadius: "10px",
                   }}
                 >
@@ -1189,7 +1189,7 @@ export default function DealsPage() {
                       style={{
                         fontSize: "13px",
                         fontWeight: 700,
-                        color: "#e2e8f0",
+                        color: "var(--ow-text)",
                       }}
                     >
                       {col.label}
@@ -1216,11 +1216,11 @@ export default function DealsPage() {
                   {colDeals.length === 0 ? (
                     <div
                       style={{
-                        border: "1px dashed #1c1c2a",
+                        border: "1px dashed var(--ow-border)",
                         borderRadius: "10px",
                         padding: "24px",
                         textAlign: "center",
-                        color: "#475569",
+                        color: "var(--ow-text-faint)",
                         fontSize: "12px",
                       }}
                     >
@@ -1249,11 +1249,11 @@ export default function DealsPage() {
           style={{
             textAlign: "center",
             padding: "80px 20px",
-            color: "#64748b",
+            color: "var(--ow-text-dim)",
           }}
         >
           <div style={{ fontSize: "48px", marginBottom: "16px" }}>🔍</div>
-          <div style={{ fontSize: "18px", fontWeight: 700, color: "#94a3b8", marginBottom: "8px" }}>
+          <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--ow-text-muted)", marginBottom: "8px" }}>
             No deals yet
           </div>
           <p style={{ fontSize: "14px", marginBottom: "24px" }}>

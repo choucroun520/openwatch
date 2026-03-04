@@ -141,7 +141,7 @@ function FilterSidebar({
   return (
     <div className="flex flex-col gap-0">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "#1c1c2a" }}>
+      <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "var(--ow-border)" }}>
         <span className="text-sm font-bold text-foreground flex items-center gap-2">
           <Filter size={14} />
           Filter
@@ -157,7 +157,7 @@ function FilterSidebar({
       </div>
 
       {/* Status section */}
-      <div className="px-4 py-3 border-b" style={{ borderColor: "#1c1c2a" }}>
+      <div className="px-4 py-3 border-b" style={{ borderColor: "var(--ow-border)" }}>
         <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-2.5">Status</p>
         <div className="flex gap-2">
           <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white">
@@ -167,7 +167,7 @@ function FilterSidebar({
       </div>
 
       {/* Brand section */}
-      <div className="px-4 py-3 border-b" style={{ borderColor: "#1c1c2a" }}>
+      <div className="px-4 py-3 border-b" style={{ borderColor: "var(--ow-border)" }}>
         <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-2.5">Brand</p>
         <div className="space-y-1.5 max-h-80 overflow-y-auto">
           {/* All Brands */}
@@ -228,7 +228,7 @@ function FilterSidebar({
 
                 {/* Model sub-list */}
                 {isExpanded && models && models.size > 0 && (
-                  <div className="ml-4 pl-3 border-l mt-1 space-y-1" style={{ borderColor: "#1c1c2a" }}>
+                  <div className="ml-4 pl-3 border-l mt-1 space-y-1" style={{ borderColor: "var(--ow-border)" }}>
                     {[...models.entries()]
                       .sort((a, b) => b[1] - a[1])
                       .map(([modelKey, modelCount]) => {
@@ -251,7 +251,7 @@ function FilterSidebar({
                             )}>
                               {modelKey}
                             </span>
-                            <span className="text-[11px] shrink-0" style={{ color: "#475569" }}>
+                            <span className="text-[11px] shrink-0" style={{ color: "var(--ow-text-faint)" }}>
                               {modelCount}
                             </span>
                           </button>
@@ -267,7 +267,7 @@ function FilterSidebar({
 
       {/* Dealer section */}
       {dealers.length > 0 && (
-        <div className="px-4 py-3 border-b" style={{ borderColor: "#1c1c2a" }}>
+        <div className="px-4 py-3 border-b" style={{ borderColor: "var(--ow-border)" }}>
           <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-2.5">Dealer</p>
           <div className="space-y-1.5 max-h-48 overflow-y-auto">
             {/* All Dealers */}
@@ -314,7 +314,7 @@ function FilterSidebar({
       )}
 
       {/* Condition section */}
-      <div className="px-4 py-3 border-b" style={{ borderColor: "#1c1c2a" }}>
+      <div className="px-4 py-3 border-b" style={{ borderColor: "var(--ow-border)" }}>
         <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-2.5">Condition</p>
         <div className="space-y-1.5">
           {CONDITIONS.map((c) => (
@@ -332,7 +332,7 @@ function FilterSidebar({
       </div>
 
       {/* Has Box / Has Papers */}
-      <div className="px-4 py-3 border-b" style={{ borderColor: "#1c1c2a" }}>
+      <div className="px-4 py-3 border-b" style={{ borderColor: "var(--ow-border)" }}>
         <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-2.5">Completeness</p>
         <div className="space-y-2.5">
           <div className="flex items-center justify-between">
@@ -356,7 +356,7 @@ function FilterSidebar({
             value={minPrice}
             onChange={(e) => setMinPrice(e.target.value)}
             className="w-full h-8 px-2 rounded-lg text-sm text-foreground border placeholder:text-muted-foreground focus:outline-none"
-            style={{ background: "#161622", borderColor: "#22222e" }}
+            style={{ background: "var(--ow-bg-elevated)", borderColor: "var(--ow-border-light)" }}
           />
           <input
             type="number"
@@ -364,7 +364,7 @@ function FilterSidebar({
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
             className="w-full h-8 px-2 rounded-lg text-sm text-foreground border placeholder:text-muted-foreground focus:outline-none"
-            style={{ background: "#161622", borderColor: "#22222e" }}
+            style={{ background: "var(--ow-bg-elevated)", borderColor: "var(--ow-border-light)" }}
           />
         </div>
       </div>
@@ -547,7 +547,7 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
       {sidebarOpen && (
         <aside
           className="hidden lg:block w-64 shrink-0 border-r self-start sticky top-[73px] max-h-[calc(100vh-73px)] overflow-y-auto"
-          style={{ borderColor: "#1c1c2a" }}
+          style={{ borderColor: "var(--ow-border)" }}
         >
           <FilterSidebar {...sidebarProps} />
         </aside>
@@ -561,7 +561,7 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
           <button
             onClick={() => setSidebarOpen((v) => !v)}
             className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border transition-colors hover:bg-bg-elevated"
-            style={{ borderColor: "#1c1c2a", color: "#94a3b8" }}
+            style={{ borderColor: "var(--ow-border)", color: "var(--ow-text-muted)" }}
           >
             <SlidersHorizontal size={14} />
             {sidebarOpen ? "Hide" : "Filters"}
@@ -572,7 +572,7 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
             <SheetTrigger asChild>
               <button
                 className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border transition-colors"
-                style={{ borderColor: "#1c1c2a", color: "#94a3b8" }}
+                style={{ borderColor: "var(--ow-border)", color: "var(--ow-text-muted)" }}
               >
                 <Filter size={14} />
                 Filters
@@ -586,7 +586,7 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
             <SheetContent
               side="left"
               className="w-72 p-0 overflow-y-auto"
-              style={{ background: "#111119", borderColor: "#1c1c2a" }}
+              style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
             >
               <FilterSidebar {...sidebarProps} />
             </SheetContent>
@@ -614,10 +614,10 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
           {/* Sort + View toggle — right side */}
           <div className="flex items-center gap-2 ml-auto">
             <Select value={sort} onValueChange={setSort}>
-              <SelectTrigger className="w-40 h-8 text-sm" style={{ background: "#161622", borderColor: "#22222e" }}>
+              <SelectTrigger className="w-40 h-8 text-sm" style={{ background: "var(--ow-bg-elevated)", borderColor: "var(--ow-border-light)" }}>
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
-              <SelectContent style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+              <SelectContent style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
                 <SelectItem value="newest">Recently Listed</SelectItem>
                 <SelectItem value="price-asc">Price: Low → High</SelectItem>
                 <SelectItem value="price-desc">Price: High → Low</SelectItem>
@@ -625,14 +625,14 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
               </SelectContent>
             </Select>
 
-            <div className="flex rounded-lg border overflow-hidden" style={{ borderColor: "#22222e" }}>
+            <div className="flex rounded-lg border overflow-hidden" style={{ borderColor: "var(--ow-border-light)" }}>
               <button
                 onClick={() => setViewMode("grid")}
                 className={cn(
                   "p-1.5 transition-colors",
                   viewMode === "grid" ? "bg-blue-600 text-white" : "text-muted-foreground hover:text-foreground"
                 )}
-                style={viewMode !== "grid" ? { background: "#161622" } : undefined}
+                style={viewMode !== "grid" ? { background: "var(--ow-bg-elevated)" } : undefined}
               >
                 <LayoutGrid size={16} />
               </button>
@@ -642,7 +642,7 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
                   "p-1.5 transition-colors",
                   viewMode === "list" ? "bg-blue-600 text-white" : "text-muted-foreground hover:text-foreground"
                 )}
-                style={viewMode !== "list" ? { background: "#161622" } : undefined}
+                style={viewMode !== "list" ? { background: "var(--ow-bg-elevated)" } : undefined}
               >
                 <List size={16} />
               </button>
@@ -667,11 +667,11 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
             ))}
           </div>
         ) : (
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#1c1c2a" }}>
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--ow-border)" }}>
             {/* List header */}
             <div
               className="grid grid-cols-12 gap-3 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground"
-              style={{ background: "#0b0b14" }}
+              style={{ background: "var(--ow-bg)" }}
             >
               <div className="col-span-1" />
               <div className="col-span-4">Watch</div>
@@ -689,12 +689,12 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
                 target="_blank"
                 rel="noopener noreferrer"
                 className="grid grid-cols-12 gap-3 px-4 py-3 border-t items-center hover:bg-bg-elevated transition-colors"
-                style={{ borderColor: "#1c1c2a" }}
+                style={{ borderColor: "var(--ow-border)" }}
               >
                 {/* Watch icon */}
                 <div
                   className="col-span-1 w-10 h-10 rounded-lg flex items-center justify-center relative"
-                  style={{ background: l.brand.banner_gradient ?? "linear-gradient(135deg, #1e3a5f, #111119)" }}
+                  style={{ background: l.brand.banner_gradient ?? "linear-gradient(135deg, #1e3a5f, var(--ow-bg-card))" }}
                 >
                   <span className="text-base">⌚</span>
                   <span className="absolute -top-1 -right-1 text-[8px] px-1 rounded font-black text-white" style={{ background: "rgba(32,129,226,0.9)" }}>C24</span>
@@ -748,12 +748,12 @@ export default function NetworkGrid({ listings, brands, initialBrand }: NetworkG
                 key={l.id}
                 href={`/listing/${l.id}`}
                 className="grid grid-cols-12 gap-3 px-4 py-3 border-t items-center hover:bg-bg-elevated transition-colors"
-                style={{ borderColor: "#1c1c2a" }}
+                style={{ borderColor: "var(--ow-border)" }}
               >
                 {/* Watch icon */}
                 <div
                   className="col-span-1 w-10 h-10 rounded-lg flex items-center justify-center"
-                  style={{ background: l.brand.banner_gradient ?? "linear-gradient(135deg, #1e3a5f, #111119)" }}
+                  style={{ background: l.brand.banner_gradient ?? "linear-gradient(135deg, #1e3a5f, var(--ow-bg-card))" }}
                 >
                   <span className="text-base">⌚</span>
                 </div>

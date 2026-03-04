@@ -34,7 +34,7 @@ function ResultIcon({ type }: { type: SearchResult["type"] }) {
   if (type === "ref") return <Hash className={cls} style={{ color: "#10b981" }} />
   if (type === "brand") return <Store className={cls} style={{ color: "#2081E2" }} />
   if (type === "dealer") return <Store className={cls} style={{ color: "#f59e0b" }} />
-  return <TrendingUp className={cls} style={{ color: "#64748b" }} />
+  return <TrendingUp className={cls} style={{ color: "var(--ow-text-dim)" }} />
 }
 
 export default function CommandSearch() {
@@ -190,11 +190,11 @@ export default function CommandSearch() {
         {/* Loading / shortcut hint */}
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
           {loading ? (
-            <Loader2 size={12} className="animate-spin" style={{ color: "#64748b" }} />
+            <Loader2 size={12} className="animate-spin" style={{ color: "var(--ow-text-dim)" }} />
           ) : !open ? (
             <kbd
               className="text-[10px] px-1.5 py-0.5 rounded font-mono"
-              style={{ background: "#2a2a3a", color: "#64748b", border: "1px solid #333" }}
+              style={{ background: "#2a2a3a", color: "var(--ow-text-dim)", border: "1px solid #333" }}
             >
               ⌘K
             </kbd>
@@ -215,8 +215,8 @@ export default function CommandSearch() {
         <div
           className="absolute top-full left-0 right-0 mt-1.5 rounded-xl overflow-hidden z-50 shadow-2xl"
           style={{
-            background: "#111119",
-            border: "1px solid #1c1c2a",
+            background: "var(--ow-bg-card)",
+            border: "1px solid var(--ow-border)",
             maxHeight: "480px",
             overflowY: "auto",
           }}
@@ -233,7 +233,7 @@ export default function CommandSearch() {
                   onMouseEnter={() => setActiveIdx(i)}
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors",
-                    activeIdx === i ? "bg-[#1c1c2a]" : "hover:bg-[#161622]"
+                    activeIdx === i ? "bg-[var(--ow-border)]" : "hover:bg-[var(--ow-bg-elevated)]"
                   )}
                 >
                   {/* Thumbnail or icon */}
@@ -242,12 +242,12 @@ export default function CommandSearch() {
                       src={r.image}
                       alt=""
                       className="w-9 h-9 rounded-md object-cover shrink-0"
-                      style={{ background: "#0b0b14" }}
+                      style={{ background: "var(--ow-bg)" }}
                     />
                   ) : (
                     <div
                       className="w-9 h-9 rounded-md flex items-center justify-center shrink-0"
-                      style={{ background: "#161622" }}
+                      style={{ background: "var(--ow-bg-elevated)" }}
                     >
                       <ResultIcon type={r.type} />
                     </div>
@@ -256,7 +256,7 @@ export default function CommandSearch() {
                   {/* Text */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-sm font-medium truncate" style={{ color: "#e2e8f0" }}>
+                      <span className="text-sm font-medium truncate" style={{ color: "var(--ow-text)" }}>
                         {r.title}
                       </span>
                       {r.badge && (
@@ -293,7 +293,7 @@ export default function CommandSearch() {
                         </span>
                       )}
                     </div>
-                    <div className="text-xs truncate mt-0.5" style={{ color: "#64748b" }}>
+                    <div className="text-xs truncate mt-0.5" style={{ color: "var(--ow-text-dim)" }}>
                       {r.subtitle}
                     </div>
                   </div>
@@ -307,7 +307,7 @@ export default function CommandSearch() {
                     </div>
                   )}
 
-                  <ArrowRight size={12} className="shrink-0 opacity-0 group-hover:opacity-100" style={{ color: "#64748b" }} />
+                  <ArrowRight size={12} className="shrink-0 opacity-0 group-hover:opacity-100" style={{ color: "var(--ow-text-dim)" }} />
                 </button>
               ))}
             </div>
@@ -316,7 +316,7 @@ export default function CommandSearch() {
           {/* Empty state */}
           {query.length >= 2 && !loading && results.length === 0 && (
             <div className="px-4 py-8 text-center">
-              <p className="text-sm" style={{ color: "#64748b" }}>No results for &ldquo;{query}&rdquo;</p>
+              <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>No results for &ldquo;{query}&rdquo;</p>
               <button
                 onClick={() => navigate(`/network?q=${encodeURIComponent(query)}`, query)}
                 className="mt-2 text-xs underline transition-colors"
@@ -330,17 +330,17 @@ export default function CommandSearch() {
           {/* Recent searches (shown when input is empty) */}
           {query.length === 0 && recentSearches.length > 0 && (
             <div className="p-1">
-              <div className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#64748b" }}>
+              <div className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>
                 Recent
               </div>
               {recentSearches.map((s) => (
                 <button
                   key={s}
                   onClick={() => { setQuery(s); inputRef.current?.focus() }}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#161622] text-left transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--ow-bg-elevated)] text-left transition-colors"
                 >
-                  <Clock size={13} className="shrink-0" style={{ color: "#64748b" }} />
-                  <span className="text-sm" style={{ color: "#94a3b8" }}>{s}</span>
+                  <Clock size={13} className="shrink-0" style={{ color: "var(--ow-text-dim)" }} />
+                  <span className="text-sm" style={{ color: "var(--ow-text-muted)" }}>{s}</span>
                 </button>
               ))}
             </div>
@@ -349,17 +349,17 @@ export default function CommandSearch() {
           {/* Popular searches (shown when input is empty and no recent) */}
           {query.length === 0 && recentSearches.length === 0 && (
             <div className="p-1">
-              <div className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#64748b" }}>
+              <div className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>
                 Popular
               </div>
               {POPULAR.map((p) => (
                 <button
                   key={p.q}
                   onClick={() => { setQuery(p.q); inputRef.current?.focus() }}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#161622] text-left transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--ow-bg-elevated)] text-left transition-colors"
                 >
-                  <TrendingUp size={13} className="shrink-0" style={{ color: "#64748b" }} />
-                  <span className="text-sm" style={{ color: "#94a3b8" }}>{p.label}</span>
+                  <TrendingUp size={13} className="shrink-0" style={{ color: "var(--ow-text-dim)" }} />
+                  <span className="text-sm" style={{ color: "var(--ow-text-muted)" }}>{p.label}</span>
                 </button>
               ))}
             </div>
@@ -368,7 +368,7 @@ export default function CommandSearch() {
           {/* Quick-action shortcuts */}
           <div
             className="flex items-center gap-2 px-3 py-2"
-            style={{ borderTop: "1px solid #1c1c2a" }}
+            style={{ borderTop: "1px solid var(--ow-border)" }}
           >
             <button
               onClick={() => navigate("/analytics")}
@@ -390,7 +390,7 @@ export default function CommandSearch() {
           {results.length > 0 && (
             <div
               className="flex items-center gap-3 px-3 py-2 text-[10px]"
-              style={{ borderTop: "1px solid #1c1c2a", color: "#64748b" }}
+              style={{ borderTop: "1px solid var(--ow-border)", color: "var(--ow-text-dim)" }}
             >
               <span><kbd className="font-mono">↑↓</kbd> navigate</span>
               <span><kbd className="font-mono">↵</kbd> open</span>

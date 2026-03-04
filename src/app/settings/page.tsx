@@ -32,7 +32,7 @@ type SettingsTab = "sources" | "keys"
 const STATUS_CONFIG = {
   active:     { label: "Active",      color: "#10b981", icon: CheckCircle2 },
   needs_key:  { label: "Needs Key",   color: "#f59e0b", icon: Key },
-  inactive:   { label: "Inactive",    color: "#64748b", icon: Clock },
+  inactive:   { label: "Inactive",    color: "var(--ow-text-dim)", icon: Clock },
   error:      { label: "Error",       color: "#ef4444", icon: XCircle },
 }
 
@@ -90,12 +90,12 @@ function SourceCard({ src }: { src: DataSource }) {
   return (
     <div
       className="rounded-xl overflow-hidden transition-all"
-      style={{ background: "#111119", border: "1px solid #1c1c2a" }}
+      style={{ background: "var(--ow-bg-card)", border: "1px solid var(--ow-border)" }}
     >
       {/* Header row */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#161622] transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[var(--ow-bg-elevated)] transition-colors"
       >
         {/* Flag */}
         <span className="text-xl shrink-0 w-7">{src.flag}</span>
@@ -103,13 +103,13 @@ function SourceCard({ src }: { src: DataSource }) {
         {/* Name + badges */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>{src.name}</span>
+            <span className="text-sm font-semibold" style={{ color: "var(--ow-text)" }}>{src.name}</span>
             <CategoryBadge category={src.category} />
           </div>
           <div className="flex items-center gap-3 mt-0.5">
-            <span className="text-[11px]" style={{ color: "#64748b" }}>{src.market} · {src.currency}</span>
+            <span className="text-[11px]" style={{ color: "var(--ow-text-dim)" }}>{src.market} · {src.currency}</span>
             {src.last_sync_ago && (
-              <span className="text-[11px]" style={{ color: "#64748b" }}>Last sync: {src.last_sync_ago}</span>
+              <span className="text-[11px]" style={{ color: "var(--ow-text-dim)" }}>Last sync: {src.last_sync_ago}</span>
             )}
           </div>
         </div>
@@ -117,21 +117,21 @@ function SourceCard({ src }: { src: DataSource }) {
         {/* Stats */}
         {src.listing_count > 0 && (
           <div className="shrink-0 text-right mr-2">
-            <div className="text-sm font-bold" style={{ color: "#e2e8f0" }}>{fmt(src.listing_count)}</div>
-            <div className="text-[10px]" style={{ color: "#64748b" }}>listings</div>
+            <div className="text-sm font-bold" style={{ color: "var(--ow-text)" }}>{fmt(src.listing_count)}</div>
+            <div className="text-[10px]" style={{ color: "var(--ow-text-dim)" }}>listings</div>
           </div>
         )}
 
         {/* Status */}
         <StatusBadge status={src.status} />
-        {open ? <ChevronUp size={14} style={{ color: "#64748b" }} /> : <ChevronDown size={14} style={{ color: "#64748b" }} />}
+        {open ? <ChevronUp size={14} style={{ color: "var(--ow-text-dim)" }} /> : <ChevronDown size={14} style={{ color: "var(--ow-text-dim)" }} />}
       </button>
 
       {/* Expandable detail */}
       {open && (
-        <div className="px-4 pb-4 pt-1" style={{ borderTop: "1px solid #1c1c2a" }}>
+        <div className="px-4 pb-4 pt-1" style={{ borderTop: "1px solid var(--ow-border)" }}>
           {src.notes && (
-            <p className="text-xs mb-3 mt-2" style={{ color: "#94a3b8" }}>{src.notes}</p>
+            <p className="text-xs mb-3 mt-2" style={{ color: "var(--ow-text-muted)" }}>{src.notes}</p>
           )}
 
           {src.requires_key && !src.has_key && (
@@ -146,10 +146,10 @@ function SourceCard({ src }: { src: DataSource }) {
 
           {src.run_cmd && (
             <div className="mt-2">
-              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: "#64748b" }}>Run manually</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: "var(--ow-text-dim)" }}>Run manually</p>
               <div
                 className="flex items-center justify-between px-3 py-2 rounded-lg font-mono text-xs"
-                style={{ background: "#0b0b14", border: "1px solid #1c1c2a", color: "#94a3b8" }}
+                style={{ background: "var(--ow-bg)", border: "1px solid var(--ow-border)", color: "var(--ow-text-muted)" }}
               >
                 <span className="truncate">{src.run_cmd}</span>
                 <button
@@ -191,19 +191,19 @@ function KeyCard({ apiKey, onSave, onDelete }: {
   return (
     <div
       className="rounded-xl p-4"
-      style={{ background: "#111119", border: `1px solid ${apiKey.is_set ? "#10b98133" : "#1c1c2a"}` }}
+      style={{ background: "var(--ow-bg-card)", border: `1px solid ${apiKey.is_set ? "#10b98133" : "var(--ow-border)"}` }}
     >
       <div className="flex items-start gap-3">
         <div
           className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mt-0.5"
-          style={{ background: apiKey.is_set ? "#10b98118" : "#1c1c2a" }}
+          style={{ background: apiKey.is_set ? "#10b98118" : "var(--ow-border)" }}
         >
-          <Icon size={15} style={{ color: apiKey.is_set ? "#10b981" : "#64748b" }} />
+          <Icon size={15} style={{ color: apiKey.is_set ? "#10b981" : "var(--ow-text-dim)" }} />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>{apiKey.label}</span>
+            <span className="text-sm font-semibold" style={{ color: "var(--ow-text)" }}>{apiKey.label}</span>
             {apiKey.is_set ? (
               <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                 style={{ background: "#10b98118", color: "#10b981" }}>
@@ -222,10 +222,10 @@ function KeyCard({ apiKey, onSave, onDelete }: {
             )}
           </div>
 
-          <p className="text-xs mt-1 mb-2" style={{ color: "#64748b" }}>{apiKey.description}</p>
+          <p className="text-xs mt-1 mb-2" style={{ color: "var(--ow-text-dim)" }}>{apiKey.description}</p>
 
           {apiKey.updated_at && (
-            <p className="text-[10px] mb-2" style={{ color: "#475569" }}>
+            <p className="text-[10px] mb-2" style={{ color: "var(--ow-text-faint)" }}>
               Last updated: {new Date(apiKey.updated_at).toLocaleDateString()}
             </p>
           )}
@@ -254,7 +254,7 @@ function KeyCard({ apiKey, onSave, onDelete }: {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1"
-                  style={{ background: "#1c1c2a", color: "#94a3b8" }}
+                  style={{ background: "var(--ow-border)", color: "var(--ow-text-muted)" }}
                 >
                   <ExternalLink size={11} /> Get key
                 </a>
@@ -271,15 +271,15 @@ function KeyCard({ apiKey, onSave, onDelete }: {
                     autoFocus
                     className="w-full h-9 px-3 pr-9 rounded-lg text-xs font-mono focus:outline-none"
                     style={{
-                      background: "#0b0b14",
+                      background: "var(--ow-bg)",
                       border: "1px solid #2081E2",
-                      color: "#e2e8f0",
+                      color: "var(--ow-text)",
                     }}
                   />
                   <button
                     onClick={() => setShow(s => !s)}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2"
-                    style={{ color: "#64748b" }}
+                    style={{ color: "var(--ow-text-dim)" }}
                   >
                     {show ? <EyeOff size={13} /> : <Eye size={13} />}
                   </button>
@@ -296,7 +296,7 @@ function KeyCard({ apiKey, onSave, onDelete }: {
                 <button
                   onClick={() => { setEditing(false); setValue("") }}
                   className="h-9 px-3 rounded-lg text-xs transition-colors"
-                  style={{ background: "#1c1c2a", color: "#94a3b8" }}
+                  style={{ background: "var(--ow-border)", color: "var(--ow-text-muted)" }}
                 >
                   Cancel
                 </button>
@@ -386,7 +386,7 @@ export default function SettingsPage() {
         {/* ── Header ── */}
         <div className="mb-6">
           <h1 className="text-2xl font-black text-white mb-1">Settings</h1>
-          <p className="text-sm" style={{ color: "#64748b" }}>Manage data sources, API keys, and integrations</p>
+          <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>Manage data sources, API keys, and integrations</p>
         </div>
 
         {/* ── Stats bar ── */}
@@ -397,10 +397,10 @@ export default function SettingsPage() {
             { label: "API Keys Set", value: `${keysSet}/${apiKeys.length}`, color: "#2081E2", icon: CheckCircle2 },
             { label: "Total Datapoints", value: fmt(totalListings), color: "#a78bfa", icon: Database },
           ].map(({ label, value, color, icon: Icon }) => (
-            <div key={label} className="rounded-xl px-4 py-3" style={{ background: "#111119", border: "1px solid #1c1c2a" }}>
+            <div key={label} className="rounded-xl px-4 py-3" style={{ background: "var(--ow-bg-card)", border: "1px solid var(--ow-border)" }}>
               <div className="flex items-center gap-2 mb-1">
                 <Icon size={13} style={{ color }} />
-                <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#64748b" }}>{label}</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>{label}</span>
               </div>
               <div className="text-xl font-black" style={{ color }}>{value}</div>
             </div>
@@ -408,7 +408,7 @@ export default function SettingsPage() {
         </div>
 
         {/* ── Tab bar ── */}
-        <div className="flex items-center gap-1 mb-6 p-1 rounded-xl" style={{ background: "#111119", border: "1px solid #1c1c2a" }}>
+        <div className="flex items-center gap-1 mb-6 p-1 rounded-xl" style={{ background: "var(--ow-bg-card)", border: "1px solid var(--ow-border)" }}>
           {(["sources", "keys"] as SettingsTab[]).map(t => (
             <button
               key={t}
@@ -418,8 +418,8 @@ export default function SettingsPage() {
                 tab === t ? "text-white" : "hover:text-white"
               )}
               style={{
-                background: tab === t ? "#1c1c2a" : "transparent",
-                color: tab === t ? "#fff" : "#64748b",
+                background: tab === t ? "var(--ow-border)" : "transparent",
+                color: tab === t ? "#fff" : "var(--ow-text-dim)",
               }}
             >
               {t === "sources" ? <><Database size={14} /> Data Sources</> : <><Key size={14} /> API Keys</>}
@@ -428,8 +428,8 @@ export default function SettingsPage() {
           <button
             onClick={fetchData}
             disabled={refreshing}
-            className="p-2 rounded-lg transition-colors hover:bg-[#1c1c2a]"
-            style={{ color: "#64748b" }}
+            className="p-2 rounded-lg transition-colors hover:bg-[var(--ow-border)]"
+            style={{ color: "var(--ow-text-dim)" }}
             title="Refresh"
           >
             <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
@@ -447,8 +447,8 @@ export default function SettingsPage() {
                   onClick={() => setFilterCategory(cat)}
                   className="text-xs px-3 py-1.5 rounded-full font-semibold transition-colors"
                   style={{
-                    background: filterCategory === cat ? "#2081E2" : "#1c1c2a",
-                    color: filterCategory === cat ? "#fff" : "#94a3b8",
+                    background: filterCategory === cat ? "#2081E2" : "var(--ow-border)",
+                    color: filterCategory === cat ? "#fff" : "var(--ow-text-muted)",
                   }}
                 >
                   {cat === "all" ? "All Sources" :
@@ -462,7 +462,7 @@ export default function SettingsPage() {
 
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <RefreshCw size={20} className="animate-spin" style={{ color: "#64748b" }} />
+                <RefreshCw size={20} className="animate-spin" style={{ color: "var(--ow-text-dim)" }} />
               </div>
             ) : (
               <div className="flex flex-col gap-2">
@@ -475,13 +475,13 @@ export default function SettingsPage() {
             {/* Help footer */}
             <div
               className="mt-6 rounded-xl px-4 py-4 text-xs"
-              style={{ background: "#111119", border: "1px solid #1c1c2a", color: "#64748b" }}
+              style={{ background: "var(--ow-bg-card)", border: "1px solid var(--ow-border)", color: "var(--ow-text-dim)" }}
             >
-              <p className="font-semibold mb-1" style={{ color: "#94a3b8" }}>💡 How to populate data</p>
+              <p className="font-semibold mb-1" style={{ color: "var(--ow-text-muted)" }}>💡 How to populate data</p>
               <p>Run the global market scanner to populate price data across all 9 markets:</p>
               <code
                 className="block mt-2 px-3 py-2 rounded-lg font-mono text-xs"
-                style={{ background: "#0b0b14", color: "#10b981" }}
+                style={{ background: "var(--ow-bg)", color: "#10b981" }}
               >
                 node scripts/run-global-scan.mjs --quick
               </code>
@@ -492,19 +492,19 @@ export default function SettingsPage() {
         {/* ── API Keys Tab ── */}
         {tab === "keys" && (
           <div>
-            <p className="text-sm mb-4" style={{ color: "#64748b" }}>
+            <p className="text-sm mb-4" style={{ color: "var(--ow-text-dim)" }}>
               API keys are stored securely in your database. They unlock additional data sources and AI features.
             </p>
 
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <RefreshCw size={20} className="animate-spin" style={{ color: "#64748b" }} />
+                <RefreshCw size={20} className="animate-spin" style={{ color: "var(--ow-text-dim)" }} />
               </div>
             ) : (
               <div className="flex flex-col gap-6">
                 {keyGroups.map(group => (
                   <div key={group}>
-                    <h3 className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "#64748b" }}>
+                    <h3 className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "var(--ow-text-dim)" }}>
                       {group}
                     </h3>
                     <div className="flex flex-col gap-2">
@@ -529,7 +529,7 @@ export default function SettingsPage() {
       {toast && (
         <div
           className="fixed bottom-6 right-6 px-4 py-3 rounded-xl text-sm font-medium shadow-2xl z-50 transition-all"
-          style={{ background: "#111119", border: "1px solid #1c1c2a", color: "#e2e8f0" }}
+          style={{ background: "var(--ow-bg-card)", border: "1px solid var(--ow-border)", color: "var(--ow-text)" }}
         >
           {toast}
         </div>

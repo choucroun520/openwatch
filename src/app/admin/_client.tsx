@@ -47,7 +47,7 @@ function VerifiedIndicator({ verified }: { verified: boolean }) {
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 text-xs text-[#475569]">
+    <span className="inline-flex items-center gap-1 text-xs text-[var(--ow-text-faint)]">
       <Clock size={12} />
       Pending
     </span>
@@ -158,7 +158,7 @@ export default function AdminClient({
                   (h) => (
                     <TableHead
                       key={h}
-                      className="text-xs text-[#475569] uppercase tracking-wider"
+                      className="text-xs text-[var(--ow-text-faint)] uppercase tracking-wider"
                     >
                       {h}
                     </TableHead>
@@ -197,7 +197,7 @@ export default function AdminClient({
                   <TableCell>
                     <VerifiedIndicator verified={dealer.verified} />
                   </TableCell>
-                  <TableCell className="text-xs text-[#475569] whitespace-nowrap">
+                  <TableCell className="text-xs text-[var(--ow-text-faint)] whitespace-nowrap">
                     {dealer.joined_at ? timeAgo(dealer.joined_at) : "—"}
                   </TableCell>
                   <TableCell>
@@ -212,7 +212,7 @@ export default function AdminClient({
                       </Button>
                     )}
                     {dealer.verified && (
-                      <span className="text-xs text-[#475569]">—</span>
+                      <span className="text-xs text-[var(--ow-text-faint)]">—</span>
                     )}
                   </TableCell>
                 </TableRow>
@@ -247,7 +247,7 @@ export default function AdminClient({
                 {["Code", "Status", "Used By", "Uses", "Created"].map((h) => (
                   <TableHead
                     key={h}
-                    className="text-xs text-[#475569] uppercase tracking-wider"
+                    className="text-xs text-[var(--ow-text-faint)] uppercase tracking-wider"
                   >
                     {h}
                   </TableHead>
@@ -282,7 +282,7 @@ export default function AdminClient({
                   <TableCell className="text-sm text-muted-foreground font-mono">
                     {code.use_count}/{code.max_uses}
                   </TableCell>
-                  <TableCell className="text-xs text-[#475569] whitespace-nowrap">
+                  <TableCell className="text-xs text-[var(--ow-text-faint)] whitespace-nowrap">
                     {code.created_at ? timeAgo(code.created_at) : "—"}
                   </TableCell>
                 </TableRow>

@@ -140,7 +140,7 @@ export default async function RefDeepDivePage({
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <nav className="text-sm mb-6 flex items-center gap-2" style={{ color: "#64748b" }}>
+        <nav className="text-sm mb-6 flex items-center gap-2" style={{ color: "var(--ow-text-dim)" }}>
           <Link href="/analytics" className="hover:text-white transition-colors">Analytics</Link>
           <span>/</span>
           <Link href="/trending" className="hover:text-white transition-colors">Trending</Link>
@@ -173,7 +173,7 @@ export default async function RefDeepDivePage({
                 className="flex items-center gap-1 text-sm font-bold px-2.5 py-1 rounded-full"
                 style={{
                   background: change30d > 0 ? "rgba(34,197,94,0.12)" : change30d < 0 ? "rgba(239,68,68,0.12)" : "rgba(100,116,139,0.12)",
-                  color: change30d > 0 ? "#22c55e" : change30d < 0 ? "#ef4444" : "#94a3b8",
+                  color: change30d > 0 ? "#22c55e" : change30d < 0 ? "#ef4444" : "var(--ow-text-muted)",
                 }}
               >
                 {change30d > 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
@@ -181,7 +181,7 @@ export default async function RefDeepDivePage({
               </span>
             )}
           </div>
-          <p className="text-sm mt-1" style={{ color: "#64748b" }}>
+          <p className="text-sm mt-1" style={{ color: "var(--ow-text-dim)" }}>
             Market intelligence · asking prices + confirmed sales
           </p>
         </div>
@@ -195,22 +195,22 @@ export default async function RefDeepDivePage({
             { label: "Listed Now", value: (marketStats?.total_listings ?? 0).toString() },
             { label: "Sales (90d)", value: (soldStats?.total_sold ?? 0).toString() },
           ].map(s => (
-            <div key={s.label} className="rounded-xl border p-3" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-              <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>{s.label}</p>
+            <div key={s.label} className="rounded-xl border p-3" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+              <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>{s.label}</p>
               <p className="text-xl font-black font-mono text-white mt-1">{s.value}</p>
             </div>
           ))}
         </div>
 
         {hasChartData ? (
-          <div className="rounded-2xl border p-5 mb-8" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+          <div className="rounded-2xl border p-5 mb-8" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
             <p className="text-sm font-semibold text-white mb-1">Price History</p>
-            <p className="text-xs mb-4" style={{ color: "#64748b" }}>Daily floor + avg asking price snapshots</p>
+            <p className="text-xs mb-4" style={{ color: "var(--ow-text-dim)" }}>Daily floor + avg asking price snapshots</p>
             <PriceHistoryDualChart data={chartData} height={220} />
           </div>
         ) : (
-          <div className="rounded-2xl border p-5 mb-8 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-            <p className="text-sm" style={{ color: "#64748b" }}>
+          <div className="rounded-2xl border p-5 mb-8 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+            <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>
               Price history builds over time.{" "}
               <code className="text-blue-400 text-xs">node scripts/snapshot-prices.mjs</code> seeds today&apos;s data.
             </p>
@@ -231,9 +231,9 @@ export default async function RefDeepDivePage({
                     href={filterUrl({ source: "" })}
                     className="px-2 py-1 rounded text-[11px] font-semibold transition-colors"
                     style={{
-                      background: !srcFilter ? "#2081E2" : "#111119",
+                      background: !srcFilter ? "#2081E2" : "var(--ow-bg-card)",
                       color: !srcFilter ? "#fff" : "#8A939B",
-                      border: `1px solid ${!srcFilter ? "#2081E2" : "#1c1c2a"}`,
+                      border: `1px solid ${!srcFilter ? "#2081E2" : "var(--ow-border)"}`,
                     }}
                   >All</Link>
                   {sources.map(s => (
@@ -242,9 +242,9 @@ export default async function RefDeepDivePage({
                       href={filterUrl({ source: s ?? "" })}
                       className="px-2 py-1 rounded text-[11px] font-semibold transition-colors capitalize"
                       style={{
-                        background: srcFilter === s ? "#2081E2" : "#111119",
+                        background: srcFilter === s ? "#2081E2" : "var(--ow-bg-card)",
                         color: srcFilter === s ? "#fff" : "#8A939B",
-                        border: `1px solid ${srcFilter === s ? "#2081E2" : "#1c1c2a"}`,
+                        border: `1px solid ${srcFilter === s ? "#2081E2" : "var(--ow-border)"}`,
                       }}
                     >
                       {s}
@@ -262,8 +262,8 @@ export default async function RefDeepDivePage({
                     href={filterUrl({ sort: s })}
                     className="px-2 py-1 rounded text-[11px] font-semibold transition-colors"
                     style={{
-                      background: sort === s ? "#1c1c2a" : "transparent",
-                      color: sort === s ? "#ffffff" : "#64748b",
+                      background: sort === s ? "var(--ow-border)" : "transparent",
+                      color: sort === s ? "#ffffff" : "var(--ow-text-dim)",
                       border: `1px solid ${sort === s ? "#333333" : "transparent"}`,
                     }}
                   >
@@ -275,8 +275,8 @@ export default async function RefDeepDivePage({
           </div>
 
           {listings.length === 0 ? (
-            <div className="rounded-xl border py-12 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-              <p className="text-sm" style={{ color: "#64748b" }}>No active listings for this reference.</p>
+            <div className="rounded-xl border py-12 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+              <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>No active listings for this reference.</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -296,33 +296,33 @@ export default async function RefDeepDivePage({
         {/* ── Recent Sales ── */}
         <section className="mb-8">
           <h2 className="text-lg font-black text-white mb-4">Recent Sales ({sales.length})</h2>
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#1c1c2a" }}>
-            <div className="grid grid-cols-12 gap-2 px-4 py-2 text-[11px] font-bold uppercase tracking-wider" style={{ background: "#0b0b14", color: "#64748b" }}>
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--ow-border)" }}>
+            <div className="grid grid-cols-12 gap-2 px-4 py-2 text-[11px] font-bold uppercase tracking-wider" style={{ background: "var(--ow-bg)", color: "var(--ow-text-dim)" }}>
               <div className="col-span-3">Price</div>
               <div className="col-span-3">Condition</div>
               <div className="col-span-3">Source / Dealer</div>
               <div className="col-span-3 text-right">Date</div>
             </div>
             {sales.length === 0 ? (
-              <div className="px-4 py-6 text-center text-sm" style={{ background: "#111119", color: "#64748b" }}>No confirmed sales.</div>
+              <div className="px-4 py-6 text-center text-sm" style={{ background: "var(--ow-bg-card)", color: "var(--ow-text-dim)" }}>No confirmed sales.</div>
             ) : sales.map((s, i) => {
               const dealerSlug = s.dealer_name ? dealerNameToSlug(s.dealer_name) : null
               return (
                 <div
                   key={s.id}
                   className="grid grid-cols-12 gap-2 px-4 py-2.5 border-t items-center"
-                  style={{ borderColor: "#1c1c2a", background: i % 2 === 0 ? "#111119" : "#0d0d15" }}
+                  style={{ borderColor: "var(--ow-border)", background: i % 2 === 0 ? "var(--ow-bg-card)" : "#0d0d15" }}
                 >
                   <div className="col-span-3 flex items-center gap-1.5">
                     <p className="text-sm font-black font-mono text-white">{formatCurrency(parseFloat(s.price))}</p>
                     {s.listing_url && (
-                      <a href={s.listing_url} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-blue-400 shrink-0" style={{ color: "#64748b" }}>
+                      <a href={s.listing_url} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-blue-400 shrink-0" style={{ color: "var(--ow-text-dim)" }}>
                         <ExternalLink size={11} />
                       </a>
                     )}
                   </div>
                   <div className="col-span-3">
-                    <span className="text-[11px] capitalize" style={{ color: "#94a3b8" }}>{s.condition ?? "—"}</span>
+                    <span className="text-[11px] capitalize" style={{ color: "var(--ow-text-muted)" }}>{s.condition ?? "—"}</span>
                   </div>
                   <div className="col-span-3">
                     <span className="text-[11px] px-1.5 py-0.5 rounded font-medium capitalize" style={{ background: "rgba(32,129,226,0.1)", color: "#60a5fa" }}>{s.source}</span>
@@ -330,14 +330,14 @@ export default async function RefDeepDivePage({
                       <Link
                         href={`/dealers/${dealerSlug}`}
                         className="block text-[10px] mt-0.5 hover:underline truncate"
-                        style={{ color: "#64748b" }}
+                        style={{ color: "var(--ow-text-dim)" }}
                       >
                         {s.dealer_name}
                       </Link>
                     )}
                   </div>
                   <div className="col-span-3 text-right">
-                    <p className="text-[11px]" style={{ color: "#64748b" }}>{s.sold_at ? shortTimeAgo(s.sold_at) : shortTimeAgo(s.scraped_at)}</p>
+                    <p className="text-[11px]" style={{ color: "var(--ow-text-dim)" }}>{s.sold_at ? shortTimeAgo(s.sold_at) : shortTimeAgo(s.scraped_at)}</p>
                   </div>
                 </div>
               )
@@ -346,11 +346,11 @@ export default async function RefDeepDivePage({
         </section>
 
         {marketStats && (
-          <div className="rounded-xl border p-5" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+          <div className="rounded-xl border p-5" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
             <h3 className="text-sm font-black text-white mb-3">Market Intelligence</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "#64748b" }}>Asking vs Sold</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--ow-text-dim)" }}>Asking vs Sold</p>
                 <p className="font-mono font-bold text-white">
                   {soldStats?.sold_avg && marketStats.avg_price
                     ? `${((parseFloat(marketStats.avg_price) - parseFloat(soldStats.sold_avg)) / parseFloat(soldStats.sold_avg) * 100).toFixed(1)}% above sold avg`
@@ -358,7 +358,7 @@ export default async function RefDeepDivePage({
                 </p>
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "#64748b" }}>Price Spread</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--ow-text-dim)" }}>Price Spread</p>
                 <p className="font-mono font-bold text-white">
                   {marketStats.floor_price && marketStats.ceiling_price
                     ? `${formatCurrency(parseFloat(marketStats.floor_price))} → ${formatCurrency(parseFloat(marketStats.ceiling_price))}`
@@ -366,17 +366,17 @@ export default async function RefDeepDivePage({
                 </p>
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "#64748b" }}>Buy Signal</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--ow-text-dim)" }}>Buy Signal</p>
                 {marketStats.floor_price && marketStats.avg_price ? (
                   parseFloat(marketStats.floor_price) < parseFloat(marketStats.avg_price) * 0.9 ? (
                     <span className="font-bold" style={{ color: "#22c55e" }}>🟢 Below avg — potential value</span>
                   ) : parseFloat(marketStats.floor_price) > parseFloat(marketStats.avg_price) * 1.1 ? (
                     <span className="font-bold" style={{ color: "#ef4444" }}>🔴 Above avg — overpriced</span>
                   ) : (
-                    <span className="font-bold" style={{ color: "#94a3b8" }}>🟡 At market rate</span>
+                    <span className="font-bold" style={{ color: "var(--ow-text-muted)" }}>🟡 At market rate</span>
                   )
                 ) : (
-                  <span style={{ color: "#64748b" }}>Insufficient data</span>
+                  <span style={{ color: "var(--ow-text-dim)" }}>Insufficient data</span>
                 )}
               </div>
             </div>

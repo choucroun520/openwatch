@@ -37,7 +37,7 @@ function PriceChange({ change }: { change: number | null }) {
     </span>
   )
   return (
-    <span className="flex items-center gap-0.5 text-[11px] font-bold" style={{ color: "#64748b" }}>
+    <span className="flex items-center gap-0.5 text-[11px] font-bold" style={{ color: "var(--ow-text-dim)" }}>
       <Minus size={11} />—
     </span>
   )
@@ -134,14 +134,14 @@ export default async function BrandPage({
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm" style={{ color: "#64748b" }}>
+        <nav className="flex items-center gap-2 text-sm" style={{ color: "var(--ow-text-dim)" }}>
           <Link href="/brands" className="hover:text-white transition-colors">Brands</Link>
           <span>/</span>
           <span className="text-white font-semibold">{brandName}</span>
         </nav>
 
         {/* Brand header */}
-        <div className="rounded-2xl border p-6" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
+        <div className="rounded-2xl border p-6" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
           <div className="flex items-center gap-4 mb-4">
             <BrandLogo brandName={brandName} size="lg" />
             <div>
@@ -153,25 +153,25 @@ export default async function BrandPage({
           </div>
 
           {/* Stats bar */}
-          <div className="flex flex-wrap gap-6 pt-4 border-t" style={{ borderColor: "#1c1c2a" }}>
+          <div className="flex flex-wrap gap-6 pt-4 border-t" style={{ borderColor: "var(--ow-border)" }}>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>Floor Price</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>Floor Price</p>
               <p className="text-lg font-black font-mono text-white mt-0.5">
                 {brandFloor ? formatCurrency(brandFloor) : "—"}
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>Avg Price</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>Avg Price</p>
               <p className="text-lg font-black font-mono text-white mt-0.5">
                 {brandAvg ? formatCurrency(brandAvg) : "—"}
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>Refs Tracked</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>Refs Tracked</p>
               <p className="text-lg font-black font-mono text-white mt-0.5">{refs.length}</p>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#64748b" }}>Total Listed</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>Total Listed</p>
               <p className="text-lg font-black font-mono text-white mt-0.5">{totalListings.toLocaleString()}</p>
             </div>
           </div>
@@ -183,7 +183,7 @@ export default async function BrandPage({
             {refs.length} references
           </p>
           <div className="flex items-center gap-2">
-            <span className="text-xs" style={{ color: "#64748b" }}>Sort by</span>
+            <span className="text-xs" style={{ color: "var(--ow-text-dim)" }}>Sort by</span>
             <div className="flex gap-1">
               {SORT_OPTIONS.map(opt => (
                 <Link
@@ -191,9 +191,9 @@ export default async function BrandPage({
                   href={`/brands/${slug}?sort=${opt.value}${min ? `&min=${min}` : ""}${max ? `&max=${max}` : ""}`}
                   className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
                   style={{
-                    background: sort === opt.value ? "#2081E2" : "#111119",
+                    background: sort === opt.value ? "#2081E2" : "var(--ow-bg-card)",
                     color: sort === opt.value ? "#ffffff" : "#8A939B",
-                    border: `1px solid ${sort === opt.value ? "#2081E2" : "#1c1c2a"}`,
+                    border: `1px solid ${sort === opt.value ? "#2081E2" : "var(--ow-border)"}`,
                   }}
                 >
                   {opt.label}
@@ -205,8 +205,8 @@ export default async function BrandPage({
 
         {/* Reference grid */}
         {refs.length === 0 ? (
-          <div className="rounded-xl border py-16 text-center" style={{ background: "#111119", borderColor: "#1c1c2a" }}>
-            <p className="text-sm" style={{ color: "#64748b" }}>
+          <div className="rounded-xl border py-16 text-center" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+            <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>
               No references found for {brandName}.{" "}
               <code className="text-blue-400 text-xs">node scripts/scrape-chrono24-market.mjs</code>
             </p>
@@ -219,21 +219,21 @@ export default async function BrandPage({
                 href={`/ref/${encodeURIComponent(ref.ref_number)}`}
                 className="rounded-xl border flex flex-col overflow-hidden transition-all duration-150 hover:-translate-y-0.5 hover:border-[#2081E2]"
                 style={{
-                  background: "#111119",
-                  borderColor: "#1c1c2a",
+                  background: "var(--ow-bg-card)",
+                  borderColor: "var(--ow-border)",
                   boxShadow: "0 1px 3px rgba(0,0,0,.3)",
                 }}
               >
                 {/* Image placeholder */}
                 <div
                   className="w-full aspect-square flex flex-col items-center justify-center gap-1"
-                  style={{ background: "#0b0b14" }}
+                  style={{ background: "var(--ow-bg)" }}
                 >
                   <span className="text-lg font-black font-mono text-white opacity-50 px-2 text-center leading-tight">
                     {ref.ref_number}
                   </span>
                   {ref.model && (
-                    <span className="text-[9px] uppercase tracking-wider px-2 text-center" style={{ color: "#64748b" }}>
+                    <span className="text-[9px] uppercase tracking-wider px-2 text-center" style={{ color: "var(--ow-text-dim)" }}>
                       {ref.model}
                     </span>
                   )}
@@ -249,7 +249,7 @@ export default async function BrandPage({
                     {ref.floor_price ? formatCurrency(ref.floor_price) : "—"}
                   </p>
                   <div className="flex items-center justify-between mt-0.5">
-                    <span className="text-[10px]" style={{ color: "#64748b" }}>
+                    <span className="text-[10px]" style={{ color: "var(--ow-text-dim)" }}>
                       {ref.listing_count} listed
                     </span>
                     <PriceChange change={ref.change_30d} />

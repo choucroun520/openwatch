@@ -20,7 +20,7 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#0b0b14" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--ow-bg)" }}>
       {/* Fixed left sidebar — renders on top of everything, z-40 */}
       <Sidebar />
 

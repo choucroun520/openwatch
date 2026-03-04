@@ -13,7 +13,7 @@ export function PriceChange({ value, className }: PriceChangeProps) {
     ? "text-success"
     : isNegative
       ? "text-danger"
-      : "text-[#475569]";
+      : "text-[var(--ow-text-faint)]";
 
   const formatted = `${isPositive ? "+" : ""}${value.toFixed(1)}%`;
 

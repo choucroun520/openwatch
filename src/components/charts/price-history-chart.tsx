@@ -29,7 +29,7 @@ function CustomTooltip({ active, payload, label }: any) {
   return (
     <div
       className="rounded-lg border p-3 text-sm shadow-xl"
-      style={{ background: "#161622", borderColor: "#22222e" }}
+      style={{ background: "var(--ow-bg-elevated)", borderColor: "var(--ow-border-light)" }}
     >
       <p className="text-muted-foreground text-xs mb-1">{label}</p>
       <p className="font-bold font-mono text-foreground">
@@ -44,7 +44,7 @@ export function PriceHistoryChart({ data, height = 200, color = "#2563eb" }: Pri
     return (
       <div
         className="flex items-center justify-center text-sm text-muted-foreground rounded-lg border"
-        style={{ height, background: "#111119", borderColor: "#1c1c2a" }}
+        style={{ height, background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
       >
         No price history yet
       </div>
@@ -62,15 +62,15 @@ export function PriceHistoryChart({ data, height = 200, color = "#2563eb" }: Pri
             <stop offset="95%" stopColor={color} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#1c1c2a" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--ow-border)" vertical={false} />
         <XAxis
           dataKey="label"
-          tick={{ fill: "#475569", fontSize: 11 }}
+          tick={{ fill: "var(--ow-text-faint)", fontSize: 11 }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
-          tick={{ fill: "#475569", fontSize: 11 }}
+          tick={{ fill: "var(--ow-text-faint)", fontSize: 11 }}
           axisLine={false}
           tickLine={false}
           tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}

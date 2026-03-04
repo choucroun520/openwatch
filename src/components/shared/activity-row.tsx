@@ -24,7 +24,7 @@ const EVENT_CONFIG: Record<string, { label: string; color: string; bg: string }>
 }
 
 function getEventConfig(type: string) {
-  return EVENT_CONFIG[type] ?? { label: type.replace(/_/g, " "), color: "#94a3b8", bg: "rgba(148,163,184,0.1)" }
+  return EVENT_CONFIG[type] ?? { label: type.replace(/_/g, " "), color: "var(--ow-text-muted)", bg: "rgba(148,163,184,0.1)" }
 }
 
 export function ActivityRow({
@@ -45,7 +45,7 @@ export function ActivityRow({
         "flex items-center gap-3 border-b last:border-0 hover:bg-bg-elevated transition-colors",
         compact ? "py-2 px-3" : "py-3 px-4"
       )}
-      style={{ borderColor: "#1c1c2a" }}
+      style={{ borderColor: "var(--ow-border)" }}
     >
       {/* Event badge */}
       <span

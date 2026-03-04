@@ -135,12 +135,12 @@ export default async function RankingsPage() {
         </div>
 
         {/* Rankings table */}
-        <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#1c1c2a" }}>
+        <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--ow-border)" }}>
           {/* Header */}
           <div
             className="grid items-center gap-4 px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground"
             style={{
-              background: "#0b0b14",
+              background: "var(--ow-bg)",
               gridTemplateColumns: "40px 1fr 120px 120px 100px 80px 80px 80px",
             }}
           >
@@ -157,7 +157,7 @@ export default async function RankingsPage() {
           {brandStats.length === 0 && (
             <div
               className="px-4 py-12 text-center text-sm text-muted-foreground border-t"
-              style={{ borderColor: "#1c1c2a" }}
+              style={{ borderColor: "var(--ow-border)" }}
             >
               No brand data available yet.
             </div>
@@ -169,7 +169,7 @@ export default async function RankingsPage() {
               href={`/collection/${bs.brand.slug}`}
               className="grid items-center gap-4 px-4 py-4 border-t hover:bg-bg-elevated transition-colors group"
               style={{
-                borderColor: "#1c1c2a",
+                borderColor: "var(--ow-border)",
                 gridTemplateColumns: "40px 1fr 120px 120px 100px 80px 80px 80px",
               }}
             >
@@ -177,7 +177,7 @@ export default async function RankingsPage() {
               <div className="text-center">
                 <span
                   className="text-sm font-black"
-                  style={{ color: bs.rank <= 3 ? "#eab308" : "#475569" }}
+                  style={{ color: bs.rank <= 3 ? "#eab308" : "var(--ow-text-faint)" }}
                 >
                   {bs.rank}
                 </span>
@@ -266,7 +266,7 @@ export default async function RankingsPage() {
               <div
                 key={s.label}
                 className="rounded-xl border p-4 text-center"
-                style={{ background: "#111119", borderColor: "#1c1c2a" }}
+                style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
               >
                 <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{s.label}</p>
                 <p className="text-xl font-black font-mono text-foreground mt-1">{s.value}</p>

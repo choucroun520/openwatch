@@ -96,7 +96,7 @@ export default function TopNav() {
       style={{
         backgroundColor: "rgba(11, 11, 20, 0.96)",
         backdropFilter: "blur(12px)",
-        borderColor: "#1c1c2a",
+        borderColor: "var(--ow-border)",
       }}
     >
       <div className="max-w-[1400px] mx-auto px-4 h-[72px] flex items-center gap-3">
@@ -125,7 +125,7 @@ export default function TopNav() {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search watches, references, dealers..."
               className="w-full h-10 pl-9 pr-4 rounded-xl text-sm bg-bg-elevated border border-border-default focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-foreground placeholder:text-muted-foreground transition-all"
-              style={{ background: "#161622", borderColor: "#1c1c2a" }}
+              style={{ background: "var(--ow-bg-elevated)", borderColor: "var(--ow-border)" }}
             />
           </div>
         </form>
@@ -229,7 +229,7 @@ export default function TopNav() {
                 <Avatar className="w-9 h-9 cursor-pointer ring-2 ring-border-default hover:ring-blue-500 transition-all">
                   <AvatarFallback
                     className="text-sm font-bold text-foreground"
-                    style={{ background: "#1a1a28" }}
+                    style={{ background: "var(--ow-bg-hover)" }}
                   >
                     {initials}
                   </AvatarFallback>
@@ -315,10 +315,10 @@ export default function TopNav() {
             <SheetContent
               side="right"
               className="w-80 p-0"
-              style={{ background: "#111119", borderColor: "#1c1c2a" }}
+              style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
             >
               {/* Mobile search */}
-              <div className="p-4 border-b" style={{ borderColor: "#1c1c2a" }}>
+              <div className="p-4 border-b" style={{ borderColor: "var(--ow-border)" }}>
                 <form onSubmit={(e) => { handleSearchSubmit(e); setMobileOpen(false) }}>
                   <div className="relative">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
@@ -328,7 +328,7 @@ export default function TopNav() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search..."
                       className="w-full h-9 pl-8 pr-3 rounded-lg text-sm border text-foreground placeholder:text-muted-foreground focus:outline-none"
-                      style={{ background: "#161622", borderColor: "#1c1c2a" }}
+                      style={{ background: "var(--ow-bg-elevated)", borderColor: "var(--ow-border)" }}
                     />
                   </div>
                 </form>
@@ -336,9 +336,9 @@ export default function TopNav() {
 
               {/* Mobile profile header */}
               {profile && (
-                <div className="px-4 py-3 border-b flex items-center gap-3" style={{ borderColor: "#1c1c2a" }}>
+                <div className="px-4 py-3 border-b flex items-center gap-3" style={{ borderColor: "var(--ow-border)" }}>
                   <Avatar className="w-10 h-10">
-                    <AvatarFallback className="text-sm font-bold text-foreground" style={{ background: "#1a1a28" }}>
+                    <AvatarFallback className="text-sm font-bold text-foreground" style={{ background: "var(--ow-bg-hover)" }}>
                       {initials}
                     </AvatarFallback>
                   </Avatar>
@@ -386,7 +386,7 @@ export default function TopNav() {
               </nav>
 
               {/* Mobile bottom actions */}
-              <div className="p-3 border-t mt-auto flex flex-col gap-2" style={{ borderColor: "#1c1c2a" }}>
+              <div className="p-3 border-t mt-auto flex flex-col gap-2" style={{ borderColor: "var(--ow-border)" }}>
                 <button
                   onClick={handleSignOut}
                   className="flex items-center gap-2.5 px-3 py-2 text-sm text-danger hover:bg-danger/10 transition-colors rounded-lg text-left"

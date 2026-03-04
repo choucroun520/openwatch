@@ -37,16 +37,16 @@ function CustomTooltip({ active, payload, label }: any) {
   return (
     <div
       className="rounded-lg border p-3 text-sm shadow-xl"
-      style={{ background: "#161622", borderColor: "#22222e" }}
+      style={{ background: "var(--ow-bg-elevated)", borderColor: "var(--ow-border-light)" }}
     >
-      <p className="text-xs mb-2" style={{ color: "#64748b" }}>{label}</p>
+      <p className="text-xs mb-2" style={{ color: "var(--ow-text-dim)" }}>{label}</p>
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {payload.map((p: any, i: number) => {
         if (p.dataKey === "listing_count") {
           return (
             <div key={i} className="flex items-center gap-2">
               <span className="w-2 h-2 rounded" style={{ background: "rgba(32,129,226,0.5)" }} />
-              <span className="text-xs" style={{ color: "#94a3b8" }}>Listed:</span>
+              <span className="text-xs" style={{ color: "var(--ow-text-muted)" }}>Listed:</span>
               <span className="font-bold font-mono text-white">{p.value}</span>
             </div>
           )
@@ -54,7 +54,7 @@ function CustomTooltip({ active, payload, label }: any) {
         return (
           <div key={i} className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full" style={{ background: p.color }} />
-            <span className="text-xs" style={{ color: "#94a3b8" }}>{p.name}:</span>
+            <span className="text-xs" style={{ color: "var(--ow-text-muted)" }}>{p.name}:</span>
             <span className="font-bold font-mono text-white">{formatCurrency(p.value)}</span>
           </div>
         )
@@ -89,9 +89,9 @@ export function PriceHistoryDualChart({
     return (
       <div
         className="rounded-2xl border p-8 mb-8 text-center"
-        style={{ background: "#111119", borderColor: "#1c1c2a" }}
+        style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
       >
-        <p className="text-sm" style={{ color: "#64748b" }}>
+        <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>
           Price history builds over time.{" "}
           <code className="text-xs" style={{ color: "#60a5fa" }}>
             node scripts/snapshot-prices.mjs
@@ -105,7 +105,7 @@ export function PriceHistoryDualChart({
   return (
     <div
       className="rounded-2xl border overflow-hidden mb-8"
-      style={{ background: "#111119", borderColor: "#1c1c2a" }}
+      style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-5 pb-3">
@@ -128,7 +128,7 @@ export function PriceHistoryDualChart({
               style={
                 range === r
                   ? { background: "#2081E2", color: "#fff" }
-                  : { color: "#64748b", background: "transparent" }
+                  : { color: "var(--ow-text-dim)", background: "transparent" }
               }
             >
               {r}
@@ -156,19 +156,19 @@ export function PriceHistoryDualChart({
             </defs>
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="#1c1c2a"
+              stroke="var(--ow-border)"
               vertical={false}
             />
             <XAxis
               dataKey="label"
-              tick={{ fill: "#475569", fontSize: 10 }}
+              tick={{ fill: "var(--ow-text-faint)", fontSize: 10 }}
               axisLine={false}
               tickLine={false}
               interval="preserveStartEnd"
             />
             <YAxis
               yAxisId="left"
-              tick={{ fill: "#475569", fontSize: 10 }}
+              tick={{ fill: "var(--ow-text-faint)", fontSize: 10 }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}

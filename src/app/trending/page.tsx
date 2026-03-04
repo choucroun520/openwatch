@@ -41,7 +41,7 @@ function PriceChange({ change }: { change: number }) {
     </span>
   )
   return (
-    <span className="flex items-center gap-0.5 text-xs font-bold" style={{ color: "#64748b" }}>
+    <span className="flex items-center gap-0.5 text-xs font-bold" style={{ color: "var(--ow-text-dim)" }}>
       <Minus size={11} />—
     </span>
   )
@@ -95,9 +95,9 @@ export default async function TrendingPage({
                 href={b === "All" ? "/trending" : `/trending?brand=${encodeURIComponent(b)}`}
                 className="px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
                 style={{
-                  background: active ? "#2081E2" : "#111119",
+                  background: active ? "#2081E2" : "var(--ow-bg-card)",
                   color: active ? "#ffffff" : "#8A939B",
-                  border: `1px solid ${active ? "#2081E2" : "#1c1c2a"}`,
+                  border: `1px solid ${active ? "#2081E2" : "var(--ow-border)"}`,
                 }}
               >
                 {b}
@@ -107,10 +107,10 @@ export default async function TrendingPage({
         </div>
 
         {/* Table */}
-        <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#1c1c2a" }}>
+        <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--ow-border)" }}>
           <div
             className="grid grid-cols-12 gap-3 px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider"
-            style={{ background: "#0b0b14", color: "#64748b" }}
+            style={{ background: "var(--ow-bg)", color: "var(--ow-text-dim)" }}
           >
             <div className="col-span-1 text-center">#</div>
             <div className="col-span-3">Reference</div>
@@ -123,12 +123,12 @@ export default async function TrendingPage({
           </div>
 
           {error ? (
-            <div className="px-4 py-8 text-center text-sm" style={{ background: "#111119", color: "#ef4444" }}>
+            <div className="px-4 py-8 text-center text-sm" style={{ background: "var(--ow-bg-card)", color: "#ef4444" }}>
               Error loading trending data.
             </div>
           ) : heatRows.length === 0 ? (
-            <div className="px-4 py-12 text-center" style={{ background: "#111119" }}>
-              <p className="text-sm" style={{ color: "#64748b" }}>
+            <div className="px-4 py-12 text-center" style={{ background: "var(--ow-bg-card)" }}>
+              <p className="text-sm" style={{ color: "var(--ow-text-dim)" }}>
                 No trending data yet.{" "}
                 <code className="text-blue-400 text-xs">node scripts/migrate-to-market-data.mjs</code>
               </p>
@@ -142,10 +142,10 @@ export default async function TrendingPage({
                   key={`${row.ref_number}-${i}`}
                   href={`/ref/${encodeURIComponent(row.ref_number)}`}
                   className="grid grid-cols-12 gap-3 px-4 py-3 border-t items-center hover:opacity-80 transition-opacity"
-                  style={{ borderColor: "#1c1c2a", background: i % 2 === 0 ? "#111119" : "#0d0d15" }}
+                  style={{ borderColor: "var(--ow-border)", background: i % 2 === 0 ? "var(--ow-bg-card)" : "#0d0d15" }}
                 >
                   <div className="col-span-1 text-center">
-                    <span className="text-sm font-mono" style={{ color: "#64748b" }}>{i + 1}</span>
+                    <span className="text-sm font-mono" style={{ color: "var(--ow-text-dim)" }}>{i + 1}</span>
                   </div>
                   <div className="col-span-3">
                     <p className="text-sm font-bold font-mono text-white truncate">{row.ref_number}</p>
@@ -153,7 +153,7 @@ export default async function TrendingPage({
                   <div className="col-span-2 min-w-0">
                     <p className="text-[11px] font-semibold truncate" style={{ color: "#60a5fa" }}>{row.brand}</p>
                     {row.model && (
-                      <p className="text-[10px] truncate" style={{ color: "#64748b" }}>{row.model}</p>
+                      <p className="text-[10px] truncate" style={{ color: "var(--ow-text-dim)" }}>{row.model}</p>
                     )}
                   </div>
                   <div className="col-span-2 text-right">
@@ -161,7 +161,7 @@ export default async function TrendingPage({
                       {row.floor_price ? formatCurrency(parseFloat(row.floor_price)) : "—"}
                     </p>
                     {row.avg_price && (
-                      <p className="text-[10px] font-mono" style={{ color: "#64748b" }}>
+                      <p className="text-[10px] font-mono" style={{ color: "var(--ow-text-dim)" }}>
                         avg {formatCurrency(parseFloat(row.avg_price))}
                       </p>
                     )}
@@ -180,7 +180,7 @@ export default async function TrendingPage({
                       className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold"
                       style={{
                         background: heat > 20 ? "rgba(234,179,8,0.12)" : heat > 10 ? "rgba(34,197,94,0.12)" : "rgba(100,116,139,0.12)",
-                        color: heat > 20 ? "#eab308" : heat > 10 ? "#22c55e" : "#94a3b8",
+                        color: heat > 20 ? "#eab308" : heat > 10 ? "#22c55e" : "var(--ow-text-muted)",
                       }}
                     >
                       {heat.toFixed(1)}
@@ -192,7 +192,7 @@ export default async function TrendingPage({
           )}
         </div>
 
-        <p className="text-xs text-center" style={{ color: "#475569" }}>
+        <p className="text-xs text-center" style={{ color: "var(--ow-text-faint)" }}>
           Heat score = (listings × 0.3) + (sales × 0.4) + (price trend × 0.3) · Asking data: last 30d · Sales: last 90d
         </p>
       </div>
