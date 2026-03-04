@@ -57,160 +57,6 @@ interface ArbitrageResult {
   last_updated: string
 }
 
-// Fallback mock data when market_comps is empty
-function getMockArbitrage(limit: number, minProfitPct: number): ArbitrageResult[] {
-  const mocks: ArbitrageResult[] = [
-    {
-      ref_number: "126610LN",
-      brand: "Rolex",
-      model_name: "Submariner Date",
-      buy_market: "EU",
-      buy_price_local: 12400,
-      buy_currency: "EUR",
-      buy_price_usd: 13480,
-      sell_market: "US",
-      sell_price_usd: 15600,
-      gross_spread_pct: 15.7,
-      import_costs_usd: 1771,
-      net_profit_usd: 349,
-      net_profit_pct: 2.6,
-      buy_listing_count: 34,
-      sell_listing_count: 18,
-      last_updated: new Date().toISOString(),
-    },
-    {
-      ref_number: "126710BLRO",
-      brand: "Rolex",
-      model_name: "GMT-Master II Pepsi",
-      buy_market: "EU",
-      buy_price_local: 14800,
-      buy_currency: "EUR",
-      buy_price_usd: 16087,
-      sell_market: "US",
-      sell_price_usd: 19500,
-      gross_spread_pct: 21.2,
-      import_costs_usd: 2125,
-      net_profit_usd: 1288,
-      net_profit_pct: 8.0,
-      buy_listing_count: 22,
-      sell_listing_count: 11,
-      last_updated: new Date().toISOString(),
-    },
-    {
-      ref_number: "116500LN",
-      brand: "Rolex",
-      model_name: "Daytona",
-      buy_market: "CH",
-      buy_price_local: 29500,
-      buy_currency: "CHF",
-      buy_price_usd: 33150,
-      sell_market: "US",
-      sell_price_usd: 40000,
-      gross_spread_pct: 20.7,
-      import_costs_usd: 3997,
-      net_profit_usd: 2853,
-      net_profit_pct: 8.6,
-      buy_listing_count: 15,
-      sell_listing_count: 8,
-      last_updated: new Date().toISOString(),
-    },
-    {
-      ref_number: "5711/1A-011",
-      brand: "Patek Philippe",
-      model_name: "Nautilus",
-      buy_market: "EU",
-      buy_price_local: 148000,
-      buy_currency: "EUR",
-      buy_price_usd: 160870,
-      sell_market: "US",
-      sell_price_usd: 185000,
-      gross_spread_pct: 15.0,
-      import_costs_usd: 16135,
-      net_profit_usd: 7995,
-      net_profit_pct: 4.9,
-      buy_listing_count: 8,
-      sell_listing_count: 5,
-      last_updated: new Date().toISOString(),
-    },
-    {
-      ref_number: "15510ST.OO.1320ST.06",
-      brand: "Audemars Piguet",
-      model_name: "Royal Oak",
-      buy_market: "EU",
-      buy_price_local: 38000,
-      buy_currency: "EUR",
-      buy_price_usd: 41304,
-      sell_market: "US",
-      sell_price_usd: 49500,
-      gross_spread_pct: 19.8,
-      import_costs_usd: 4598,
-      net_profit_usd: 3598,
-      net_profit_pct: 8.7,
-      buy_listing_count: 19,
-      sell_listing_count: 12,
-      last_updated: new Date().toISOString(),
-    },
-    {
-      ref_number: "126710BLNR",
-      brand: "Rolex",
-      model_name: "GMT-Master II Batman",
-      buy_market: "EU",
-      buy_price_local: 13900,
-      buy_currency: "EUR",
-      buy_price_usd: 15109,
-      sell_market: "US",
-      sell_price_usd: 18200,
-      gross_spread_pct: 20.5,
-      import_costs_usd: 1981,
-      net_profit_usd: 1110,
-      net_profit_pct: 7.3,
-      buy_listing_count: 25,
-      sell_listing_count: 14,
-      last_updated: new Date().toISOString(),
-    },
-    {
-      ref_number: "124060",
-      brand: "Rolex",
-      model_name: "Explorer",
-      buy_market: "EU",
-      buy_price_local: 8200,
-      buy_currency: "EUR",
-      buy_price_usd: 8913,
-      sell_market: "US",
-      sell_price_usd: 10400,
-      gross_spread_pct: 16.7,
-      import_costs_usd: 1223,
-      net_profit_usd: 264,
-      net_profit_pct: 2.9,
-      buy_listing_count: 41,
-      sell_listing_count: 22,
-      last_updated: new Date().toISOString(),
-    },
-    {
-      ref_number: "228395TBR",
-      brand: "Rolex",
-      model_name: "Sky-Dweller",
-      buy_market: "EU",
-      buy_price_local: 62000,
-      buy_currency: "EUR",
-      buy_price_usd: 67391,
-      sell_market: "US",
-      sell_price_usd: 80000,
-      gross_spread_pct: 18.7,
-      import_costs_usd: 7653,
-      net_profit_usd: 4956,
-      net_profit_pct: 7.4,
-      buy_listing_count: 9,
-      sell_listing_count: 6,
-      last_updated: new Date().toISOString(),
-    },
-  ]
-
-  return mocks
-    .filter((m) => m.net_profit_pct >= minProfitPct)
-    .sort((a, b) => b.net_profit_usd - a.net_profit_usd)
-    .slice(0, limit)
-}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -255,20 +101,14 @@ export async function GET(request: Request) {
     .gt("price", 0) as { data: MarketCompRow[] | null; error: { message: string } | null }
 
   if (compsErr) {
-    // Table doesn't exist or error — return mock data
-    return NextResponse.json({
-      arbitrage: getMockArbitrage(limit, minProfitPct),
-      meta: { source: "mock", reason: compsErr.message },
-    })
+    // Table doesn't exist or error — return empty array
+    return NextResponse.json([])
   }
 
   const rows: MarketCompRow[] = compsData ?? []
 
   if (rows.length === 0) {
-    return NextResponse.json({
-      arbitrage: getMockArbitrage(limit, minProfitPct),
-      meta: { source: "mock", reason: "market_comps table is empty" },
-    })
+    return NextResponse.json([])
   }
 
   // Group by ref_number, track prices by currency
@@ -367,14 +207,6 @@ export async function GET(request: Request) {
   // Sort by net_profit descending
   results.sort((a, b) => b.net_profit_usd - a.net_profit_usd)
 
-  return NextResponse.json({
-    arbitrage: results.slice(0, limit),
-    meta: {
-      source: "live",
-      fx_fetched_at: fxRow?.fetched_at ?? null,
-      min_profit_pct: minProfitPct,
-      total_refs_analyzed: refMap.size,
-      opportunities_found: results.length,
-    },
-  })
+  // Return plain array — no cross-currency pairs found means empty []
+  return NextResponse.json(results.slice(0, limit))
 }
