@@ -184,7 +184,7 @@ export default function CommandSearch() {
           style={{
             backgroundColor: "#1E1E2E",
             border: `1px solid ${open ? "#2081E2" : "#333333"}`,
-            color: "#ffffff",
+            color: "var(--foreground)",
           }}
         />
         {/* Loading / shortcut hint */}
