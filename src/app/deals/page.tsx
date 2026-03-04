@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import AppLayout from "@/components/layout/app-layout"
+import { shortTimeAgo } from "@/lib/utils/dates"
 import {
   Search,
   Plus,
@@ -60,8 +61,8 @@ const COLUMNS: {
   icon: string
   color: string
 }[] = [
-  { status: "spotted",       label: "Spotted",        icon: "🔍", color: "#2563eb" },
-  { status: "outreach_sent", label: "Outreach Sent",  icon: "📩", color: "#7c3aed" },
+  { status: "spotted",       label: "Spotted",        icon: "🔍", color: "#64748b" },
+  { status: "outreach_sent", label: "Outreach Sent",  icon: "📩", color: "#2563eb" },
   { status: "negotiating",   label: "Negotiating",    icon: "💬", color: "#eab308" },
   { status: "offer_accepted",label: "Offer Accepted", icon: "✅", color: "#22c55e" },
   { status: "passed",        label: "Passed",         icon: "❌", color: "#ef4444" },
@@ -312,7 +313,7 @@ function DealCard({
       </div>
 
       {/* Action buttons */}
-      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center" }}>
         {deal.listing_url && (
           <a
             href={deal.listing_url}
@@ -383,6 +384,19 @@ function DealCard({
           />
           Details
         </button>
+
+        {/* Relative time — bottom right */}
+        <span
+          style={{
+            marginLeft: "auto",
+            fontSize: "10px",
+            color: "var(--ow-text-faint)",
+            fontFamily: "ui-monospace, monospace",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {shortTimeAgo(deal.created_at)}
+        </span>
       </div>
 
       {/* Expanded details */}
@@ -1180,6 +1194,7 @@ export default function DealsPage() {
                     padding: "10px 14px",
                     backgroundColor: "var(--ow-bg-card)",
                     border: "1px solid var(--ow-border)",
+                    borderTop: `3px solid ${col.color}`,
                     borderRadius: "10px",
                   }}
                 >
@@ -1224,7 +1239,7 @@ export default function DealsPage() {
                         fontSize: "12px",
                       }}
                     >
-                      No deals
+                      No deals yet
                     </div>
                   ) : (
                     colDeals.map((deal) => (
