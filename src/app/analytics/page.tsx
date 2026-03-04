@@ -34,7 +34,6 @@ import {
   Globe,
   Tag,
   Brain,
-  Globe,
 } from "lucide-react"
 import { formatCurrency, formatCompact } from "@/lib/utils/currency"
 import { shortTimeAgo } from "@/lib/utils/dates"
@@ -1103,7 +1102,7 @@ export default function AnalyticsPage() {
                           tick={{ fill: "var(--ow-text)", fontSize: 11, fontFamily: "ui-monospace, monospace" }}
                           axisLine={false} tickLine={false} />
                         <Tooltip content={<SupplyTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
-                        <Bar dataKey="count" radius={[0, 4, 4, 0]} maxBarSize={20}>
+                        <Bar dataKey="count" radius={[0, 4, 4, 0]} maxBarSize={20} fill="#6b7280">
                           {supplyChartData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={BRAND_COLORS[entry.brand] ?? "#6b7280"} />
                           ))}
@@ -1124,8 +1123,9 @@ export default function AnalyticsPage() {
               <section>
                 <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
                   <div className="px-5 py-4 border-b" style={{ borderColor: "var(--ow-border)" }}>
-                    <h2 className="text-base font-black text-white">Grey Market vs. Retail</h2>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--ow-text-dim)" }}>
+                    <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: "var(--ow-text-faint)" }}>ANALYSIS</p>
+                    <h2 className="text-base font-black" style={{ borderLeft: "3px solid #2563eb", paddingLeft: "10px", color: "var(--ow-text)" }}>Grey Market vs. Retail</h2>
+                    <p className="text-xs mt-0.5 pl-3" style={{ color: "var(--ow-text-dim)" }}>
                       Asking-price premium above manufacturer retail — sorted by highest premium
                     </p>
                   </div>
@@ -1207,11 +1207,13 @@ export default function AnalyticsPage() {
                       label: "Asking Prices",
                       value: `${data.overview.total_listings.toLocaleString()} Chrono24 listings`,
                       color: "#22c55e",
+                      dotColor: data.overview.total_listings > 0 ? "#22c55e" : "#6b7280",
                     },
                     {
                       label: "Confirmed Sales",
                       value: "0 (eBay API key needed)",
                       color: "#ef4444",
+                      dotColor: "#ef4444",
                     },
                     {
                       label: "Last Sync",
@@ -1219,17 +1221,22 @@ export default function AnalyticsPage() {
                         ? `${data.overview.data_freshness_hours}h ago`
                         : "Never",
                       color: data.overview.data_freshness_hours < 24 ? "#22c55e" : "#eab308",
+                      dotColor: data.overview.last_updated ? "#22c55e" : "#6b7280",
                     },
                     {
                       label: "Refs Tracked",
                       value: `${data.overview.refs_tracked} unique references`,
                       color: "#2081E2",
+                      dotColor: data.overview.refs_tracked > 0 ? "#22c55e" : "#6b7280",
                     },
                   ].map((item) => (
                     <div key={item.label}>
-                      <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--ow-text-dim)" }}>
-                        {item.label}
-                      </p>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.dotColor }} />
+                        <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>
+                          {item.label}
+                        </p>
+                      </div>
                       <p className="text-sm font-bold" style={{ color: item.color }}>{item.value}</p>
                     </div>
                   ))}
