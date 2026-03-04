@@ -28,6 +28,10 @@ import {
   AlertTriangle,
   Package,
   Zap,
+  MessageSquare,
+  Briefcase,
+  List,
+  Globe,
   Tag,
   Brain,
   Globe,
@@ -415,6 +419,16 @@ type SortField = "heat_score" | "floor" | "avg" | "listings" | "spread"
 
 const MAIN_TABS: MainTab[] = ["market", "sentiment", "trending", "deals", "listings", "arbitrage", "trends"]
 
+const TAB_ICONS: Record<MainTab, React.ReactNode> = {
+  market:    <TrendingUp size={13} />,
+  sentiment: <MessageSquare size={13} />,
+  trending:  <Flame size={13} />,
+  deals:     <Briefcase size={13} />,
+  listings:  <List size={13} />,
+  arbitrage: <Globe size={13} />,
+  trends:    <BarChart2 size={13} />,
+}
+
 const MARKET_FLAGS: Record<string, string> = {
   EU: "🇪🇺", CH: "🇨🇭", UK: "🇬🇧", SG: "🇸🇬", JP: "🇯🇵", US: "🇺🇸", DE: "🇩🇪", FR: "🇫🇷",
 }
@@ -743,20 +757,27 @@ export default function AnalyticsPage() {
         </div>
 
         {/* ── Tab Bar ─────────────────────────────────────────────────────── */}
-        <div className="flex gap-0 border-b mb-8" style={{ borderColor: "var(--ow-border)" }}>
-          {MAIN_TABS.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setMainTab(tab)}
-              className="px-5 py-3 text-sm font-bold capitalize transition-colors relative"
-              style={{ color: mainTab === tab ? "#fff" : "var(--ow-text-dim)" }}
-            >
-              {tab}
-              {mainTab === tab && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
-              )}
-            </button>
-          ))}
+        <div className="flex gap-0 border-b mb-8 overflow-x-auto" style={{ borderColor: "var(--ow-border)" }}>
+          {MAIN_TABS.map((tab) => {
+            const active = mainTab === tab
+            return (
+              <button
+                key={tab}
+                onClick={() => setMainTab(tab)}
+                className="flex items-center gap-2 px-4 py-3 text-sm font-bold capitalize transition-all relative whitespace-nowrap shrink-0"
+                style={{
+                  color: active ? "#60a5fa" : "var(--ow-text-dim)",
+                  background: active ? "rgba(37,99,235,0.06)" : "transparent",
+                }}
+              >
+                <span style={{ color: active ? "#60a5fa" : "var(--ow-text-faint)" }}>{TAB_ICONS[tab]}</span>
+                {tab}
+                {active && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: "#2563eb" }} />
+                )}
+              </button>
+            )
+          })}
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════════
@@ -769,66 +790,76 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {[
                 {
-                  icon: <Package size={13} style={{ color: "#2081E2" }} />,
+                  icon: <Package size={14} />,
                   label: "Total Listings",
                   value: data.overview.total_listings.toLocaleString(),
-                  sub: null,
+                  sub: "active on market",
+                  accent: "#2563eb",
+                  valueColor: "var(--ow-text)",
                 },
                 {
-                  icon: <Tag size={13} style={{ color: "#6366f1" }} />,
+                  icon: <Tag size={14} />,
                   label: "Refs Tracked",
                   value: data.overview.refs_tracked.toString(),
-                  sub: null,
+                  sub: "reference numbers",
+                  accent: "#6366f1",
+                  valueColor: "var(--ow-text)",
                 },
                 {
-                  icon: <BarChart2 size={13} style={{ color: "#10b981" }} />,
+                  icon: <BarChart2 size={14} />,
                   label: "Brands",
                   value: data.overview.brands_covered.toString(),
-                  sub: null,
+                  sub: "maisons covered",
+                  accent: "#8b5cf6",
+                  valueColor: "var(--ow-text)",
                 },
                 {
-                  icon: <DollarSign size={13} style={{ color: "#22c55e" }} />,
+                  icon: <DollarSign size={14} />,
                   label: "Avg Price",
                   value: formatCompact(avgPriceAll),
                   sub: "across all refs",
+                  accent: "#22c55e",
+                  valueColor: "var(--ow-text)",
                 },
                 {
-                  icon: <Flame size={13} style={{ color: "#ef4444" }} />,
+                  icon: <Flame size={14} />,
                   label: "Hottest Brand",
                   value: hottestBrand?.brand ?? "—",
-                  sub: hottestBrand ? `Heat ${hottestBrand.heat_score.toFixed(1)}` : null,
+                  sub: hottestBrand ? `Heat ${hottestBrand.heat_score.toFixed(1)}` : "no data",
+                  accent: "#ef4444",
+                  valueColor: "var(--ow-text)",
                 },
                 {
-                  icon: <Zap size={13} style={{
-                    color: data.overview.data_freshness_hours < 24 ? "#22c55e" : "#eab308",
-                  }} />,
+                  icon: <Zap size={14} />,
                   label: "Freshness",
                   value: data.overview.data_freshness_hours < 1
                     ? "Live"
                     : `${data.overview.data_freshness_hours.toFixed(0)}h ago`,
+                  sub: data.overview.last_updated ? "last synced" : "no sync",
+                  accent: data.overview.data_freshness_hours < 24 ? "#22c55e" : "#eab308",
                   valueColor: data.overview.data_freshness_hours < 24 ? "#22c55e" : "#eab308",
-                  sub: data.overview.last_updated ? "last updated" : null,
                 },
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-xl border p-4"
-                  style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}
+                  className="rounded-xl border p-4 relative overflow-hidden transition-all duration-200 hover:shadow-lg"
+                  style={{
+                    background: "var(--ow-bg-card)",
+                    borderColor: "var(--ow-border)",
+                    borderLeft: `3px solid ${stat.accent}`,
+                  }}
                 >
-                  <div className="flex items-center gap-1.5 mb-2">
+                  <div className="flex items-center gap-1.5 mb-3" style={{ color: stat.accent }}>
                     {stat.icon}
-                    <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>
+                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ow-text-dim)" }}>
                       {stat.label}
                     </span>
                   </div>
-                  <p
-                    className="text-lg font-black font-mono truncate"
-                    style={{ color: ("valueColor" in stat && stat.valueColor) ? stat.valueColor : "#fff" }}
-                  >
+                  <p className="text-xl font-black font-mono truncate leading-none" style={{ color: stat.valueColor }}>
                     {stat.value}
                   </p>
                   {stat.sub && (
-                    <p className="text-[10px] mt-0.5 truncate" style={{ color: "var(--ow-text-faint)" }}>{stat.sub}</p>
+                    <p className="text-[10px] mt-1.5 truncate" style={{ color: "var(--ow-text-faint)" }}>{stat.sub}</p>
                   )}
                 </div>
               ))}
@@ -838,8 +869,9 @@ export default function AnalyticsPage() {
             <section>
               <div className="rounded-xl border overflow-hidden" style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
                 <div className="px-5 py-4 border-b" style={{ borderColor: "var(--ow-border)" }}>
-                  <h2 className="text-base font-black text-white">Top Collections</h2>
-                  <p className="text-xs mt-0.5" style={{ color: "var(--ow-text-dim)" }}>
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: "var(--ow-text-faint)" }}>OVERVIEW</p>
+                  <h2 className="text-base font-black" style={{ borderLeft: "3px solid #2563eb", paddingLeft: "10px", color: "var(--ow-text)" }}>Top Collections</h2>
+                  <p className="text-xs mt-0.5 pl-3" style={{ color: "var(--ow-text-dim)" }}>
                     Ranked by market heat · click to explore brand
                   </p>
                 </div>
@@ -880,7 +912,7 @@ export default function AnalyticsPage() {
                         className="border-t flex flex-col md:grid px-4 py-3 gap-2 md:gap-0 md:items-center transition-colors hover:opacity-90"
                         style={{
                           borderColor: "var(--ow-border)",
-                          background: i % 2 === 0 ? "var(--ow-bg-card)" : "#0d0d15",
+                          background: i % 2 === 0 ? "var(--ow-bg-card)" : "var(--ow-bg-elevated)",
                           gridTemplateColumns: "28px 2fr 1fr 1fr 1fr 80px 140px 1fr",
                         }}
                       >
@@ -941,61 +973,71 @@ export default function AnalyticsPage() {
 
             {/* ── Market Pulse ─────────────────────────────────────────────── */}
             <section>
-              <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "var(--ow-text-dim)" }}>
-                Market Pulse
-              </h2>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: "var(--ow-text-faint)" }}>SIGNALS</p>
+              <h2 className="text-base font-black mb-4" style={{ borderLeft: "3px solid #eab308", paddingLeft: "10px", color: "var(--ow-text)" }}>Market Pulse</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   {
-                    icon: <BarChart2 size={18} style={{ color: "#2081E2" }} />,
+                    icon: <BarChart2 size={16} />,
+                    iconColor: "#2563eb",
                     label: "Most Listed Ref",
                     value: mostListedRef ? mostListedRef.ref_number : "—",
                     sub: mostListedRef ? `${mostListedRef.listings} listings · ${mostListedRef.brand}` : "No data",
                     href: mostListedRef ? `/ref/${mostListedRef.ref_number}` : undefined,
+                    accent: "#2563eb",
                   },
                   {
-                    icon: <DollarSign size={18} style={{ color: "#22c55e" }} />,
+                    icon: <DollarSign size={16} />,
+                    iconColor: "#22c55e",
                     label: "Highest Floor",
                     value: highestFloorRef ? formatCompact(highestFloorRef.floor) : "—",
                     sub: highestFloorRef ? `${highestFloorRef.ref_number} · ${highestFloorRef.brand}` : "No data",
                     href: highestFloorRef ? `/ref/${highestFloorRef.ref_number}` : undefined,
+                    accent: "#22c55e",
                   },
                   {
-                    icon: <ArrowUpDown size={18} style={{ color: "#f59e0b" }} />,
+                    icon: <ArrowUpDown size={16} />,
+                    iconColor: "#f59e0b",
                     label: "Widest Spread",
                     value: widestSpreadRef ? formatCompact(widestSpreadRef.spread) : "—",
                     sub: widestSpreadRef ? `${widestSpreadRef.ref_number} · ${widestSpreadRef.spread_pct.toFixed(0)}% range` : "No data",
                     href: widestSpreadRef ? `/ref/${widestSpreadRef.ref_number}` : undefined,
+                    accent: "#f59e0b",
                   },
                   {
-                    icon: <Flame size={18} style={{ color: "#ef4444" }} />,
+                    icon: <Flame size={16} />,
+                    iconColor: "#ef4444",
                     label: "Hottest Brand",
                     value: hottestBrand ? hottestBrand.brand : "—",
                     sub: hottestBrand ? `Heat: ${hottestBrand.heat_score.toFixed(1)} · ${hottestBrand.total_listings} listings` : "No data",
                     href: hottestBrand ? `/brands/${BRAND_SLUGS[hottestBrand.brand]}` : undefined,
+                    accent: "#ef4444",
                   },
                 ].map((card) => {
                   const inner = (
                     <>
-                      <div className="flex items-center gap-2 mb-1">{card.icon}
-                        <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--ow-text-dim)" }}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-lg" style={{ background: `${card.accent}20`, color: card.iconColor }}>
+                          {card.icon}
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ow-text-dim)" }}>
                           {card.label}
                         </span>
                       </div>
-                      <p className="text-xl font-black font-mono text-white truncate">{card.value}</p>
-                      <p className="text-[11px] truncate" style={{ color: "#8A939B" }}>{card.sub}</p>
+                      <p className="text-xl font-black font-mono truncate leading-none" style={{ color: "var(--ow-text)" }}>{card.value}</p>
+                      <p className="text-[11px] mt-1.5 truncate" style={{ color: "var(--ow-text-dim)" }}>{card.sub}</p>
                     </>
                   )
                   return (
                     <div key={card.label}>
                       {card.href ? (
-                        <Link href={card.href} className="rounded-xl border p-4 flex flex-col gap-1 transition-all block"
-                          style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                        <Link href={card.href} className="rounded-xl border p-4 flex flex-col transition-all duration-200 block hover:-translate-y-0.5 hover:shadow-lg"
+                          style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)", borderTop: `3px solid ${card.accent}` }}>
                           {inner}
                         </Link>
                       ) : (
-                        <div className="rounded-xl border p-4 flex flex-col gap-1"
-                          style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)" }}>
+                        <div className="rounded-xl border p-4 flex flex-col"
+                          style={{ background: "var(--ow-bg-card)", borderColor: "var(--ow-border)", borderTop: `3px solid ${card.accent}` }}>
                           {inner}
                         </div>
                       )}
@@ -1105,7 +1147,7 @@ export default function AnalyticsPage() {
                         className="border-t px-4 py-3 transition-colors flex flex-col md:grid gap-2 md:gap-0 md:items-center hover:opacity-90"
                         style={{
                           borderColor: "var(--ow-border)",
-                          background: i % 2 === 0 ? "var(--ow-bg-card)" : "#0d0d15",
+                          background: i % 2 === 0 ? "var(--ow-bg-card)" : "var(--ow-bg-elevated)",
                           gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr 1fr",
                         }}
                       >
@@ -1501,7 +1543,7 @@ export default function AnalyticsPage() {
                       className="border-t px-4 py-3 transition-colors flex flex-col md:grid gap-2 md:gap-0 md:items-center hover:opacity-90"
                       style={{
                         borderColor: "var(--ow-border)",
-                        background: i % 2 === 0 ? "var(--ow-bg-card)" : "#0d0d15",
+                        background: i % 2 === 0 ? "var(--ow-bg-card)" : "var(--ow-bg-elevated)",
                         gridTemplateColumns: "2fr 2fr 70px 1fr 1fr 1fr 1.5fr 1fr 1fr 1fr",
                       }}
                     >
@@ -1910,7 +1952,7 @@ export default function AnalyticsPage() {
                             className="border-t px-4 py-3 flex flex-col lg:grid gap-2 lg:gap-0 lg:items-center"
                             style={{
                               borderColor: "var(--ow-border)",
-                              background: i % 2 === 0 ? "var(--ow-bg-card)" : "#0d0d15",
+                              background: i % 2 === 0 ? "var(--ow-bg-card)" : "var(--ow-bg-elevated)",
                               gridTemplateColumns: "2.5fr 2fr 1fr 1fr 1fr 1fr 1.2fr 100px",
                             }}
                           >
